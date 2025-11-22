@@ -1,0 +1,124 @@
+{
+  "problem": {
+    "name": "ORC_Optimization",
+    "description": "有机朗肯循环余热回收系统优化",
+    "variables": [
+      {
+        "name": "FLOW_S7",
+        "description": "S7流量进EV1",
+        "type": "continuous",
+        "lowerBound": 40,
+        "upperBound": 60,
+        "unit": "kmol/hr",
+        "initialValue": 50
+      },
+      {
+        "name": "FLOW_S8",
+        "description": "S8流量进EV2",
+        "type": "continuous",
+        "lowerBound": 40,
+        "upperBound": 60,
+        "unit": "kmol/hr",
+        "initialValue": 50
+      },
+      {
+        "name": "P_EVAP",
+        "description": "蒸发压力",
+        "type": "continuous",
+        "lowerBound": 2.0,
+        "upperBound": 5.0,
+        "unit": "bar",
+        "initialValue": 3.5
+      },
+      {
+        "name": "P_COND",
+        "description": "冷凝压力",
+        "type": "continuous",
+        "lowerBound": 0.5,
+        "upperBound": 1.5,
+        "unit": "bar",
+        "initialValue": 1.0
+      }
+    ],
+    "objectives": [
+      {
+        "name": "PROFIT",
+        "description": "ORC系统利润",
+        "type": "maximize",
+        "unit": "$/year",
+        "weight": 1.0
+      },
+      {
+        "name": "EFF",
+        "description": "ORC热力学效率",
+        "type": "maximize",
+        "unit": "%",
+        "weight": 1.0
+      }
+    ],
+    "constraints": [],
+    "evaluator": {
+      "type": "ORCEvaluator",
+      "timeout": 300,
+      "economicParameters": {
+        "electricityPrice": 0.1,
+        "operatingHours": 8000,
+        "coolingWaterCost": 0.354
+      }
+    }
+  },
+  "simulator": {
+    "type": "Aspen",
+    "settings": {
+      "modelPath": "r601a.bkp",
+      "timeout": 300,
+      "visible": false,
+      "autoSave": false,
+      "maxRetries": 3,
+      "retryDelay": 2
+    },
+    "nodeMapping": {
+      "variables": {
+        "FLOW_S7": "\\Data\\Streams\\S7\\Input\\TOTFLOW\\MIXED",
+        "FLOW_S8": "\\Data\\Streams\\S8\\Input\\TOTFLOW\\MIXED",
+        "P_EVAP": "\\Data\\Blocks\\PUM\\Input\\PRES",
+        "P_COND": "\\Data\\Blocks\\TUR\\Input\\PRES"
+      },
+      "results": {
+        "W_TUR": "\\Data\\Blocks\\TUR\\Output\\WNET",
+        "W_PUM": "\\Data\\Blocks\\PUM\\Output\\WNET",
+        "Q_CON": "\\Data\\Blocks\\CON\\Output\\QCALC",
+        "H_1": "\\Data\\Streams\\IN-T\\Output\\HMX\\MIXED",
+        "H_2": "\\Data\\Streams\\OUT-T\\Output\\HMX\\MIXED",
+        "H_3": "\\Data\\Streams\\IN-P\\Output\\HMX\\MIXED",
+        "H_4": "\\Data\\Streams\\S13\\Output\\HMX\\MIXED"
+      }
+    }
+  },
+  "algorithm": {
+    "type": "NSGA-II",
+    "parameters": {
+      "populationSize": 20,
+      "maxGenerations": 10,
+      "crossoverRate": 0.9,
+      "mutationRate": 1.0,
+      "crossoverDistIndex": 20,
+      "mutationDistIndex": 20
+    }
+  },
+  "_comments": {
+    "note": "这是ORC余热回收系统的配置文件",
+    "usage": "运行: run_case('case_config.json')",
+    "model_file": "确保r601a.bkp文件在同一目录下",
+    "evaluator": "使用专门的ORCEvaluator评估器",
+    "objectives": [
+      "PROFIT: 最大化系统年利润",
+      "EFF: 最大化热力学效率"
+    ],
+    "variables": [
+      "FLOW_S7/S8: 工质流量控制",
+      "P_EVAP: 蒸发压力（泵出口）",
+      "P_COND: 冷凝压力（透平出口）"
+    ]
+  }
+}

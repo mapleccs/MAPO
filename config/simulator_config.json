@@ -1,0 +1,96 @@
+{
+  "aspen": {
+    "type": "AspenPlus",
+    "description": "Aspen Plus仿真器配置",
+    "settings": {
+      "modelPath": {
+        "value": "",
+        "description": "Aspen备份文件路径（.bkp）",
+        "required": true
+      },
+      "timeout": {
+        "value": 300,
+        "description": "仿真超时时间（秒）",
+        "range": [60, 600]
+      },
+      "visible": {
+        "value": false,
+        "description": "Aspen窗口可见性",
+        "options": [true, false]
+      },
+      "autoSave": {
+        "value": false,
+        "description": "自动保存模型",
+        "options": [true, false]
+      },
+      "maxRetries": {
+        "value": 3,
+        "description": "RPC错误最大重试次数",
+        "range": [1, 5]
+      },
+      "retryDelay": {
+        "value": 2,
+        "description": "重试延迟（秒）",
+        "range": [1, 10]
+      }
+    },
+    "nodeMapping": {
+      "description": "Aspen节点路径映射示例",
+      "variables": {
+        "FEED_FLOW": "\\Data\\Streams\\FEED\\Input\\TOTFLOW",
+        "TEMPERATURE": "\\Data\\Blocks\\REACTOR\\Input\\TEMP",
+        "PRESSURE": "\\Data\\Blocks\\COLUMN\\Input\\PRES",
+        "REFLUX_RATIO": "\\Data\\Blocks\\COLUMN\\Input\\BASIS_RR",
+        "FEED_STAGE": "\\Data\\Blocks\\COLUMN\\Input\\FEED_STAGE\\FEED1"
+      },
+      "results": {
+        "PRODUCT_FLOW": "\\Data\\Streams\\PRODUCT\\Output\\MASSFLOW\\MIXED\\TOTAL",
+        "PRODUCT_PURITY": "\\Data\\Streams\\PRODUCT\\Output\\MASSFRAC\\MIXED\\PRODUCT",
+        "ENERGY_CONSUMPTION": "\\Data\\Blocks\\COLUMN\\Output\\REB_DUTY",
+        "CONVERSION": "\\Data\\Blocks\\REACTOR\\Output\\CONV\\MIXED\\REACTANT"
+      }
+    }
+  },
+  "matlab": {
+    "type": "MATLAB",
+    "description": "MATLAB函数仿真器配置",
+    "settings": {
+      "functionPath": {
+        "value": "",
+        "description": "MATLAB函数文件路径",
+        "required": true
+      },
+      "functionName": {
+        "value": "",
+        "description": "函数名称",
+        "required": true
+      },
+      "timeout": {
+        "value": 60,
+        "description": "执行超时时间（秒）",
+        "range": [10, 300]
+      }
+    }
+  },
+  "python": {
+    "type": "Python",
+    "description": "Python脚本仿真器配置",
+    "settings": {
+      "scriptPath": {
+        "value": "",
+        "description": "Python脚本路径",
+        "required": true
+      },
+      "pythonPath": {
+        "value": "python",
+        "description": "Python解释器路径",
+        "default": "python"
+      },
+      "timeout": {
+        "value": 60,
+        "description": "执行超时时间（秒）",
+        "range": [10, 300]
+      }
+    }
+  }
+}

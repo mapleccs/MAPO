@@ -1,0 +1,153 @@
+{
+  "problem": {
+    "name": "MyOptimization",
+    "description": "化工过程多目标优化示例",
+    "variables": [
+      {
+        "name": "FEED_FLOW",
+        "description": "进料流量",
+        "type": "continuous",
+        "lowerBound": 10,
+        "upperBound": 100,
+        "unit": "kmol/hr",
+        "initialValue": 50
+      },
+      {
+        "name": "TEMPERATURE",
+        "description": "反应温度",
+        "type": "continuous",
+        "lowerBound": 300,
+        "upperBound": 500,
+        "unit": "K",
+        "initialValue": 400
+      },
+      {
+        "name": "PRESSURE",
+        "description": "操作压力",
+        "type": "continuous",
+        "lowerBound": 1,
+        "upperBound": 10,
+        "unit": "bar",
+        "initialValue": 5
+      }
+    ],
+    "objectives": [
+      {
+        "name": "COST",
+        "description": "年度总成本",
+        "type": "minimize",
+        "unit": "$/year",
+        "weight": 1.0
+      },
+      {
+        "name": "YIELD",
+        "description": "产品收率",
+        "type": "maximize",
+        "unit": "%",
+        "weight": 1.0
+      }
+    ],
+    "constraints": [
+      {
+        "name": "MIN_PRODUCTION",
+        "description": "最小产量约束",
+        "type": "inequality",
+        "expression": "PRODUCT_FLOW >= 1000",
+        "unit": "kg/hr"
+      },
+      {
+        "name": "MAX_ENERGY",
+        "description": "最大能耗约束",
+        "type": "inequality",
+        "expression": "ENERGY <= 5000",
+        "unit": "kW"
+      }
+    ],
+    "evaluator": {
+      "type": "MyCaseEvaluator",
+      "timeout": 300,
+      "economicParameters": {
+        "productPrice": 1000,
+        "energyCost": 0.1,
+        "operatingHours": 8000,
+        "coolingWaterCost": 0.354
+      }
+    }
+  },
+  "simulator": {
+    "type": "Aspen",
+    "settings": {
+      "modelPath": "my_model.bkp",
+      "timeout": 300,
+      "visible": false,
+      "autoSave": false,
+      "maxRetries": 3,
+      "retryDelay": 2
+    },
+    "nodeMapping": {
+      "variables": {
+        "FEED_FLOW": "\\Data\\Streams\\FEED\\Input\\TOTFLOW\\MIXED",
+        "TEMPERATURE": "\\Data\\Blocks\\REACTOR\\Input\\TEMP",
+        "PRESSURE": "\\Data\\Blocks\\COLUMN\\Input\\PRES"
+      },
+      "results": {
+        "PRODUCT_FLOW": "\\Data\\Streams\\PRODUCT\\Output\\MASSFLOW\\MIXED\\TOTAL",
+        "PURITY": "\\Data\\Streams\\PRODUCT\\Output\\MASSFRAC\\MIXED\\COMP1",
+        "ENERGY": "\\Data\\Blocks\\COLUMN\\Output\\REB_DUTY",
+        "EFFICIENCY": "\\Data\\Blocks\\REACTOR\\Output\\EFFICIENCY",
+        "OUTPUT": "\\Data\\Streams\\PRODUCT\\Output\\TOTFLOW\\MIXED",
+        "INPUT": "\\Data\\Streams\\FEED\\Output\\TOTFLOW\\MIXED"
+      }
+    }
+  },
+  "algorithm": {
+    "type": "NSGA-II",
+    "parameters": {
+      "populationSize": 20,
+      "maxGenerations": 10,
+      "crossoverRate": 0.9,
+      "mutationRate": 1.0,
+      "crossoverDistIndex": 20,
+      "mutationDistIndex": 20,
+      "tournamentSize": 2
+    }
+  },
+  "_comments": {
+    "usage": [
+      "1. 复制此模板到您的项目目录",
+      "2. 修改problem部分定义您的优化问题",
+      "3. 修改simulator部分设置Aspen模型路径和节点映射",
+      "4. 修改algorithm部分选择算法和参数",
+      "5. 如需自定义评估器，创建新的评估器类并修改evaluator.type",
+      "6. 运行: run_case('case_config.json')"
+    ],
+    "variable_types": [
+      "continuous: 连续变量",
+      "integer: 整数变量",
+      "discrete: 离散变量"
+    ],
+    "objective_types": [
+      "minimize: 最小化目标",
+      "maximize: 最大化目标（内部会转为最小化）"
+    ],
+    "constraint_types": [
+      "equality: 等式约束 (= 0)",
+      "inequality: 不等式约束 (<= 0)"
+    ],
+    "simulator_types": [
+      "Aspen: Aspen Plus仿真器",
+      "MATLAB: MATLAB函数仿真器",
+      "Python: Python脚本仿真器"
+    ],
+    "algorithm_types": [
+      "NSGA-II: 非支配排序遗传算法II（多目标）",
+      "PSO: 粒子群优化算法（单/多目标）"
+    ],
+    "evaluator_types": [
+      "ORCEvaluator: ORC系统评估器",
+      "ADNProductionEvaluator: ADN生产评估器",
+      "MyCaseEvaluator: 自定义评估器模板",
+      "或创建您自己的评估器类"
+    ]
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "problem": {
+    "name": "ORC_Optimization",
+    "description": "有机朗肯循环余热回收系统优化",
+    "type": "multi-objective",
+    "variables": [
+      {
+        "name": "FLOW_EV1",
+        "description": "蒸发器1工质流量",
+        "type": "continuous",
+        "lowerBound": 10,
+        "upperBound": 100,
+        "unit": "kmol/hr",
+        "initialValue": 50
+      },
+      {
+        "name": "FLOW_EV2",
+        "description": "蒸发器2工质流量",
+        "type": "continuous",
+        "lowerBound": 10,
+        "upperBound": 100,
+        "unit": "kmol/hr",
+        "initialValue": 50
+      },
+      {
+        "name": "P_TUR_OUT",
+        "description": "透平出口压力",
+        "type": "continuous",
+        "lowerBound": 0.5,
+        "upperBound": 2.0,
+        "unit": "bar",
+        "initialValue": 1.2
+      },
+      {
+        "name": "P_PUM_OUT",
+        "description": "泵出口压力",
+        "type": "continuous",
+        "lowerBound": 5,
+        "upperBound": 20,
+        "unit": "bar",
+        "initialValue": 10
+      },
+      {
+        "name": "T_CON_OUT",
+        "description": "冷凝器出口温度",
+        "type": "continuous",
+        "lowerBound": 25,
+        "upperBound": 45,
+        "unit": "°C",
+        "initialValue": 35
+      }
+    ],
+    "objectives": [
+      {
+        "name": "PROFIT",
+        "description": "系统年利润",
+        "type": "maximize",
+        "unit": "$/year",
+        "weight": 1.0,
+        "target": null
+      },
+      {
+        "name": "EFFICIENCY",
+        "description": "热力学效率",
+        "type": "maximize",
+        "unit": "%",
+        "weight": 1.0,
+        "target": null
+      }
+    ],
+    "constraints": [
+      {
+        "name": "MIN_NET_POWER",
+        "description": "最小净功率约束",
+        "type": "inequality",
+        "expression": "W_NET >= 100",
+        "unit": "kW"
+      },
+      {
+        "name": "MAX_COOLING_LOAD",
+        "description": "最大冷负荷约束",
+        "type": "inequality",
+        "expression": "Q_CON <= 5000",
+        "unit": "kW"
+      }
+    ],
+    "evaluator": {
+      "type": "ORCEvaluator",
+      "timeout": 300,
+      "economicParameters": {
+        "electricityPrice": 0.1,
+        "operatingHours": 8000,
+        "coolingWaterCost": 0.354
+      }
+    }
+  },
+  "examples": {
+    "distillation": {
+      "name": "Distillation_Optimization",
+      "description": "精馏塔优化",
+      "variables": [
+        {
+          "name": "REFLUX_RATIO",
+          "type": "continuous",
+          "lowerBound": 1.0,
+          "upperBound": 5.0
+        },
+        {
+          "name": "FEED_STAGE",
+          "type": "integer",
+          "lowerBound": 5,
+          "upperBound": 25
+        }
+      ],
+      "objectives": [
+        {
+          "name": "TAC",
+          "description": "年度总成本",
+          "type": "minimize"
+        },
+        {
+          "name": "PURITY",
+          "description": "产品纯度",
+          "type": "maximize"
+        }
+      ]
+    },
+    "reactor": {
+      "name": "Reactor_Optimization",
+      "description": "反应器优化",
+      "variables": [
+        {
+          "name": "TEMPERATURE",
+          "type": "continuous",
+          "lowerBound": 300,
+          "upperBound": 500,
+          "unit": "K"
+        },
+        {
+          "name": "PRESSURE",
+          "type": "continuous",
+          "lowerBound": 1,
+          "upperBound": 10,
+          "unit": "bar"
+        },
+        {
+          "name": "RESIDENCE_TIME",
+          "type": "continuous",
+          "lowerBound": 0.5,
+          "upperBound": 5,
+          "unit": "hr"
+        }
+      ],
+      "objectives": [
+        {
+          "name": "CONVERSION",
+          "type": "maximize"
+        },
+        {
+          "name": "SELECTIVITY",
+          "type": "maximize"
+        },
+        {
+          "name": "ENERGY_COST",
+          "type": "minimize"
+        }
+      ]
+    }
+  }
+}

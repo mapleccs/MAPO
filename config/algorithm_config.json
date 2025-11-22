@@ -1,0 +1,75 @@
+{
+  "algorithm": {
+    "type": "NSGA-II",
+    "description": "多目标优化算法配置",
+    "parameters": {
+      "populationSize": {
+        "value": 50,
+        "description": "种群大小",
+        "range": [10, 200],
+        "recommended": "50-100 for most problems"
+      },
+      "maxGenerations": {
+        "value": 20,
+        "description": "最大迭代代数",
+        "range": [5, 100],
+        "recommended": "20-50 for initial tests"
+      },
+      "crossoverRate": {
+        "value": 0.9,
+        "description": "交叉概率",
+        "range": [0.6, 1.0],
+        "recommended": "0.8-0.95"
+      },
+      "mutationRate": {
+        "value": 1.0,
+        "description": "变异率（归一化到变量数）",
+        "range": [0.5, 2.0],
+        "recommended": "1.0 (1/n probability per variable)"
+      },
+      "crossoverDistIndex": {
+        "value": 20,
+        "description": "SBX交叉分布指数",
+        "range": [5, 50],
+        "recommended": "15-20 for real-coded GA"
+      },
+      "mutationDistIndex": {
+        "value": 20,
+        "description": "多项式变异分布指数",
+        "range": [5, 50],
+        "recommended": "20-30"
+      }
+    }
+  },
+  "PSO": {
+    "type": "PSO",
+    "description": "粒子群优化算法配置",
+    "parameters": {
+      "swarmSize": {
+        "value": 30,
+        "description": "粒子群大小",
+        "range": [20, 100]
+      },
+      "maxIterations": {
+        "value": 100,
+        "description": "最大迭代次数",
+        "range": [50, 500]
+      },
+      "inertiaWeight": {
+        "value": 0.729,
+        "description": "惯性权重",
+        "range": [0.4, 1.2]
+      },
+      "cognitiveParam": {
+        "value": 1.49445,
+        "description": "认知参数",
+        "range": [0, 2.5]
+      },
+      "socialParam": {
+        "value": 1.49445,
+        "description": "社会参数",
+        "range": [0, 2.5]
+      }
+    }
+  }
+}
