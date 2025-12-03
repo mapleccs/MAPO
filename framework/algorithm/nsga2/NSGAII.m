@@ -37,6 +37,8 @@ classdef NSGAII < AlgorithmBase
         upperBounds;         % 变量上界
         currentGeneration;   % 当前代数
         allEvaluatedIndividuals;  % 所有评估过的Individual（用于完整历史记录）
+        parallelConfig;      % 并行计算配置 (ParallelConfig对象)
+        enableParallel;      % 是否启用并行评估
     end
 
     methods
@@ -57,6 +59,8 @@ classdef NSGAII < AlgorithmBase
             obj.crossoverDistIndex = 20;  % SBX分布指数
             obj.mutationDistIndex = 20;   % 多项式变异分布指数
             obj.currentGeneration = 0;
+            obj.enableParallel = false;   % 默认不启用并行
+            obj.parallelConfig = [];      % 并行配置（延迟初始化）
         end
 
         function results = optimize(obj, problem, config)
@@ -98,8 +102,12 @@ classdef NSGAII < AlgorithmBase
                 % 生成子代
                 offspring = obj.generateOffspring();
 
-                % 评估子代
-                offspring.evaluate(obj.problem.evaluator);
+                % 评估子代（支持并行）
+                if obj.enableParallel && ~isempty(obj.parallelConfig)
+                    offspring.evaluate(obj.problem.evaluator, obj.parallelConfig);
+                else
+                    offspring.evaluate(obj.problem.evaluator);
+                end
                 obj.incrementEvaluationCount(offspring.size());
 
                 % 记录子代（所有评估过的解）
@@ -129,7 +137,7 @@ classdef NSGAII < AlgorithmBase
                 end
 
                 % 调用迭代回调
-                obj.callIterationCallback();
+                obj.callIterationCallback(obj.currentGeneration, struct());
             end
 
             % 完成优化
@@ -211,6 +219,31 @@ classdef NSGAII < AlgorithmBase
                 if isfield(config, 'mutationDistIndex')
                     obj.mutationDistIndex = config.mutationDistIndex;
                 end
+
+                % 加载并行配置
+                if isfield(config, 'enableParallel')
+                    obj.enableParallel = config.enableParallel;
+                end
+                if isfield(config, 'parallelConfig')
+                    obj.parallelConfig = config.parallelConfig;
+                elseif obj.enableParallel
+                    % 如果启用并行但没有提供配置，创建默认配置
+                    obj.parallelConfig = ParallelConfig('EnableParallel', true);
+                    if isfield(config, 'numWorkers')
+                        obj.parallelConfig.numWorkers = config.numWorkers;
+                    end
+                end
+            end
+
+            % 记录并行配置信息
+            if obj.enableParallel
+                obj.logMessage('INFO', '并行评估已启用');
+                if ~isempty(obj.parallelConfig)
+                    nWorkers = obj.parallelConfig.getActiveWorkers();
+                    if nWorkers > 1
+                        obj.logMessage('INFO', '当前Worker数量: %d', nWorkers);
+                    end
+                end
             end
         end
 
@@ -231,7 +264,7 @@ classdef NSGAII < AlgorithmBase
             % initializePopulation 初始化种群
             %
             % 说明:
-            %   生成初始种群并评估
+            %   生成初始种群并评估（支持并行）
 
             numVars = obj.problem.getNumberOfVariables();
 
@@ -242,8 +275,12 @@ classdef NSGAII < AlgorithmBase
             obj.population = Population.random(obj.populationSize, numVars, ...
                                               obj.lowerBounds, obj.upperBounds);
 
-            % 评估初始种群
-            obj.population.evaluate(obj.problem.evaluator);
+            % 评估初始种群（支持并行）
+            if obj.enableParallel && ~isempty(obj.parallelConfig)
+                obj.population.evaluate(obj.problem.evaluator, obj.parallelConfig);
+            else
+                obj.population.evaluate(obj.problem.evaluator);
+            end
             obj.incrementEvaluationCount(obj.populationSize);
 
             % 快速非支配排序

@@ -21,6 +21,7 @@ classdef BaseSensitivityAnalyzer < ISensitivityAnalyzer
         enableCache          % 是否启用缓存
         dataCache           % 缓存对象（containers.Map）
         progressDisplay      % 进度显示选项
+        parallelConfig       % 并行配置对象 (ParallelConfig)
     end
 
     methods
@@ -33,6 +34,8 @@ classdef BaseSensitivityAnalyzer < ISensitivityAnalyzer
             %     'EnableParallel' - 是否启用并行计算 (默认false)
             %     'EnableCache' - 是否启用缓存 (默认true)
             %     'ProgressDisplay' - 进度显示选项 (默认true)
+            %     'ParallelConfig' - 并行配置对象 (可选)
+            %     'NumWorkers' - Worker数量 (可选，仅当EnableParallel为true时有效)
 
             % 解析输入参数
             p = inputParser;
@@ -40,12 +43,26 @@ classdef BaseSensitivityAnalyzer < ISensitivityAnalyzer
             addParameter(p, 'EnableParallel', false, @islogical);
             addParameter(p, 'EnableCache', true, @islogical);
             addParameter(p, 'ProgressDisplay', true, @islogical);
+            addParameter(p, 'ParallelConfig', [], @(x) isempty(x) || isa(x, 'ParallelConfig'));
+            addParameter(p, 'NumWorkers', 0, @isnumeric);
             parse(p, context, varargin{:});
 
             obj.context = p.Results.context;
             obj.enableParallel = p.Results.EnableParallel;
             obj.enableCache = p.Results.EnableCache;
             obj.progressDisplay = p.Results.ProgressDisplay;
+
+            % 初始化并行配置
+            if ~isempty(p.Results.ParallelConfig)
+                obj.parallelConfig = p.Results.ParallelConfig;
+            elseif obj.enableParallel
+                obj.parallelConfig = ParallelConfig(...
+                    'EnableParallel', true, ...
+                    'NumWorkers', p.Results.NumWorkers, ...
+                    'Verbose', obj.progressDisplay);
+            else
+                obj.parallelConfig = [];
+            end
 
             % 初始化缓存
             if obj.enableCache
@@ -54,6 +71,11 @@ classdef BaseSensitivityAnalyzer < ISensitivityAnalyzer
 
             % 默认使用简单的收敛性评估
             obj.convergenceEvaluator = [];
+
+            % 显示并行信息
+            if obj.enableParallel && obj.progressDisplay
+                fprintf('灵敏度分析: 并行计算已启用\n');
+            end
         end
 
         function result = analyzeVariable(obj, variableName)
@@ -335,15 +357,147 @@ classdef BaseSensitivityAnalyzer < ISensitivityAnalyzer
 
         function [convergency, outputs] = parallelSimulation(...
                 obj, variableName, testValues, baseline)
-            % 并行执行仿真（简化版本，暂时调用顺序版本）
+            % 并行执行仿真
             %
-            % 注意：完整的并行实现需要考虑Aspen COM对象的线程安全性
+            % 输入:
+            %   variableName - 变量名称
+            %   testValues - 测试值数组
+            %   baseline - 基准值Map
+            %
+            % 输出:
+            %   convergency - 收敛性数组
+            %   outputs - 输出矩阵
+            %
+            % 说明:
+            %   使用parfor并行评估多个测试点
+            %   自动检测评估器类型并选择合适的并行策略
 
-            warning('BaseSensitivityAnalyzer:ParallelNotImplemented', ...
-                '并行仿真尚未实现，使用顺序仿真代替');
+            n = length(testValues);
+            convergency = false(n, 1);
+            outputs = [];
 
-            [convergency, outputs] = obj.sequentialSimulation(...
-                variableName, testValues, baseline);
+            problem = obj.context.problem;
+            evaluator = problem.evaluator;
+
+            % 检测评估器类型
+            evaluatorClass = class(evaluator);
+            isAspenEvaluator = contains(evaluatorClass, 'Aspen', 'IgnoreCase', true);
+
+            % 如果是Aspen评估器，警告并回退到顺序执行
+            if isAspenEvaluator
+                if obj.progressDisplay
+                    fprintf('  注意: Aspen评估器检测到，使用顺序执行\n');
+                end
+                [convergency, outputs] = obj.sequentialSimulation(...
+                    variableName, testValues, baseline);
+                return;
+            end
+
+            % 构建基准变量向量
+            variables = problem.variables;
+            baselineVector = zeros(length(variables), 1);
+            varIndex = 0;
+
+            for i = 1:length(variables)
+                if strcmp(variables(i).name, variableName)
+                    varIndex = i;
+                end
+                if baseline.isKey(variables(i).name)
+                    baselineVector(i) = baseline(variables(i).name);
+                else
+                    baselineVector(i) = (variables(i).lowerBound + variables(i).upperBound) / 2;
+                end
+            end
+
+            % 获取或创建并行池
+            if ~isempty(obj.parallelConfig)
+                pool = obj.parallelConfig.getOrCreatePool();
+            else
+                pool = gcp('nocreate');
+                if isempty(pool)
+                    try
+                        pool = parpool('local');
+                    catch
+                        pool = [];
+                    end
+                end
+            end
+
+            if isempty(pool)
+                % 回退到顺序执行
+                if obj.progressDisplay
+                    fprintf('  无法创建并行池，回退到顺序执行\n');
+                end
+                [convergency, outputs] = obj.sequentialSimulation(...
+                    variableName, testValues, baseline);
+                return;
+            end
+
+            % 准备并行评估的数据
+            % 由于parfor的限制，需要预先分配数据
+            varsToEval = zeros(n, length(baselineVector));
+            for i = 1:n
+                varsToEval(i, :) = baselineVector;
+                varsToEval(i, varIndex) = testValues(i);
+            end
+
+            % 并行评估
+            evalResults = cell(n, 1);
+            evalConvergency = false(n, 1);
+
+            if obj.progressDisplay
+                fprintf('  并行评估 %d 个测试点 (%d workers)...\n', n, pool.NumWorkers);
+            end
+
+            try
+                parfor i = 1:n
+                    try
+                        x = varsToEval(i, :);
+                        result = evaluator.evaluate(x);
+
+                        % 检查收敛性
+                        if ~isempty(result) && isfield(result, 'objectives')
+                            evalConvergency(i) = true;
+                            evalResults{i} = result;
+                        else
+                            evalConvergency(i) = false;
+                            evalResults{i} = [];
+                        end
+                    catch
+                        evalConvergency(i) = false;
+                        evalResults{i} = [];
+                    end
+                end
+            catch ME
+                warning('BaseSensitivityAnalyzer:ParforFailed', ...
+                    '并行执行失败: %s\n回退到顺序执行', ME.message);
+                [convergency, outputs] = obj.sequentialSimulation(...
+                    variableName, testValues, baseline);
+                return;
+            end
+
+            % 处理结果
+            convergency = evalConvergency;
+
+            % 初始化输出矩阵
+            firstValidIdx = find(convergency, 1);
+            if ~isempty(firstValidIdx) && ~isempty(evalResults{firstValidIdx})
+                numOutputs = length(evalResults{firstValidIdx}.objectives);
+                outputs = NaN(n, numOutputs);
+
+                for i = 1:n
+                    if convergency(i) && ~isempty(evalResults{i})
+                        outputs(i, :) = evalResults{i}.objectives;
+                    end
+                end
+            else
+                outputs = NaN(n, 2);  % 默认假设2个输出
+            end
+
+            if obj.progressDisplay
+                convRate = sum(convergency) / n * 100;
+                fprintf('  并行评估完成: 收敛率 %.1f%%\n', convRate);
+            end
         end
 
         function generateConsoleReport(obj)

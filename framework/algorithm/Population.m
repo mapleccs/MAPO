@@ -169,15 +169,25 @@ classdef Population < handle
             obj.individuals = Individual.empty(0, 0);
         end
 
-        function evaluate(obj, evaluator)
+        function evaluate(obj, evaluator, parallelConfig)
             % evaluate 批量评估所有未评估的个体
             %
             % 输入:
             %   evaluator - Evaluator对象
+            %   parallelConfig - (可选) ParallelConfig对象，用于并行评估
             %
             % 示例:
             %   pop.evaluate(evaluator);
+            %   pop.evaluate(evaluator, parallelConfig);  % 并行评估
 
+            % 如果提供了并行配置且启用了并行，使用并行评估
+            if nargin >= 3 && ~isempty(parallelConfig) && ...
+               isa(parallelConfig, 'ParallelConfig') && parallelConfig.enableParallel
+                obj.evaluateParallel(evaluator, parallelConfig);
+                return;
+            end
+
+            % 顺序评估
             for i = 1:length(obj.individuals)
                 ind = obj.individuals(i);
                 if ~ind.isEvaluated()
@@ -192,6 +202,87 @@ classdef Population < handle
 
                     if isfield(result, 'constraints')
                         ind.setConstraints(result.constraints);
+                    end
+                end
+            end
+        end
+
+        function evaluateParallel(obj, evaluator, parallelConfig)
+            % evaluateParallel 并行评估所有未评估的个体
+            %
+            % 输入:
+            %   evaluator - Evaluator对象
+            %   parallelConfig - ParallelConfig对象
+            %
+            % 示例:
+            %   pop.evaluateParallel(evaluator, parallelConfig);
+
+            n = length(obj.individuals);
+            if n == 0
+                return;
+            end
+
+            % 收集需要评估的个体信息
+            needsEval = false(n, 1);
+            numVars = length(obj.individuals(1).getVariables());
+            varMatrix = zeros(n, numVars);
+
+            for i = 1:n
+                needsEval(i) = ~obj.individuals(i).isEvaluated();
+                varMatrix(i, :) = obj.individuals(i).getVariables();
+            end
+
+            evalIndices = find(needsEval);
+            numToEval = length(evalIndices);
+
+            if numToEval == 0
+                return;
+            end
+
+            % 获取或创建并行池
+            pool = parallelConfig.getOrCreatePool();
+
+            if isempty(pool)
+                % 回退到顺序评估
+                obj.evaluate(evaluator);
+                return;
+            end
+
+            % 提取需要评估的变量
+            varsToEval = varMatrix(evalIndices, :);
+
+            % 并行评估
+            results = cell(numToEval, 1);
+
+            try
+                parfor i = 1:numToEval
+                    try
+                        x = varsToEval(i, :);
+                        results{i} = evaluator.evaluate(x);
+                    catch ME
+                        results{i} = struct(...
+                            'objectives', inf, ...
+                            'constraints', inf, ...
+                            'success', false, ...
+                            'message', ME.message);
+                    end
+                end
+            catch ME
+                warning('Population:ParallelEvalFailed', ...
+                    '并行评估失败: %s\n回退到顺序评估', ME.message);
+                obj.evaluate(evaluator);
+                return;
+            end
+
+            % 更新个体
+            for i = 1:numToEval
+                idx = evalIndices(i);
+                if ~isempty(results{i})
+                    if isfield(results{i}, 'objectives')
+                        obj.individuals(idx).setObjectives(results{i}.objectives);
+                    end
+                    if isfield(results{i}, 'constraints')
+                        obj.individuals(idx).setConstraints(results{i}.constraints);
                     end
                 end
             end
@@ -596,6 +687,47 @@ classdef Population < handle
                 truncated = Population(obj.individuals);
             else
                 truncated = Population(obj.individuals(1:n));
+            end
+        end
+
+        function bestInd = getBestIndividual(obj, objectiveIndex)
+            % getBestIndividual 获取最优个体（单目标或指定目标）
+            %
+            % 输入:
+            %   objectiveIndex - (可选) 目标索引，默认为1
+            %
+            % 输出:
+            %   bestInd - 最优Individual对象，如果种群为空返回[]
+            %
+            % 示例:
+            %   best = pop.getBestIndividual();
+            %   best = pop.getBestIndividual(2);  % 按第二个目标
+
+            if nargin < 2
+                objectiveIndex = 1;
+            end
+
+            if obj.isEmpty()
+                bestInd = [];
+                return;
+            end
+
+            % 检查是否已评估
+            if ~obj.individuals(1).isEvaluated()
+                bestInd = [];
+                return;
+            end
+
+            % 找到目标值最小的个体
+            bestInd = obj.individuals(1);
+            bestValue = bestInd.getObjective(objectiveIndex);
+
+            for i = 2:length(obj.individuals)
+                currentValue = obj.individuals(i).getObjective(objectiveIndex);
+                if currentValue < bestValue
+                    bestValue = currentValue;
+                    bestInd = obj.individuals(i);
+                end
             end
         end
 

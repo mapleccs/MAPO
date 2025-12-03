@@ -34,6 +34,8 @@ classdef PSO < AlgorithmBase
         upperBounds;        % 变量上界
         useExternalArchive; % 是否使用外部档案（多目标）
         archive;            % 外部档案（多目标Pareto解集）
+        parallelConfig;     % 并行计算配置 (ParallelConfig对象)
+        enableParallel;     % 是否启用并行评估
     end
 
     methods
@@ -55,6 +57,8 @@ classdef PSO < AlgorithmBase
             obj.vMax = 0.2;           % 最大速度（占搜索空间的比例）
             obj.useExternalArchive = false;
             obj.archive = [];
+            obj.enableParallel = false;   % 默认不启用并行
+            obj.parallelConfig = [];      % 并行配置（延迟初始化）
         end
 
         function results = optimize(obj, problem, config)
@@ -93,8 +97,12 @@ classdef PSO < AlgorithmBase
                 % 更新位置
                 obj.updatePositions();
 
-                % 评估
-                obj.population.evaluate(problem.evaluator);
+                % 评估（支持并行）
+                if obj.enableParallel && ~isempty(obj.parallelConfig)
+                    obj.population.evaluate(problem.evaluator, obj.parallelConfig);
+                else
+                    obj.population.evaluate(problem.evaluator);
+                end
                 obj.incrementEvaluationCount(obj.swarmSize);
 
                 % 更新个体最优
@@ -143,11 +151,36 @@ classdef PSO < AlgorithmBase
                 if isfield(config, 'useExternalArchive')
                     obj.useExternalArchive = config.useExternalArchive;
                 end
+
+                % 加载并行配置
+                if isfield(config, 'enableParallel')
+                    obj.enableParallel = config.enableParallel;
+                end
+                if isfield(config, 'parallelConfig')
+                    obj.parallelConfig = config.parallelConfig;
+                elseif obj.enableParallel
+                    % 如果启用并行但没有提供配置，创建默认配置
+                    obj.parallelConfig = ParallelConfig('EnableParallel', true);
+                    if isfield(config, 'numWorkers')
+                        obj.parallelConfig.numWorkers = config.numWorkers;
+                    end
+                end
             end
 
             % 多目标优化自动启用外部档案
             if obj.problem.getNumberOfObjectives() > 1
                 obj.useExternalArchive = true;
+            end
+
+            % 记录并行配置信息
+            if obj.enableParallel
+                obj.logMessage('INFO', '并行评估已启用');
+                if ~isempty(obj.parallelConfig)
+                    nWorkers = obj.parallelConfig.getActiveWorkers();
+                    if nWorkers > 1
+                        obj.logMessage('INFO', '当前Worker数量: %d', nWorkers);
+                    end
+                end
             end
         end
 
@@ -169,7 +202,7 @@ classdef PSO < AlgorithmBase
             % initializeSwarm 初始化粒子群
             %
             % 说明:
-            %   生成初始粒子位置和速度
+            %   生成初始粒子位置和速度（支持并行）
 
             numVars = obj.problem.getNumberOfVariables();
 
@@ -180,8 +213,12 @@ classdef PSO < AlgorithmBase
             obj.population = Population.random(obj.swarmSize, numVars, ...
                                               obj.lowerBounds, obj.upperBounds);
 
-            % 评估初始种群
-            obj.population.evaluate(obj.problem.evaluator);
+            % 评估初始种群（支持并行）
+            if obj.enableParallel && ~isempty(obj.parallelConfig)
+                obj.population.evaluate(obj.problem.evaluator, obj.parallelConfig);
+            else
+                obj.population.evaluate(obj.problem.evaluator);
+            end
             obj.incrementEvaluationCount(obj.swarmSize);
 
             % 初始化速度
