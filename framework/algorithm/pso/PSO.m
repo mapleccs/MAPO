@@ -136,16 +136,25 @@ classdef PSO < AlgorithmBase
                     obj.maxIterations = config.maxIterations;
                     obj.maxEvaluations = obj.swarmSize * obj.maxIterations;
                 end
-                if isfield(config, 'w')
+                % Support both legacy and GUI/ConfigBuilder parameter names
+                if isfield(config, 'inertiaWeight')
+                    obj.w = config.inertiaWeight;
+                elseif isfield(config, 'w')
                     obj.w = config.w;
                 end
-                if isfield(config, 'c1')
+                if isfield(config, 'cognitiveCoeff')
+                    obj.c1 = config.cognitiveCoeff;
+                elseif isfield(config, 'c1')
                     obj.c1 = config.c1;
                 end
-                if isfield(config, 'c2')
+                if isfield(config, 'socialCoeff')
+                    obj.c2 = config.socialCoeff;
+                elseif isfield(config, 'c2')
                     obj.c2 = config.c2;
                 end
-                if isfield(config, 'vMax')
+                if isfield(config, 'maxVelocityRatio')
+                    obj.vMax = config.maxVelocityRatio;
+                elseif isfield(config, 'vMax')
                     obj.vMax = config.vMax;
                 end
                 if isfield(config, 'useExternalArchive')
@@ -493,10 +502,17 @@ classdef PSO < AlgorithmBase
             config.swarmSize = 30;
             config.maxIterations = 200;
             config.maxEvaluations = 6000;
-            config.w = 0.7298;        % 惯性权重
-            config.c1 = 1.49618;      % 个体学习因子
-            config.c2 = 1.49618;      % 社会学习因子
-            config.vMax = 0.2;        % 最大速度
+            % Preferred parameter names (aligned with GUI/ConfigBuilder)
+            config.inertiaWeight = 0.7298;        % 惯性权重
+            config.cognitiveCoeff = 1.49618;      % 个体学习因子
+            config.socialCoeff = 1.49618;         % 社会学习因子
+            config.maxVelocityRatio = 0.2;        % 最大速度比例
+
+            % Legacy aliases for backward compatibility
+            config.w = config.inertiaWeight;
+            config.c1 = config.cognitiveCoeff;
+            config.c2 = config.socialCoeff;
+            config.vMax = config.maxVelocityRatio;
             config.verbose = true;
             config.useExternalArchive = false;  % 多目标时自动启用
         end

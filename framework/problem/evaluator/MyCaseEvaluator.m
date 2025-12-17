@@ -1,268 +1,241 @@
 classdef MyCaseEvaluator < Evaluator
-    % MyCaseEvaluator 评估器模板类
-    % 这是一个极简的评估器模板，用户可以基于此模板创建自定义评估器
+    % MyCaseEvaluator - 用户自定义评估器模板（推荐从此文件复制）
     %
-    % 使用说明:
-    %   1. 复制此文件并重命名为您的评估器名称（如: MyReactorEvaluator.m）
-    %   2. 修改类名以匹配文件名
-    %   3. 在evaluate方法中实现您的目标函数计算逻辑
-    %   4. 在配置文件中设置evaluator.type为您的评估器类名
+    % 评估器职责:
+    %   - 接收算法给出的决策变量向量 x
+    %   - 将 x 写入仿真器（simulator.setVariables）
+    %   - 运行仿真（simulator.run）
+    %   - 从仿真器提取结果并计算目标/约束
+    %   - 返回统一的结果结构体（result.objectives / result.constraints）
     %
-    % 重要提示:
-    %   - 最大化问题需要取负值（框架内部统一为最小化）
-    %   - 仿真失败时返回惩罚值（如1e8）
-    %   - 可以添加自定义属性存储经济参数等
+    % 评估器接口要求（被算法调用）:
+    %   result = evaluator.evaluate(x)
+    %   其中 result 必须是 struct，至少包含字段:
+    %     - objectives  : 1×nObj 数值向量
+    %     - constraints : 1×nCon 数值向量（可为空）
+    %     - success     : logical
+    %     - message     : char
     %
-    % 示例:
-    %   evaluator = MyCaseEvaluator(simulator);
-    %   evaluator.productPrice = 1000;  % 设置自定义参数
-    %   [objectives, constraints] = evaluator.evaluate(x);
+    % 配置文件:
+    %   在 case_config.json 中设置:
+    %     problem.evaluator.type = "MyCaseEvaluator"
+    %     problem.evaluator.timeout = 300
+    %     problem.evaluator.economicParameters = { ... }  % 可选
     %
-    % 作者: MAPO Framework
-    % 版本: 1.0.0
+    % 说明:
+    %   - 最大化目标需要在此处取负值（框架内部统一为最小化）
+    %   - 仿真失败/异常应返回惩罚值（默认 1e8）
 
     properties
-        % 在这里添加您的自定义属性
-        % 例如：经济参数、物理常数等
+        % 通用参数（runOptimizationAsync 会在存在该属性时写入）
+        timeout = 300;                 % 仿真超时时间（秒）
+        constraintPenalty = 1e8;       % 惩罚值（用于失败/不收敛）
 
-        % 经济参数示例
-        productPrice = 1000;        % 产品价格 ($/ton)
-        energyCost = 0.1;          % 能源成本 ($/kWh)
-        operatingHours = 8000;      % 年运行小时数
+        % ===== 可选：用户自定义参数（可通过 economicParameters 注入）=====
+        productPrice = 1000;           % 产品价格 ($/ton)
+        energyCost = 0.1;              % 能源成本 ($/kWh)
+        operatingHours = 8000;         % 年运行小时数
+    end
 
-        % 物理参数示例
-        conversionFactor = 1.0;     % 转换系数
-        efficiencyTarget = 0.9;     % 目标效率
+    properties (Access = private)
+        simulator;                     % SimulatorBase 实例（AspenPlusSimulator 等）
     end
 
     methods
         function obj = MyCaseEvaluator(simulator)
-            % MyCaseEvaluator 构造函数
-            %
+            % 构造函数
             % 输入:
-            %   simulator - 仿真器实例（AspenPlusSimulator等）
+            %   simulator - 仿真器实例（可选；部分测试评估器可不依赖仿真器）
 
-            % 调用父类构造函数
-            obj@Evaluator(simulator);
+            obj@Evaluator();
 
-            % 可以在这里初始化默认参数
-            obj.timeout = 300;  % 默认超时时间
+            if nargin >= 1
+                obj.simulator = simulator;
+            else
+                obj.simulator = [];
+            end
         end
 
-        function [objectiveValues, constraintViolations] = evaluate(obj, x)
-            % evaluate 评估函数 - 核心方法
-            % 这是您需要重点修改的方法
-            %
-            % 输入:
-            %   x - 决策变量向量
-            %       例如: x = [流量, 温度, 压力, ...]
-            %
-            % 输出:
-            %   objectiveValues - 目标函数值向量
-            %       注意: 最大化问题需要取负值
-            %   constraintViolations - 约束违反值向量（可选）
-            %       违反约束时为正值，满足约束时为0或负值
+        function result = evaluate(obj, x)
+            % evaluate - 核心评估函数
+
+            % 计数（算法默认直接调用 evaluate，不会走 evaluateWithValidation）
+            obj.evaluationCounter = obj.evaluationCounter + 1;
 
             try
-                %% Step 1: 设置仿真器变量
-                % 将决策变量传递给仿真器
-                obj.simulator.setVariables(x);
-
-                % 记录评估
-                obj.incrementEvaluationCount();
-
-                %% Step 2: 运行仿真
-                success = obj.simulator.run();
-
-                % 检查仿真是否成功
-                if ~success
-                    % 仿真失败，返回惩罚值
-                    obj.logMessage('WARNING', '仿真失败，返回惩罚值');
-
-                    % 假设有2个目标函数
-                    objectiveValues = [1e8, 1e8];
-                    constraintViolations = [];
+                % 无仿真器场景（例如纯函数测试）——此处给出一个示例
+                if isempty(obj.simulator)
+                    f = sum(x(:)'.^2);
+                    result = obj.createSuccessResult(f, [], '');
                     return;
                 end
 
-                %% Step 3: 获取仿真结果
-                % 获取所有配置的结果变量
-                resultNames = obj.simulator.config.getResultMappingNames();
-                results = obj.simulator.getResults(resultNames);
+                % 1) 写入变量并运行仿真
+                obj.simulator.setVariables(x);
+                success = obj.simulator.run(obj.timeout);
 
-                % 也可以获取特定结果
-                % results = obj.simulator.getResults({'PRODUCT_FLOW', 'ENERGY', 'PURITY'});
+                if ~success
+                    result = obj.createPenaltyResult('仿真失败或未收敛');
+                    return;
+                end
 
-                %% Step 4: 计算目标函数
-                % ========================================
-                % 这里是您需要修改的核心部分
-                % 根据您的具体问题计算目标函数值
-                % ========================================
+                % 2) 读取结果并计算目标/约束（示例逻辑：请按你的问题修改）
+                %
+                % 推荐做法：把 Tab3 结果映射中需要用到的 key 映射好，
+                % 然后在此处通过 key 获取数值。
 
-                % 示例1: 经济目标 - 年度利润（最大化，需要取负）
-                if isKey(results, 'PRODUCT_FLOW') && isKey(results, 'ENERGY')
-                    productFlow = results('PRODUCT_FLOW');    % kg/hr
-                    energyUsage = results('ENERGY');           % kW
+                productFlow = obj.tryGetResultValue('PRODUCT_FLOW', NaN);  % kg/hr
+                energyUsage = obj.tryGetResultValue('ENERGY', NaN);        % kW
+                efficiency = obj.tryGetResultValue('EFFICIENCY', NaN);     % 0-1 或 %
 
-                    % 计算年度收入
-                    annualRevenue = productFlow * obj.operatingHours * obj.productPrice / 1000;  % $/year
-
-                    % 计算年度成本
-                    annualCost = energyUsage * obj.operatingHours * obj.energyCost;  % $/year
-
-                    % 计算利润（最大化，取负值）
+                % 目标 1：利润（最大化 -> 取负最小化）
+                objective1 = 0;
+                if ~isnan(productFlow) && ~isnan(energyUsage)
+                    annualRevenue = productFlow * obj.operatingHours * obj.productPrice / 1000; % $/year
+                    annualCost = energyUsage * obj.operatingHours * obj.energyCost;             % $/year
                     profit = annualRevenue - annualCost;
-                    objective1 = -profit;  % 转为最小化
-                else
-                    % 缺少必要结果，使用默认值
-                    objective1 = 0;
+                    objective1 = -profit;
                 end
 
-                % 示例2: 技术目标 - 效率（最大化，需要取负）
-                if isKey(results, 'EFFICIENCY') || (isKey(results, 'OUTPUT') && isKey(results, 'INPUT'))
-                    if isKey(results, 'EFFICIENCY')
-                        efficiency = results('EFFICIENCY');
-                    else
-                        % 计算效率
-                        output = results('OUTPUT');
-                        input = results('INPUT');
-                        efficiency = output / input;
+                % 目标 2：效率（最大化 -> 取负最小化；若为百分比请自行统一单位）
+                objective2 = 0;
+                if ~isnan(efficiency)
+                    if efficiency > 1
+                        efficiency = efficiency / 100;
                     end
-
-                    % 效率目标（最大化，取负值）
-                    objective2 = -efficiency * 100;  % 转为百分比并取负
-                else
-                    % 使用默认效率
-                    objective2 = -50;  % 假设50%效率
+                    objective2 = -efficiency;
                 end
 
-                % 组合目标函数值
-                objectiveValues = [objective1, objective2];
+                objectives = obj.fitObjectivesToProblem([objective1, objective2]);
 
-                %% Step 5: 计算约束违反（可选）
-                constraintViolations = [];
-
-                % 示例约束1: 最小产量约束
-                % 要求: productFlow >= 1000 kg/hr
-                % 转换为: 1000 - productFlow <= 0
-                if isKey(results, 'PRODUCT_FLOW')
-                    minProductFlow = 1000;
-                    productFlow = results('PRODUCT_FLOW');
-                    constraint1 = minProductFlow - productFlow;  % <= 0 表示满足
-                    constraintViolations(end+1) = max(0, constraint1);  % 违反时为正
+                % 约束（可选）：按 g(x) <= 0 形式返回（>0 为违反）
+                constraints = [];
+                if ~isnan(productFlow)
+                    minProductFlow = 1000;                 % 示例：最小产量
+                    constraints(end+1) = minProductFlow - productFlow; %#ok<AGROW>
                 end
-
-                % 示例约束2: 最大能耗约束
-                % 要求: energyUsage <= 5000 kW
-                % 转换为: energyUsage - 5000 <= 0
-                if isKey(results, 'ENERGY')
-                    maxEnergy = 5000;
-                    energyUsage = results('ENERGY');
-                    constraint2 = energyUsage - maxEnergy;  % <= 0 表示满足
-                    constraintViolations(end+1) = max(0, constraint2);  % 违反时为正
+                if ~isnan(energyUsage)
+                    maxEnergy = 5000;                      % 示例：最大能耗
+                    constraints(end+1) = energyUsage - maxEnergy; %#ok<AGROW>
                 end
+                constraints = obj.fitConstraintsToProblem(constraints);
 
-                %% 记录日志（可选）
-                obj.logMessage('INFO', sprintf('评估完成: x=[%s], obj=[%.2f, %.2f]', ...
-                    num2str(x, '%.4f '), objectiveValues(1), objectiveValues(2)));
+                result = obj.createSuccessResult(objectives, constraints, '');
 
             catch ME
-                % 错误处理
-                obj.logMessage('ERROR', sprintf('评估失败: %s', ME.message));
-
-                % 返回惩罚值
-                objectiveValues = [1e8, 1e8];  % 根据实际目标数调整
-                constraintViolations = [];
+                result = obj.createPenaltyResult(ME.message);
             end
-        end
-
-        function reset(obj)
-            % reset 重置评估器状态
-            % 可以在这里重置自定义的内部状态
-
-            % 调用父类的重置方法
-            reset@Evaluator(obj);
-
-            % 重置自定义状态（如果有）
-            % obj.someInternalState = [];
-        end
-
-        function setEconomicParameters(obj, params)
-            % setEconomicParameters 设置经济参数
-            % 这是一个辅助方法示例，您可以添加自己的辅助方法
-            %
-            % 输入:
-            %   params - 参数结构体
-
-            if isfield(params, 'productPrice')
-                obj.productPrice = params.productPrice;
-            end
-
-            if isfield(params, 'energyCost')
-                obj.energyCost = params.energyCost;
-            end
-
-            if isfield(params, 'operatingHours')
-                obj.operatingHours = params.operatingHours;
-            end
-        end
-
-        function displayParameters(obj)
-            % displayParameters 显示当前参数设置
-            % 用于调试和验证
-
-            fprintf('\n========================================\n');
-            fprintf('MyCaseEvaluator 参数设置:\n');
-            fprintf('========================================\n');
-            fprintf('  产品价格: %.2f $/ton\n', obj.productPrice);
-            fprintf('  能源成本: %.4f $/kWh\n', obj.energyCost);
-            fprintf('  年运行时间: %d hours\n', obj.operatingHours);
-            fprintf('  转换系数: %.4f\n', obj.conversionFactor);
-            fprintf('  目标效率: %.2f%%\n', obj.efficiencyTarget * 100);
-            fprintf('========================================\n\n');
         end
     end
 
-    methods (Access = protected)
-        function valid = validateResults(obj, results)
-            % validateResults 验证仿真结果
-            % 可选的辅助方法，用于验证结果的合理性
+    methods (Access = private)
+        function value = tryGetResultValue(obj, resultName, defaultValue)
+            % tryGetResultValue - 尝试按“结果映射名称”获取数值
             %
-            % 输入:
-            %   results - 结果字典
-            %
-            % 输出:
-            %   valid - 是否有效
+            % AspenPlusSimulator 提供 getVariable(name)（基于 resultMapping）
+            % 其他仿真器可通过 SimulatorConfig 的 resultMapping 获取节点路径，
+            % 再调用 getResults({nodePath}) 取回单值。
 
-            valid = true;
+            value = defaultValue;
 
-            % 检查关键结果是否存在
-            requiredResults = {'PRODUCT_FLOW', 'ENERGY'};  % 根据需要修改
+            if isempty(obj.simulator)
+                return;
+            end
 
-            for i = 1:length(requiredResults)
-                if ~isKey(results, requiredResults{i})
-                    obj.logMessage('WARNING', sprintf('缺少必要结果: %s', requiredResults{i}));
-                    valid = false;
+            % 1) AspenPlusSimulator: getVariable(name)
+            if ismethod(obj.simulator, 'getVariable')
+                try
+                    value = obj.simulator.getVariable(resultName);
+                    return;
+                catch
+                end
+            end
+
+            % 2) Generic: use SimulatorConfig resultMapping -> nodePath -> getResults(nodePath)
+            try
+                cfg = obj.simulator.getConfig();
+                if isa(cfg, 'SimulatorConfig') && cfg.hasResultMapping(resultName)
+                    nodePath = cfg.getResultPath(resultName);
+                    s = obj.simulator.getResults({nodePath});
+                    f = fieldnames(s);
+                    if ~isempty(f)
+                        value = s.(f{1});
+                    end
                     return;
                 end
+            catch
             end
 
-            % 检查结果范围的合理性
-            if isKey(results, 'PRODUCT_FLOW')
-                flow = results('PRODUCT_FLOW');
-                if flow < 0 || flow > 1e6
-                    obj.logMessage('WARNING', sprintf('产品流量超出合理范围: %.2f', flow));
-                    valid = false;
+            % 3) Fallback: try getResults({resultName}) (e.g., MATLABSimulator)
+            try
+                s = obj.simulator.getResults({resultName});
+                if isstruct(s) && isfield(s, resultName)
+                    value = s.(resultName);
+                    return;
                 end
+                f = fieldnames(s);
+                if ~isempty(f)
+                    value = s.(f{1});
+                end
+            catch
+            end
+        end
+
+        function objectives = fitObjectivesToProblem(obj, objectives)
+            % 将目标向量长度适配到 problem.objectives 数量（若已设置 problem）
+            n = obj.getProblemObjectiveCount();
+            if n <= 0
+                return;
+            end
+            objectives = objectives(:)';
+            if numel(objectives) >= n
+                objectives = objectives(1:n);
+            else
+                objectives = [objectives, zeros(1, n - numel(objectives))];
+            end
+        end
+
+        function constraints = fitConstraintsToProblem(obj, constraints)
+            % 将约束向量长度适配到 problem.constraints 数量（若已设置 problem）
+            n = obj.getProblemConstraintCount();
+            if n <= 0
+                return;
+            end
+            constraints = constraints(:)';
+            if numel(constraints) >= n
+                constraints = constraints(1:n);
+            else
+                constraints = [constraints, zeros(1, n - numel(constraints))];
+            end
+        end
+
+        function n = getProblemObjectiveCount(obj)
+            n = 0;
+            if ~isempty(obj.problem) && isa(obj.problem, 'OptimizationProblem')
+                n = obj.problem.getNumberOfObjectives();
+            end
+        end
+
+        function n = getProblemConstraintCount(obj)
+            n = 0;
+            if ~isempty(obj.problem) && isa(obj.problem, 'OptimizationProblem')
+                n = obj.problem.getNumberOfConstraints();
+            end
+        end
+
+        function result = createPenaltyResult(obj, message)
+            nObj = obj.getProblemObjectiveCount();
+            nCon = obj.getProblemConstraintCount();
+            if nObj <= 0
+                nObj = 1;
             end
 
-            if isKey(results, 'EFFICIENCY')
-                eff = results('EFFICIENCY');
-                if eff < 0 || eff > 1
-                    obj.logMessage('WARNING', sprintf('效率超出[0,1]范围: %.4f', eff));
-                    valid = false;
-                end
-            end
+            result = struct();
+            result.objectives = obj.constraintPenalty * ones(1, nObj);
+            result.constraints = obj.constraintPenalty * ones(1, nCon);
+            result.success = false;
+            result.message = message;
         end
     end
 end
+

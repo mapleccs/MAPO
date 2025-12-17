@@ -129,15 +129,14 @@ classdef NSGAII < AlgorithmBase
                 obj.population = obj.environmentalSelection(combinedPop);
 
                 % 记录历史
-                obj.recordHistory();
+                iterData = obj.getIterationData(obj.currentGeneration);
+                obj.logIteration(obj.currentGeneration, iterData);
 
                 % 日志输出
                 if mod(obj.currentGeneration, 10) == 0 || obj.shouldStop()
                     obj.logProgress();
                 end
 
-                % 调用迭代回调
-                obj.callIterationCallback(obj.currentGeneration, struct());
             end
 
             % 完成优化
@@ -418,6 +417,126 @@ classdef NSGAII < AlgorithmBase
                 obj.history = historyEntry;
             else
                 obj.history(end+1) = historyEntry;
+            end
+        end
+
+        function data = getIterationData(obj, iteration)
+            % getIterationData 获取用于GUI/日志的迭代数据
+            %
+            % 输出字段（尽量与 OptimizationCallbacks 兼容）:
+            %   - iteration
+            %   - evaluations
+            %   - bestObjectives
+            %   - paretoFront      (数值矩阵: nSolutions x nObj)
+            %   - archiveSize      (Pareto 解数量)
+            %   - feasibleRatio    (可行解比例，可选)
+
+            data = struct();
+            data.iteration = iteration;
+            data.evaluations = obj.evaluationCount;
+            data.bestObjectives = [];
+            data.paretoFront = [];
+            data.populationObjectives = [];
+            data.archiveSize = 0;
+
+            if isempty(obj.population)
+                return;
+            end
+
+            inds = obj.population.getAll();
+            if isempty(inds)
+                return;
+            end
+
+            % 尝试使用已计算的 rank 提取第一前沿，避免重复 fastNonDominatedSort
+            frontInds = Individual.empty(0, 0);
+            try
+                for i = 1:length(inds)
+                    if inds(i).getRank() == 1
+                        frontInds(end+1) = inds(i); %#ok<AGROW>
+                    end
+                end
+            catch
+                frontInds = Individual.empty(0, 0);
+            end
+
+            if isempty(frontInds)
+                frontInds = inds;
+            end
+
+            % 提取目标值矩阵
+            nSolutions = length(frontInds);
+            if nSolutions == 0
+                return;
+            end
+
+            try
+                nObj = length(frontInds(1).getObjectives());
+            catch
+                nObj = 0;
+            end
+            if nObj <= 0
+                return;
+            end
+
+            % 全体个体目标值（用于绘制非 Pareto 解）
+            allObjValues = nan(length(inds), nObj);
+            for i = 1:length(inds)
+                try
+                    allObjValues(i, :) = inds(i).getObjectives();
+                catch
+                end
+            end
+
+            validAll = ~all(isnan(allObjValues), 2);
+            allObjValues = allObjValues(validAll, :);
+            data.populationObjectives = allObjValues;
+
+            objValues = nan(nSolutions, nObj);
+            for i = 1:nSolutions
+                try
+                    objValues(i, :) = frontInds(i).getObjectives();
+                catch
+                end
+            end
+
+            % 删除全 NaN 行（防御）
+            validRow = ~all(isnan(objValues), 2);
+            objValues = objValues(validRow, :);
+
+            data.paretoFront = objValues;
+            data.archiveSize = size(objValues, 1);
+
+            % 用每个目标的当前最小值作为“bestObjectives”，用于收敛曲线（忽略 NaN/Inf）
+            best = nan(1, nObj);
+            if ~isempty(allObjValues)
+                for j = 1:nObj
+                    col = allObjValues(:, j);
+                    col = col(isfinite(col));
+                    if ~isempty(col)
+                        best(j) = min(col);
+                    end
+                end
+            end
+            if ~all(isnan(best))
+                data.bestObjectives = best;
+            end
+
+            % 可行解比例（如果有约束）
+            try
+                if obj.problem.getNumberOfConstraints() > 0
+                    feasibleCount = 0;
+                    for i = 1:length(inds)
+                        try
+                            if inds(i).isFeasible()
+                                feasibleCount = feasibleCount + 1;
+                            end
+                        catch
+                        end
+                    end
+                    data.feasibleRatio = feasibleCount / max(1, length(inds));
+                end
+            catch
             end
         end
     end

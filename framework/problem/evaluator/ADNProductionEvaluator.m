@@ -30,6 +30,7 @@ classdef ADNProductionEvaluator < handle
         simulator;          % AspenPlusSimulator对象
         logger;             % Logger对象
         evaluationCount;    % 评估计数
+        variableIndex;      % 变量名到向量索引映射（可选，用于避免顺序错配）
     end
 
     properties (Access = public)
@@ -63,6 +64,8 @@ classdef ADNProductionEvaluator < handle
             else
                 obj.logger = [];
             end
+
+            obj.variableIndex = [];
         end
 
         function result = evaluate(obj, x)
@@ -85,10 +88,20 @@ classdef ADNProductionEvaluator < handle
 
             obj.evaluationCount = obj.evaluationCount + 1;
 
-            % 提取设计变量
-            T0301_BF = x(1);
-            T0301_FEED_STAGE = round(x(2));  % 进料板位置必须是整数
-            T0301_BASIS_RR = x(3);
+            % 提取设计变量（优先按变量名映射，避免变量顺序不一致导致错配）
+            idxBF = obj.getVarIndex('T0301_BF', 1);
+            idxStage = obj.getVarIndex('T0301_FEED_STAGE', 2);
+            idxRR = obj.getVarIndex('T0301_BASIS_RR', 3);
+
+            maxIdx = max([idxBF, idxStage, idxRR]);
+            if numel(x) < maxIdx
+                error('ADNProductionEvaluator:InputSizeMismatch', ...
+                    '输入变量向量长度不足: 需要至少 %d 个元素，实际 %d', maxIdx, numel(x));
+            end
+
+            T0301_BF = x(idxBF);
+            T0301_FEED_STAGE = round(x(idxStage));  % 进料板位置必须是整数
+            T0301_BASIS_RR = x(idxRR);
 
             obj.logInfo(sprintf('评估 #%d: BF=%.4f, FEED_STAGE=%d, BASIS_RR=%.4f', ...
                 obj.evaluationCount, T0301_BF, T0301_FEED_STAGE, T0301_BASIS_RR));
@@ -98,7 +111,11 @@ classdef ADNProductionEvaluator < handle
 
             try
                 % 步骤1: 运行Aspen Plus仿真
-                simResults = obj.runSimulation([T0301_BF, T0301_FEED_STAGE, T0301_BASIS_RR]);
+                vars = struct();
+                vars.T0301_BF = T0301_BF;
+                vars.T0301_FEED_STAGE = T0301_FEED_STAGE;
+                vars.T0301_BASIS_RR = T0301_BASIS_RR;
+                simResults = obj.runSimulation(vars);
 
                 if ~simResults.success
                     obj.logWarning('仿真失败或收敛失败，返回惩罚值');
@@ -136,11 +153,11 @@ classdef ADNProductionEvaluator < handle
     end
 
     methods (Access = private)
-        function simResults = runSimulation(obj, x)
+        function simResults = runSimulation(obj, vars)
             % runSimulation 运行Aspen Plus仿真
             %
-            % 输入:
-            %   x - [T0301_BF, T0301_FEED_STAGE, T0301_BASIS_RR]
+            % 输入（推荐结构体形式，避免变量顺序错配）:
+            %   vars - struct，字段为变量名
             %
             % 输出:
             %   simResults - 仿真结果结构体
@@ -153,7 +170,7 @@ classdef ADNProductionEvaluator < handle
 
             try
                 % 设置Aspen变量
-                obj.simulator.setVariables(x);
+                obj.simulator.setVariables(vars);
 
                 % 运行仿真
                 success = obj.simulator.run(obj.timeout);
@@ -175,6 +192,18 @@ classdef ADNProductionEvaluator < handle
             catch ME
                 obj.logError(sprintf('仿真执行异常: %s', ME.message));
                 simResults.success = false;
+            end
+        end
+
+        function idx = getVarIndex(obj, varName, defaultIdx)
+            idx = defaultIdx;
+            try
+                if ~isempty(obj.variableIndex) && isa(obj.variableIndex, 'containers.Map')
+                    if obj.variableIndex.isKey(varName)
+                        idx = obj.variableIndex(varName);
+                    end
+                end
+            catch
             end
         end
 
@@ -200,6 +229,31 @@ classdef ADNProductionEvaluator < handle
                 obj.logger.error(message);
             else
                 fprintf('[ERROR] %s\n', message);
+            end
+        end
+    end
+
+    methods (Access = public)
+        function setProblem(obj, problem)
+            % setProblem 可选：根据问题变量顺序建立索引映射
+            try
+                varSet = problem.getVariableSet();
+                iterator = varSet.getIterator(); % cell array of Variable
+
+                m = containers.Map('KeyType', 'char', 'ValueType', 'double');
+                for i = 1:length(iterator)
+                    try
+                        name = iterator{i}.name;
+                        if ischar(name) && ~isempty(name)
+                            m(name) = i;
+                        end
+                    catch
+                    end
+                end
+
+                obj.variableIndex = m;
+            catch
+                obj.variableIndex = [];
             end
         end
     end

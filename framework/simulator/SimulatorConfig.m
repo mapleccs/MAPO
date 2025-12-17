@@ -159,6 +159,10 @@ classdef SimulatorConfig < handle
             %   config.setNodeMapping('temperature', 'B1.TEMP');
             %   config.setNodeMapping('stages', 'B2.NSTAGE');
 
+            nodePath = SimulatorConfig.ensureChar(nodePath);
+            if strcmpi(obj.simulatorType, 'Aspen')
+                nodePath = SimulatorConfig.normalizeAspenNodePath(nodePath);
+            end
             obj.nodeMapping(variableName) = nodePath;
 
             % 记录插入顺序（如果是新变量）
@@ -236,6 +240,10 @@ classdef SimulatorConfig < handle
             %   config.setResultMapping('conversion', 'R1.CONV');
             %   config.setResultMapping('ADN_FRAC', '\\Data\\Streams\\0320\\Output\\MASSFRAC\\MIXED\\ADN');
 
+            nodePath = SimulatorConfig.ensureChar(nodePath);
+            if strcmpi(obj.simulatorType, 'Aspen')
+                nodePath = SimulatorConfig.normalizeAspenNodePath(nodePath);
+            end
             obj.resultMapping(resultName) = nodePath;
 
             % 记录插入顺序（如果是新结果）
@@ -561,6 +569,44 @@ classdef SimulatorConfig < handle
 
             obj = SimulatorConfig('Generic');
             obj.loadFromConfig(config);
+        end
+    end
+
+    methods (Static, Access = private)
+        function s = ensureChar(value)
+            if ischar(value)
+                s = value;
+                return;
+            end
+            if isstring(value) && isscalar(value)
+                s = char(value);
+                return;
+            end
+            try
+                s = char(string(value));
+            catch
+                s = '';
+            end
+        end
+
+        function nodePath = normalizeAspenNodePath(nodePath)
+            nodePath = strtrim(nodePath);
+            if isempty(nodePath)
+                return;
+            end
+
+            % Aspen Tree 路径使用反斜杠
+            nodePath = strrep(nodePath, '/', '\');
+
+            % 处理用户从 JSON 复制导致的双反斜杠
+            while contains(nodePath, '\\')
+                nodePath = strrep(nodePath, '\\', '\');
+            end
+
+            % 如果用户遗漏了开头的反斜杠，补上
+            if startsWith(nodePath, 'Data\')
+                nodePath = ['\' nodePath];
+            end
         end
     end
 end

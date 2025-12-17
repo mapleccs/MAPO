@@ -45,6 +45,7 @@ classdef Variable < handle
         upperBound;   % 上界（连续/整数变量）
         values;       % 离散值集合（离散/分类变量）
         description;  % 变量描述
+        unit;         % 变量单位
     end
 
     methods
@@ -75,15 +76,22 @@ classdef Variable < handle
             obj.name = name;
             obj.type = lower(type);
             obj.description = '';
+            obj.unit = '';
 
             % 解析可选参数
             p = inputParser;
             addParameter(p, 'Description', '', @(x) ischar(x) || isstring(x) || isempty(x));
+            addParameter(p, 'Unit', '', @(x) ischar(x) || isstring(x) || isempty(x));
             parse(p, varargin{:});
             if isstring(p.Results.Description)
                 obj.description = char(p.Results.Description);
             else
                 obj.description = p.Results.Description;
+            end
+            if isstring(p.Results.Unit)
+                obj.unit = char(p.Results.Unit);
+            else
+                obj.unit = p.Results.Unit;
             end
 
             % 根据类型设置边界或值集合
@@ -312,6 +320,7 @@ classdef Variable < handle
             s.name = obj.name;
             s.type = obj.type;
             s.description = obj.description;
+            s.unit = obj.unit;
 
             switch obj.type
                 case {Variable.TYPE_CONTINUOUS, Variable.TYPE_INTEGER}

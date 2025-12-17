@@ -1,0 +1,1217 @@
+
+========================================
+日志开始时间: 11-Dec-2025 21:25:01
+========================================
+[21:25:01] [INFO] 正在连接Aspen Plus...
+[21:25:01] [INFO] 模型文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\阿司匹林.bkp
+[21:25:01] [INFO] Aspen窗口可见性: true
+[21:25:16] [INFO] 正在进行首次初始化运行...
+[21:25:23] [INFO] 仿真器已连接
+[21:25:23] [INFO] Aspen Plus连接成功
+[21:25:23] [DEBUG] 设置2个变量...
+[21:25:24] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 80
+[21:25:24] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 137.0307
+[21:25:24] [DEBUG]   R101_FEED_TEMP = 137 -> \Data\Blocks\R101\Input\TEMP
+[21:25:24] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 1
+[21:25:24] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7645
+[21:25:25] [DEBUG]   R101_FEED_PRES = 2.764 -> \Data\Blocks\R101\Input\PRES
+[21:25:25] [INFO] 变量设置完成
+[21:25:25] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:25] [DEBUG] 执行Reinit...
+[21:25:25] [DEBUG] 执行Run...
+[21:25:27] [DEBUG] Engine已停止运行
+[21:25:27] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:28] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:28] [INFO] 仿真运行成功 (第1次)
+[21:25:28] [INFO] 仿真成功完成 (耗时: 2.85秒)
+[21:25:28] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.077903
+[21:25:28] [DEBUG] 获取结果: SA_FRAC = 0.0779025
+[21:25:28] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 26.6662
+[21:25:28] [DEBUG] 获取结果: SA_FLOW = 26.6662
+[21:25:28] [DEBUG] 设置2个变量...
+[21:25:28] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 137.0307
+[21:25:28] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:25:28] [DEBUG]   R101_FEED_TEMP = 88.89 -> \Data\Blocks\R101\Input\TEMP
+[21:25:28] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7645
+[21:25:28] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7834
+[21:25:29] [DEBUG]   R101_FEED_PRES = 2.783 -> \Data\Blocks\R101\Input\PRES
+[21:25:29] [INFO] 变量设置完成
+[21:25:29] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:29] [DEBUG] 执行Reinit...
+[21:25:29] [DEBUG] 执行Run...
+[21:25:31] [DEBUG] Engine已停止运行
+[21:25:31] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:31] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:31] [INFO] 仿真运行成功 (第2次)
+[21:25:31] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:25:31] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25088
+[21:25:31] [DEBUG] 获取结果: SA_FRAC = 0.250884
+[21:25:31] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 85.8784
+[21:25:31] [DEBUG] 获取结果: SA_FLOW = 85.8784
+[21:25:32] [DEBUG] 设置2个变量...
+[21:25:32] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:25:32] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 124.2651
+[21:25:32] [DEBUG]   R101_FEED_TEMP = 124.3 -> \Data\Blocks\R101\Input\TEMP
+[21:25:32] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7834
+[21:25:32] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 0.74385
+[21:25:33] [DEBUG]   R101_FEED_PRES = 0.7439 -> \Data\Blocks\R101\Input\PRES
+[21:25:33] [INFO] 变量设置完成
+[21:25:33] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:33] [DEBUG] 执行Reinit...
+[21:25:33] [DEBUG] 执行Run...
+[21:25:35] [DEBUG] Engine已停止运行
+[21:25:35] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:35] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:35] [INFO] 仿真运行成功 (第3次)
+[21:25:35] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:25:35] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.11165
+[21:25:35] [DEBUG] 获取结果: SA_FRAC = 0.111654
+[21:25:35] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 38.2195
+[21:25:35] [DEBUG] 获取结果: SA_FLOW = 38.2195
+[21:25:35] [DEBUG] 设置2个变量...
+[21:25:35] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 124.2651
+[21:25:35] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 99.4949
+[21:25:36] [DEBUG]   R101_FEED_TEMP = 99.49 -> \Data\Blocks\R101\Input\TEMP
+[21:25:36] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 0.74385
+[21:25:36] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 1.8672
+[21:25:36] [DEBUG]   R101_FEED_PRES = 1.867 -> \Data\Blocks\R101\Input\PRES
+[21:25:36] [INFO] 变量设置完成
+[21:25:36] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:37] [DEBUG] 执行Reinit...
+[21:25:37] [DEBUG] 执行Run...
+[21:25:39] [DEBUG] Engine已停止运行
+[21:25:39] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:39] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:39] [INFO] 仿真运行成功 (第4次)
+[21:25:39] [INFO] 仿真成功完成 (耗时: 2.96秒)
+[21:25:39] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.20447
+[21:25:39] [DEBUG] 获取结果: SA_FRAC = 0.204466
+[21:25:39] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 69.9891
+[21:25:39] [DEBUG] 获取结果: SA_FLOW = 69.9891
+[21:25:39] [DEBUG] 设置2个变量...
+[21:25:39] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 99.4949
+[21:25:39] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 147.0255
+[21:25:40] [DEBUG]   R101_FEED_TEMP = 147 -> \Data\Blocks\R101\Input\TEMP
+[21:25:40] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 1.8672
+[21:25:40] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.9122
+[21:25:40] [DEBUG]   R101_FEED_PRES = 2.912 -> \Data\Blocks\R101\Input\PRES
+[21:25:40] [INFO] 变量设置完成
+[21:25:40] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:41] [DEBUG] 执行Reinit...
+[21:25:41] [DEBUG] 执行Run...
+[21:25:43] [DEBUG] Engine已停止运行
+[21:25:43] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:43] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:43] [INFO] 仿真运行成功 (第5次)
+[21:25:43] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:25:43] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.058015
+[21:25:43] [DEBUG] 获取结果: SA_FRAC = 0.0580155
+[21:25:43] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 19.8588
+[21:25:43] [DEBUG] 获取结果: SA_FLOW = 19.8588
+[21:25:43] [DEBUG] 设置2个变量...
+[21:25:43] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 147.0255
+[21:25:43] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 91.0329
+[21:25:44] [DEBUG]   R101_FEED_TEMP = 91.03 -> \Data\Blocks\R101\Input\TEMP
+[21:25:44] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.9122
+[21:25:44] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.9265
+[21:25:44] [DEBUG]   R101_FEED_PRES = 2.926 -> \Data\Blocks\R101\Input\PRES
+[21:25:44] [INFO] 变量设置完成
+[21:25:44] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:45] [DEBUG] 执行Reinit...
+[21:25:45] [DEBUG] 执行Run...
+[21:25:47] [DEBUG] Engine已停止运行
+[21:25:47] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:47] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:47] [INFO] 仿真运行成功 (第6次)
+[21:25:47] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:25:47] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.24148
+[21:25:47] [DEBUG] 获取结果: SA_FRAC = 0.241478
+[21:25:47] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 82.6587
+[21:25:47] [DEBUG] 获取结果: SA_FLOW = 82.6587
+[21:25:47] [DEBUG] 设置2个变量...
+[21:25:47] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 91.0329
+[21:25:47] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 147.0017
+[21:25:48] [DEBUG]   R101_FEED_TEMP = 147 -> \Data\Blocks\R101\Input\TEMP
+[21:25:48] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.9265
+[21:25:48] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 1.7134
+[21:25:48] [DEBUG]   R101_FEED_PRES = 1.713 -> \Data\Blocks\R101\Input\PRES
+[21:25:48] [INFO] 变量设置完成
+[21:25:48] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:49] [DEBUG] 执行Reinit...
+[21:25:49] [DEBUG] 执行Run...
+[21:25:51] [DEBUG] Engine已停止运行
+[21:25:51] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:51] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:51] [INFO] 仿真运行成功 (第7次)
+[21:25:51] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:25:51] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.058057
+[21:25:51] [DEBUG] 获取结果: SA_FRAC = 0.0580567
+[21:25:51] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 19.873
+[21:25:51] [DEBUG] 获取结果: SA_FLOW = 19.873
+[21:25:51] [DEBUG] 设置2个变量...
+[21:25:51] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 147.0017
+[21:25:51] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 136.0196
+[21:25:52] [DEBUG]   R101_FEED_TEMP = 136 -> \Data\Blocks\R101\Input\TEMP
+[21:25:52] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 1.7134
+[21:25:52] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 0.85472
+[21:25:52] [DEBUG]   R101_FEED_PRES = 0.8547 -> \Data\Blocks\R101\Input\PRES
+[21:25:52] [INFO] 变量设置完成
+[21:25:52] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:53] [DEBUG] 执行Reinit...
+[21:25:53] [DEBUG] 执行Run...
+[21:25:55] [DEBUG] Engine已停止运行
+[21:25:55] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:55] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:55] [INFO] 仿真运行成功 (第8次)
+[21:25:55] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:25:55] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.080219
+[21:25:55] [DEBUG] 获取结果: SA_FRAC = 0.0802187
+[21:25:55] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 27.4591
+[21:25:55] [DEBUG] 获取结果: SA_FLOW = 27.4591
+[21:25:55] [DEBUG] 设置2个变量...
+[21:25:55] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 136.0196
+[21:25:55] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 109.5233
+[21:25:56] [DEBUG]   R101_FEED_TEMP = 109.5 -> \Data\Blocks\R101\Input\TEMP
+[21:25:56] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 0.85472
+[21:25:56] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7893
+[21:25:56] [DEBUG]   R101_FEED_PRES = 2.789 -> \Data\Blocks\R101\Input\PRES
+[21:25:56] [INFO] 变量设置完成
+[21:25:56] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:25:57] [DEBUG] 执行Reinit...
+[21:25:57] [DEBUG] 执行Run...
+[21:25:59] [DEBUG] Engine已停止运行
+[21:25:59] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:25:59] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:25:59] [INFO] 仿真运行成功 (第9次)
+[21:25:59] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:25:59] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.16307
+[21:25:59] [DEBUG] 获取结果: SA_FRAC = 0.163066
+[21:25:59] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 55.8179
+[21:25:59] [DEBUG] 获取结果: SA_FLOW = 55.8179
+[21:25:59] [DEBUG] 设置2个变量...
+[21:25:59] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 109.5233
+[21:25:59] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 135.4545
+[21:25:59] [DEBUG]   R101_FEED_TEMP = 135.5 -> \Data\Blocks\R101\Input\TEMP
+[21:25:59] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7893
+[21:25:59] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.8987
+[21:26:00] [DEBUG]   R101_FEED_PRES = 2.899 -> \Data\Blocks\R101\Input\PRES
+[21:26:00] [INFO] 变量设置完成
+[21:26:00] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:00] [DEBUG] 执行Reinit...
+[21:26:01] [DEBUG] 执行Run...
+[21:26:03] [DEBUG] Engine已停止运行
+[21:26:03] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:03] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:03] [INFO] 仿真运行成功 (第10次)
+[21:26:03] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:26:03] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.081539
+[21:26:03] [DEBUG] 获取结果: SA_FRAC = 0.0815391
+[21:26:03] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 27.911
+[21:26:03] [DEBUG] 获取结果: SA_FLOW = 27.911
+[21:26:03] [DEBUG] 设置2个变量...
+[21:26:03] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 135.4545
+[21:26:03] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 137.0307
+[21:26:03] [DEBUG]   R101_FEED_TEMP = 137 -> \Data\Blocks\R101\Input\TEMP
+[21:26:03] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.8987
+[21:26:03] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.8171
+[21:26:04] [DEBUG]   R101_FEED_PRES = 2.817 -> \Data\Blocks\R101\Input\PRES
+[21:26:04] [INFO] 变量设置完成
+[21:26:04] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:04] [DEBUG] 执行Reinit...
+[21:26:05] [DEBUG] 执行Run...
+[21:26:07] [DEBUG] Engine已停止运行
+[21:26:07] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:07] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:07] [INFO] 仿真运行成功 (第11次)
+[21:26:07] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:26:07] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.077903
+[21:26:07] [DEBUG] 获取结果: SA_FRAC = 0.0779025
+[21:26:07] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 26.6662
+[21:26:07] [DEBUG] 获取结果: SA_FLOW = 26.6662
+[21:26:07] [DEBUG] 设置2个变量...
+[21:26:07] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 137.0307
+[21:26:07] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 123.3698
+[21:26:07] [DEBUG]   R101_FEED_TEMP = 123.4 -> \Data\Blocks\R101\Input\TEMP
+[21:26:07] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.8171
+[21:26:07] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 0.62653
+[21:26:08] [DEBUG]   R101_FEED_PRES = 0.6265 -> \Data\Blocks\R101\Input\PRES
+[21:26:08] [INFO] 变量设置完成
+[21:26:08] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:08] [DEBUG] 执行Reinit...
+[21:26:09] [DEBUG] 执行Run...
+[21:26:11] [DEBUG] Engine已停止运行
+[21:26:11] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:11] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:11] [INFO] 仿真运行成功 (第12次)
+[21:26:11] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:26:11] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.1144
+[21:26:11] [DEBUG] 获取结果: SA_FRAC = 0.1144
+[21:26:11] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 39.1592
+[21:26:11] [DEBUG] 获取结果: SA_FLOW = 39.1592
+[21:26:11] [DEBUG] 设置2个变量...
+[21:26:11] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 123.3698
+[21:26:11] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:26:11] [DEBUG]   R101_FEED_TEMP = 88.89 -> \Data\Blocks\R101\Input\TEMP
+[21:26:11] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 0.62653
+[21:26:11] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7834
+[21:26:12] [DEBUG]   R101_FEED_PRES = 2.783 -> \Data\Blocks\R101\Input\PRES
+[21:26:12] [INFO] 变量设置完成
+[21:26:12] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:12] [DEBUG] 执行Reinit...
+[21:26:12] [DEBUG] 执行Run...
+[21:26:14] [DEBUG] Engine已停止运行
+[21:26:14] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:14] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:14] [INFO] 仿真运行成功 (第13次)
+[21:26:14] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:26:14] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25088
+[21:26:14] [DEBUG] 获取结果: SA_FRAC = 0.250884
+[21:26:14] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 85.8784
+[21:26:14] [DEBUG] 获取结果: SA_FLOW = 85.8784
+[21:26:14] [DEBUG] 设置2个变量...
+[21:26:14] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:26:14] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:26:15] [DEBUG]   R101_FEED_TEMP = 88.89 -> \Data\Blocks\R101\Input\TEMP
+[21:26:15] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7834
+[21:26:15] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7815
+[21:26:15] [DEBUG]   R101_FEED_PRES = 2.781 -> \Data\Blocks\R101\Input\PRES
+[21:26:15] [INFO] 变量设置完成
+[21:26:15] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:16] [DEBUG] 执行Reinit...
+[21:26:16] [DEBUG] 执行Run...
+[21:26:18] [DEBUG] Engine已停止运行
+[21:26:18] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:18] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:18] [INFO] 仿真运行成功 (第14次)
+[21:26:18] [INFO] 仿真成功完成 (耗时: 2.88秒)
+[21:26:18] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25088
+[21:26:18] [DEBUG] 获取结果: SA_FRAC = 0.250884
+[21:26:18] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 85.8784
+[21:26:18] [DEBUG] 获取结果: SA_FLOW = 85.8784
+[21:26:18] [DEBUG] 设置2个变量...
+[21:26:18] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:26:18] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.3115
+[21:26:19] [DEBUG]   R101_FEED_TEMP = 88.31 -> \Data\Blocks\R101\Input\TEMP
+[21:26:19] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7815
+[21:26:19] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.6746
+[21:26:19] [DEBUG]   R101_FEED_PRES = 2.675 -> \Data\Blocks\R101\Input\PRES
+[21:26:19] [INFO] 变量设置完成
+[21:26:19] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:20] [DEBUG] 执行Reinit...
+[21:26:20] [DEBUG] 执行Run...
+[21:26:22] [DEBUG] Engine已停止运行
+[21:26:22] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:22] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:22] [INFO] 仿真运行成功 (第15次)
+[21:26:22] [INFO] 仿真成功完成 (耗时: 2.87秒)
+[21:26:22] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25341
+[21:26:22] [DEBUG] 获取结果: SA_FRAC = 0.253409
+[21:26:22] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 86.7425
+[21:26:22] [DEBUG] 获取结果: SA_FLOW = 86.7425
+[21:26:22] [DEBUG] 设置2个变量...
+[21:26:22] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.3115
+[21:26:22] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 101.8618
+[21:26:23] [DEBUG]   R101_FEED_TEMP = 101.9 -> \Data\Blocks\R101\Input\TEMP
+[21:26:23] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.6746
+[21:26:23] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 1.8672
+[21:26:23] [DEBUG]   R101_FEED_PRES = 1.867 -> \Data\Blocks\R101\Input\PRES
+[21:26:23] [INFO] 变量设置完成
+[21:26:23] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:24] [DEBUG] 执行Reinit...
+[21:26:24] [DEBUG] 执行Run...
+[21:26:26] [DEBUG] Engine已停止运行
+[21:26:26] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:26] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:26] [INFO] 仿真运行成功 (第16次)
+[21:26:26] [INFO] 仿真成功完成 (耗时: 2.88秒)
+[21:26:26] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.19435
+[21:26:26] [DEBUG] 获取结果: SA_FRAC = 0.194352
+[21:26:26] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 66.5273
+[21:26:26] [DEBUG] 获取结果: SA_FLOW = 66.5273
+[21:26:26] [DEBUG] 设置2个变量...
+[21:26:26] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 101.8618
+[21:26:26] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 91.0329
+[21:26:27] [DEBUG]   R101_FEED_TEMP = 91.03 -> \Data\Blocks\R101\Input\TEMP
+[21:26:27] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 1.8672
+[21:26:27] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5188
+[21:26:27] [DEBUG]   R101_FEED_PRES = 2.519 -> \Data\Blocks\R101\Input\PRES
+[21:26:27] [INFO] 变量设置完成
+[21:26:27] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:28] [DEBUG] 执行Reinit...
+[21:26:28] [DEBUG] 执行Run...
+[21:26:30] [DEBUG] Engine已停止运行
+[21:26:30] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:30] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:30] [INFO] 仿真运行成功 (第17次)
+[21:26:30] [INFO] 仿真成功完成 (耗时: 2.89秒)
+[21:26:30] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.24148
+[21:26:30] [DEBUG] 获取结果: SA_FRAC = 0.241478
+[21:26:30] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 82.6587
+[21:26:30] [DEBUG] 获取结果: SA_FLOW = 82.6587
+[21:26:30] [DEBUG] 设置2个变量...
+[21:26:30] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 91.0329
+[21:26:30] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 99.5528
+[21:26:31] [DEBUG]   R101_FEED_TEMP = 99.55 -> \Data\Blocks\R101\Input\TEMP
+[21:26:31] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5188
+[21:26:31] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5877
+[21:26:31] [DEBUG]   R101_FEED_PRES = 2.588 -> \Data\Blocks\R101\Input\PRES
+[21:26:31] [INFO] 变量设置完成
+[21:26:31] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:32] [DEBUG] 执行Reinit...
+[21:26:32] [DEBUG] 执行Run...
+[21:26:34] [DEBUG] Engine已停止运行
+[21:26:34] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:34] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:34] [INFO] 仿真运行成功 (第18次)
+[21:26:34] [INFO] 仿真成功完成 (耗时: 2.88秒)
+[21:26:34] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.20422
+[21:26:34] [DEBUG] 获取结果: SA_FRAC = 0.204216
+[21:26:34] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 69.9038
+[21:26:34] [DEBUG] 获取结果: SA_FLOW = 69.9038
+[21:26:34] [DEBUG] 设置2个变量...
+[21:26:34] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 99.5528
+[21:26:34] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 124.2651
+[21:26:35] [DEBUG]   R101_FEED_TEMP = 124.3 -> \Data\Blocks\R101\Input\TEMP
+[21:26:35] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5877
+[21:26:35] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 0.84298
+[21:26:35] [DEBUG]   R101_FEED_PRES = 0.843 -> \Data\Blocks\R101\Input\PRES
+[21:26:35] [INFO] 变量设置完成
+[21:26:35] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:36] [DEBUG] 执行Reinit...
+[21:26:36] [DEBUG] 执行Run...
+[21:26:38] [DEBUG] Engine已停止运行
+[21:26:38] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:38] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:38] [INFO] 仿真运行成功 (第19次)
+[21:26:38] [INFO] 仿真成功完成 (耗时: 2.86秒)
+[21:26:38] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.11165
+[21:26:38] [DEBUG] 获取结果: SA_FRAC = 0.111654
+[21:26:38] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 38.2195
+[21:26:38] [DEBUG] 获取结果: SA_FLOW = 38.2195
+[21:26:38] [DEBUG] 设置2个变量...
+[21:26:38] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 124.2651
+[21:26:38] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 105.528
+[21:26:39] [DEBUG]   R101_FEED_TEMP = 105.5 -> \Data\Blocks\R101\Input\TEMP
+[21:26:39] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 0.84298
+[21:26:39] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 1.9825
+[21:26:39] [DEBUG]   R101_FEED_PRES = 1.983 -> \Data\Blocks\R101\Input\PRES
+[21:26:39] [INFO] 变量设置完成
+[21:26:39] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:40] [DEBUG] 执行Reinit...
+[21:26:40] [DEBUG] 执行Run...
+[21:26:42] [DEBUG] Engine已停止运行
+[21:26:42] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:42] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:42] [INFO] 仿真运行成功 (第20次)
+[21:26:42] [INFO] 仿真成功完成 (耗时: 2.85秒)
+[21:26:42] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.17907
+[21:26:42] [DEBUG] 获取结果: SA_FRAC = 0.179067
+[21:26:42] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 61.2952
+[21:26:42] [DEBUG] 获取结果: SA_FLOW = 61.2952
+[21:26:42] [DEBUG] 设置2个变量...
+[21:26:42] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 105.528
+[21:26:42] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.4179
+[21:26:43] [DEBUG]   R101_FEED_TEMP = 85.42 -> \Data\Blocks\R101\Input\TEMP
+[21:26:43] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 1.9825
+[21:26:43] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5041
+[21:26:43] [DEBUG]   R101_FEED_PRES = 2.504 -> \Data\Blocks\R101\Input\PRES
+[21:26:43] [INFO] 变量设置完成
+[21:26:43] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:44] [DEBUG] 执行Reinit...
+[21:26:44] [DEBUG] 执行Run...
+[21:26:46] [DEBUG] Engine已停止运行
+[21:26:46] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:46] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:46] [INFO] 仿真运行成功 (第21次)
+[21:26:46] [INFO] 仿真成功完成 (耗时: 2.85秒)
+[21:26:46] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26595
+[21:26:46] [DEBUG] 获取结果: SA_FRAC = 0.265951
+[21:26:46] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.0356
+[21:26:46] [DEBUG] 获取结果: SA_FLOW = 91.0356
+[21:26:46] [DEBUG] 设置2个变量...
+[21:26:46] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.4179
+[21:26:46] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 99.998
+[21:26:46] [DEBUG]   R101_FEED_TEMP = 100 -> \Data\Blocks\R101\Input\TEMP
+[21:26:46] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5041
+[21:26:46] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5634
+[21:26:47] [DEBUG]   R101_FEED_PRES = 2.563 -> \Data\Blocks\R101\Input\PRES
+[21:26:47] [INFO] 变量设置完成
+[21:26:47] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:47] [DEBUG] 执行Reinit...
+[21:26:48] [DEBUG] 执行Run...
+[21:26:50] [DEBUG] Engine已停止运行
+[21:26:50] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:50] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:50] [INFO] 仿真运行成功 (第22次)
+[21:26:50] [INFO] 仿真成功完成 (耗时: 2.89秒)
+[21:26:50] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.2023
+[21:26:50] [DEBUG] 获取结果: SA_FRAC = 0.202302
+[21:26:50] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 69.2486
+[21:26:50] [DEBUG] 获取结果: SA_FLOW = 69.2486
+[21:26:50] [DEBUG] 设置2个变量...
+[21:26:50] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 99.998
+[21:26:50] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.2167
+[21:26:50] [DEBUG]   R101_FEED_TEMP = 85.22 -> \Data\Blocks\R101\Input\TEMP
+[21:26:50] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5634
+[21:26:50] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.6746
+[21:26:51] [DEBUG]   R101_FEED_PRES = 2.675 -> \Data\Blocks\R101\Input\PRES
+[21:26:51] [INFO] 变量设置完成
+[21:26:51] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:51] [DEBUG] 执行Reinit...
+[21:26:52] [DEBUG] 执行Run...
+[21:26:54] [DEBUG] Engine已停止运行
+[21:26:54] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:54] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:54] [INFO] 仿真运行成功 (第23次)
+[21:26:54] [INFO] 仿真成功完成 (耗时: 2.86秒)
+[21:26:54] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26682
+[21:26:54] [DEBUG] 获取结果: SA_FRAC = 0.266815
+[21:26:54] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.3315
+[21:26:54] [DEBUG] 获取结果: SA_FLOW = 91.3315
+[21:26:54] [DEBUG] 设置2个变量...
+[21:26:54] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.2167
+[21:26:54] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 91.9907
+[21:26:54] [DEBUG]   R101_FEED_TEMP = 91.99 -> \Data\Blocks\R101\Input\TEMP
+[21:26:54] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.6746
+[21:26:54] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7818
+[21:26:55] [DEBUG]   R101_FEED_PRES = 2.782 -> \Data\Blocks\R101\Input\PRES
+[21:26:55] [INFO] 变量设置完成
+[21:26:55] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:55] [DEBUG] 执行Reinit...
+[21:26:56] [DEBUG] 执行Run...
+[21:26:58] [DEBUG] Engine已停止运行
+[21:26:58] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:26:58] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:26:58] [INFO] 仿真运行成功 (第24次)
+[21:26:58] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:26:58] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.23726
+[21:26:58] [DEBUG] 获取结果: SA_FRAC = 0.237265
+[21:26:58] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 81.2164
+[21:26:58] [DEBUG] 获取结果: SA_FLOW = 81.2164
+[21:26:58] [DEBUG] 设置2个变量...
+[21:26:58] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 91.9907
+[21:26:58] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 101.7123
+[21:26:58] [DEBUG]   R101_FEED_TEMP = 101.7 -> \Data\Blocks\R101\Input\TEMP
+[21:26:58] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7818
+[21:26:58] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7834
+[21:26:59] [DEBUG]   R101_FEED_PRES = 2.783 -> \Data\Blocks\R101\Input\PRES
+[21:26:59] [INFO] 变量设置完成
+[21:26:59] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:26:59] [DEBUG] 执行Reinit...
+[21:27:00] [DEBUG] 执行Run...
+[21:27:02] [DEBUG] Engine已停止运行
+[21:27:02] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:02] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:02] [INFO] 仿真运行成功 (第25次)
+[21:27:02] [INFO] 仿真成功完成 (耗时: 2.85秒)
+[21:27:02] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.19499
+[21:27:02] [DEBUG] 获取结果: SA_FRAC = 0.194986
+[21:27:02] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 66.7443
+[21:27:02] [DEBUG] 获取结果: SA_FLOW = 66.7443
+[21:27:02] [DEBUG] 设置2个变量...
+[21:27:02] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 101.7123
+[21:27:02] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 91.0329
+[21:27:02] [DEBUG]   R101_FEED_TEMP = 91.03 -> \Data\Blocks\R101\Input\TEMP
+[21:27:02] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7834
+[21:27:02] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5188
+[21:27:03] [DEBUG]   R101_FEED_PRES = 2.519 -> \Data\Blocks\R101\Input\PRES
+[21:27:03] [INFO] 变量设置完成
+[21:27:03] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:03] [DEBUG] 执行Reinit...
+[21:27:03] [DEBUG] 执行Run...
+[21:27:05] [DEBUG] Engine已停止运行
+[21:27:05] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:05] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:05] [INFO] 仿真运行成功 (第26次)
+[21:27:05] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:27:05] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.24148
+[21:27:05] [DEBUG] 获取结果: SA_FRAC = 0.241478
+[21:27:05] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 82.6587
+[21:27:05] [DEBUG] 获取结果: SA_FLOW = 82.6587
+[21:27:05] [DEBUG] 设置2个变量...
+[21:27:05] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 91.0329
+[21:27:05] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.4598
+[21:27:06] [DEBUG]   R101_FEED_TEMP = 88.46 -> \Data\Blocks\R101\Input\TEMP
+[21:27:06] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5188
+[21:27:06] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.9296
+[21:27:06] [DEBUG]   R101_FEED_PRES = 2.93 -> \Data\Blocks\R101\Input\PRES
+[21:27:06] [INFO] 变量设置完成
+[21:27:06] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:07] [DEBUG] 执行Reinit...
+[21:27:07] [DEBUG] 执行Run...
+[21:27:09] [DEBUG] Engine已停止运行
+[21:27:09] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:09] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:09] [INFO] 仿真运行成功 (第27次)
+[21:27:09] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:27:09] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25276
+[21:27:09] [DEBUG] 获取结果: SA_FRAC = 0.252761
+[21:27:09] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 86.5207
+[21:27:09] [DEBUG] 获取结果: SA_FLOW = 86.5207
+[21:27:09] [DEBUG] 设置2个变量...
+[21:27:09] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.4598
+[21:27:09] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.5215
+[21:27:10] [DEBUG]   R101_FEED_TEMP = 88.52 -> \Data\Blocks\R101\Input\TEMP
+[21:27:10] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.9296
+[21:27:10] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 1.8631
+[21:27:10] [DEBUG]   R101_FEED_PRES = 1.863 -> \Data\Blocks\R101\Input\PRES
+[21:27:10] [INFO] 变量设置完成
+[21:27:10] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:11] [DEBUG] 执行Reinit...
+[21:27:11] [DEBUG] 执行Run...
+[21:27:13] [DEBUG] Engine已停止运行
+[21:27:13] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:13] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:13] [INFO] 仿真运行成功 (第28次)
+[21:27:13] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:27:13] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25249
+[21:27:13] [DEBUG] 获取结果: SA_FRAC = 0.252491
+[21:27:13] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 86.4284
+[21:27:13] [DEBUG] 获取结果: SA_FLOW = 86.4284
+[21:27:13] [DEBUG] 设置2个变量...
+[21:27:13] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.5215
+[21:27:13] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 95.096
+[21:27:14] [DEBUG]   R101_FEED_TEMP = 95.1 -> \Data\Blocks\R101\Input\TEMP
+[21:27:14] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 1.8631
+[21:27:14] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7799
+[21:27:14] [DEBUG]   R101_FEED_PRES = 2.78 -> \Data\Blocks\R101\Input\PRES
+[21:27:14] [INFO] 变量设置完成
+[21:27:14] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:15] [DEBUG] 执行Reinit...
+[21:27:15] [DEBUG] 执行Run...
+[21:27:17] [DEBUG] Engine已停止运行
+[21:27:17] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:17] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:17] [INFO] 仿真运行成功 (第29次)
+[21:27:17] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:27:17] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.22361
+[21:27:17] [DEBUG] 获取结果: SA_FRAC = 0.223611
+[21:27:17] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 76.5426
+[21:27:17] [DEBUG] 获取结果: SA_FLOW = 76.5426
+[21:27:17] [DEBUG] 设置2个变量...
+[21:27:17] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 95.096
+[21:27:17] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:27:18] [DEBUG]   R101_FEED_TEMP = 88.89 -> \Data\Blocks\R101\Input\TEMP
+[21:27:18] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7799
+[21:27:18] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7788
+[21:27:18] [DEBUG]   R101_FEED_PRES = 2.779 -> \Data\Blocks\R101\Input\PRES
+[21:27:18] [INFO] 变量设置完成
+[21:27:18] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:19] [DEBUG] 执行Reinit...
+[21:27:19] [DEBUG] 执行Run...
+[21:27:21] [DEBUG] Engine已停止运行
+[21:27:21] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:21] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:21] [INFO] 仿真运行成功 (第30次)
+[21:27:21] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:27:21] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25088
+[21:27:21] [DEBUG] 获取结果: SA_FRAC = 0.250884
+[21:27:21] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 85.8784
+[21:27:21] [DEBUG] 获取结果: SA_FLOW = 85.8784
+[21:27:21] [DEBUG] 设置2个变量...
+[21:27:21] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:27:21] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:27:21] [DEBUG]   R101_FEED_TEMP = 88.89 -> \Data\Blocks\R101\Input\TEMP
+[21:27:21] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7788
+[21:27:21] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7788
+[21:27:22] [DEBUG]   R101_FEED_PRES = 2.779 -> \Data\Blocks\R101\Input\PRES
+[21:27:22] [INFO] 变量设置完成
+[21:27:22] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:22] [DEBUG] 执行Reinit...
+[21:27:23] [DEBUG] 执行Run...
+[21:27:25] [DEBUG] Engine已停止运行
+[21:27:25] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:25] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:25] [INFO] 仿真运行成功 (第31次)
+[21:27:25] [INFO] 仿真成功完成 (耗时: 2.81秒)
+[21:27:25] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25088
+[21:27:25] [DEBUG] 获取结果: SA_FRAC = 0.250884
+[21:27:25] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 85.8784
+[21:27:25] [DEBUG] 获取结果: SA_FLOW = 85.8784
+[21:27:25] [DEBUG] 设置2个变量...
+[21:27:25] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.8891
+[21:27:25] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.369
+[21:27:25] [DEBUG]   R101_FEED_TEMP = 85.37 -> \Data\Blocks\R101\Input\TEMP
+[21:27:25] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7788
+[21:27:25] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5016
+[21:27:26] [DEBUG]   R101_FEED_PRES = 2.502 -> \Data\Blocks\R101\Input\PRES
+[21:27:26] [INFO] 变量设置完成
+[21:27:26] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:26] [DEBUG] 执行Reinit...
+[21:27:27] [DEBUG] 执行Run...
+[21:27:29] [DEBUG] Engine已停止运行
+[21:27:29] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:29] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:29] [INFO] 仿真运行成功 (第32次)
+[21:27:29] [INFO] 仿真成功完成 (耗时: 2.81秒)
+[21:27:29] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26616
+[21:27:29] [DEBUG] 获取结果: SA_FRAC = 0.266161
+[21:27:29] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.1077
+[21:27:29] [DEBUG] 获取结果: SA_FLOW = 91.1077
+[21:27:29] [DEBUG] 设置2个变量...
+[21:27:29] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.369
+[21:27:29] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.3021
+[21:27:29] [DEBUG]   R101_FEED_TEMP = 88.3 -> \Data\Blocks\R101\Input\TEMP
+[21:27:29] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5016
+[21:27:29] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7834
+[21:27:30] [DEBUG]   R101_FEED_PRES = 2.783 -> \Data\Blocks\R101\Input\PRES
+[21:27:30] [INFO] 变量设置完成
+[21:27:30] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:30] [DEBUG] 执行Reinit...
+[21:27:30] [DEBUG] 执行Run...
+[21:27:32] [DEBUG] Engine已停止运行
+[21:27:33] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:33] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:33] [INFO] 仿真运行成功 (第33次)
+[21:27:33] [INFO] 仿真成功完成 (耗时: 2.81秒)
+[21:27:33] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25345
+[21:27:33] [DEBUG] 获取结果: SA_FRAC = 0.25345
+[21:27:33] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 86.7564
+[21:27:33] [DEBUG] 获取结果: SA_FLOW = 86.7564
+[21:27:33] [DEBUG] 设置2个变量...
+[21:27:33] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.3021
+[21:27:33] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.5081
+[21:27:33] [DEBUG]   R101_FEED_TEMP = 88.51 -> \Data\Blocks\R101\Input\TEMP
+[21:27:33] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7834
+[21:27:33] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 1.8636
+[21:27:34] [DEBUG]   R101_FEED_PRES = 1.864 -> \Data\Blocks\R101\Input\PRES
+[21:27:34] [INFO] 变量设置完成
+[21:27:34] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:34] [DEBUG] 执行Reinit...
+[21:27:34] [DEBUG] 执行Run...
+[21:27:36] [DEBUG] Engine已停止运行
+[21:27:36] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:36] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:36] [INFO] 仿真运行成功 (第34次)
+[21:27:36] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:27:36] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25255
+[21:27:36] [DEBUG] 获取结果: SA_FRAC = 0.25255
+[21:27:36] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 86.4485
+[21:27:36] [DEBUG] 获取结果: SA_FLOW = 86.4485
+[21:27:36] [DEBUG] 设置2个变量...
+[21:27:36] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.5081
+[21:27:36] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.8895
+[21:27:37] [DEBUG]   R101_FEED_TEMP = 88.89 -> \Data\Blocks\R101\Input\TEMP
+[21:27:37] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 1.8636
+[21:27:37] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.951
+[21:27:37] [DEBUG]   R101_FEED_PRES = 2.951 -> \Data\Blocks\R101\Input\PRES
+[21:27:37] [INFO] 变量设置完成
+[21:27:37] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:38] [DEBUG] 执行Reinit...
+[21:27:38] [DEBUG] 执行Run...
+[21:27:40] [DEBUG] Engine已停止运行
+[21:27:40] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:40] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:40] [INFO] 仿真运行成功 (第35次)
+[21:27:40] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:27:40] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25088
+[21:27:40] [DEBUG] 获取结果: SA_FRAC = 0.250883
+[21:27:40] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 85.8777
+[21:27:40] [DEBUG] 获取结果: SA_FLOW = 85.8777
+[21:27:40] [DEBUG] 设置2个变量...
+[21:27:40] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.8895
+[21:27:40] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 92.0431
+[21:27:41] [DEBUG]   R101_FEED_TEMP = 92.04 -> \Data\Blocks\R101\Input\TEMP
+[21:27:41] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.951
+[21:27:41] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 1.8911
+[21:27:41] [DEBUG]   R101_FEED_PRES = 1.891 -> \Data\Blocks\R101\Input\PRES
+[21:27:41] [INFO] 变量设置完成
+[21:27:41] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:42] [DEBUG] 执行Reinit...
+[21:27:42] [DEBUG] 执行Run...
+[21:27:44] [DEBUG] Engine已停止运行
+[21:27:44] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:44] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:44] [INFO] 仿真运行成功 (第36次)
+[21:27:44] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:27:44] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.23703
+[21:27:44] [DEBUG] 获取结果: SA_FRAC = 0.237034
+[21:27:44] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 81.1375
+[21:27:44] [DEBUG] 获取结果: SA_FLOW = 81.1375
+[21:27:44] [DEBUG] 设置2个变量...
+[21:27:44] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 92.0431
+[21:27:44] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.3115
+[21:27:45] [DEBUG]   R101_FEED_TEMP = 88.31 -> \Data\Blocks\R101\Input\TEMP
+[21:27:45] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 1.8911
+[21:27:45] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.4977
+[21:27:45] [DEBUG]   R101_FEED_PRES = 2.498 -> \Data\Blocks\R101\Input\PRES
+[21:27:45] [INFO] 变量设置完成
+[21:27:45] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:46] [DEBUG] 执行Reinit...
+[21:27:46] [DEBUG] 执行Run...
+[21:27:48] [DEBUG] Engine已停止运行
+[21:27:48] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:48] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:48] [INFO] 仿真运行成功 (第37次)
+[21:27:48] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:27:48] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25341
+[21:27:48] [DEBUG] 获取结果: SA_FRAC = 0.253409
+[21:27:48] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 86.7425
+[21:27:48] [DEBUG] 获取结果: SA_FLOW = 86.7425
+[21:27:48] [DEBUG] 设置2个变量...
+[21:27:48] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.3115
+[21:27:48] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 90.4311
+[21:27:49] [DEBUG]   R101_FEED_TEMP = 90.43 -> \Data\Blocks\R101\Input\TEMP
+[21:27:49] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.4977
+[21:27:49] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.6547
+[21:27:49] [DEBUG]   R101_FEED_PRES = 2.655 -> \Data\Blocks\R101\Input\PRES
+[21:27:49] [INFO] 变量设置完成
+[21:27:49] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:50] [DEBUG] 执行Reinit...
+[21:27:50] [DEBUG] 执行Run...
+[21:27:52] [DEBUG] Engine已停止运行
+[21:27:52] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:52] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:52] [INFO] 仿真运行成功 (第38次)
+[21:27:52] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:27:52] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.24412
+[21:27:52] [DEBUG] 获取结果: SA_FRAC = 0.244123
+[21:27:52] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 83.564
+[21:27:52] [DEBUG] 获取结果: SA_FLOW = 83.564
+[21:27:52] [DEBUG] 设置2个变量...
+[21:27:52] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 90.4311
+[21:27:52] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.4598
+[21:27:52] [DEBUG]   R101_FEED_TEMP = 88.46 -> \Data\Blocks\R101\Input\TEMP
+[21:27:52] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.6547
+[21:27:52] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.9296
+[21:27:53] [DEBUG]   R101_FEED_PRES = 2.93 -> \Data\Blocks\R101\Input\PRES
+[21:27:53] [INFO] 变量设置完成
+[21:27:53] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:53] [DEBUG] 执行Reinit...
+[21:27:54] [DEBUG] 执行Run...
+[21:27:56] [DEBUG] Engine已停止运行
+[21:27:56] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:27:56] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:27:56] [INFO] 仿真运行成功 (第39次)
+[21:27:56] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:27:56] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.25276
+[21:27:56] [DEBUG] 获取结果: SA_FRAC = 0.252761
+[21:27:56] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 86.5207
+[21:27:56] [DEBUG] 获取结果: SA_FLOW = 86.5207
+[21:27:56] [DEBUG] 设置2个变量...
+[21:27:56] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.4598
+[21:27:56] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 84.4328
+[21:27:56] [DEBUG]   R101_FEED_TEMP = 84.43 -> \Data\Blocks\R101\Input\TEMP
+[21:27:56] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.9296
+[21:27:56] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.9475
+[21:27:57] [DEBUG]   R101_FEED_PRES = 2.948 -> \Data\Blocks\R101\Input\PRES
+[21:27:57] [INFO] 变量设置完成
+[21:27:57] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:27:57] [DEBUG] 执行Reinit...
+[21:27:58] [DEBUG] 执行Run...
+[21:28:00] [DEBUG] Engine已停止运行
+[21:28:00] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:00] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:00] [INFO] 仿真运行成功 (第40次)
+[21:28:00] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:28:00] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.27017
+[21:28:00] [DEBUG] 获取结果: SA_FRAC = 0.270169
+[21:28:00] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 92.4797
+[21:28:00] [DEBUG] 获取结果: SA_FLOW = 92.4797
+[21:28:00] [DEBUG] 设置2个变量...
+[21:28:00] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 84.4328
+[21:28:00] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.036
+[21:28:00] [DEBUG]   R101_FEED_TEMP = 85.04 -> \Data\Blocks\R101\Input\TEMP
+[21:28:00] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.9475
+[21:28:00] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.4357
+[21:28:01] [DEBUG]   R101_FEED_PRES = 2.436 -> \Data\Blocks\R101\Input\PRES
+[21:28:01] [INFO] 变量设置完成
+[21:28:01] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:01] [DEBUG] 执行Reinit...
+[21:28:02] [DEBUG] 执行Run...
+[21:28:04] [DEBUG] Engine已停止运行
+[21:28:04] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:04] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:04] [INFO] 仿真运行成功 (第41次)
+[21:28:04] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:28:04] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26759
+[21:28:04] [DEBUG] 获取结果: SA_FRAC = 0.26759
+[21:28:04] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.5968
+[21:28:04] [DEBUG] 获取结果: SA_FLOW = 91.5968
+[21:28:04] [DEBUG] 设置2个变量...
+[21:28:04] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.036
+[21:28:04] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 88.4741
+[21:28:04] [DEBUG]   R101_FEED_TEMP = 88.47 -> \Data\Blocks\R101\Input\TEMP
+[21:28:04] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.4357
+[21:28:04] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.9495
+[21:28:05] [DEBUG]   R101_FEED_PRES = 2.949 -> \Data\Blocks\R101\Input\PRES
+[21:28:05] [INFO] 变量设置完成
+[21:28:05] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:05] [DEBUG] 执行Reinit...
+[21:28:05] [DEBUG] 执行Run...
+[21:28:07] [DEBUG] Engine已停止运行
+[21:28:07] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:07] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:07] [INFO] 仿真运行成功 (第42次)
+[21:28:07] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:28:08] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.2527
+[21:28:08] [DEBUG] 获取结果: SA_FRAC = 0.252699
+[21:28:08] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 86.4994
+[21:28:08] [DEBUG] 获取结果: SA_FLOW = 86.4994
+[21:28:08] [DEBUG] 设置2个变量...
+[21:28:08] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 88.4741
+[21:28:08] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 84.4704
+[21:28:08] [DEBUG]   R101_FEED_TEMP = 84.47 -> \Data\Blocks\R101\Input\TEMP
+[21:28:08] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.9495
+[21:28:08] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5041
+[21:28:09] [DEBUG]   R101_FEED_PRES = 2.504 -> \Data\Blocks\R101\Input\PRES
+[21:28:09] [INFO] 变量设置完成
+[21:28:09] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:09] [DEBUG] 执行Reinit...
+[21:28:09] [DEBUG] 执行Run...
+[21:28:11] [DEBUG] Engine已停止运行
+[21:28:11] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:11] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:11] [INFO] 仿真运行成功 (第43次)
+[21:28:11] [INFO] 仿真成功完成 (耗时: 2.82秒)
+[21:28:11] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.27001
+[21:28:11] [DEBUG] 获取结果: SA_FRAC = 0.270009
+[21:28:11] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 92.4247
+[21:28:11] [DEBUG] 获取结果: SA_FLOW = 92.4247
+[21:28:11] [DEBUG] 设置2个变量...
+[21:28:11] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 84.4704
+[21:28:11] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.369
+[21:28:12] [DEBUG]   R101_FEED_TEMP = 85.37 -> \Data\Blocks\R101\Input\TEMP
+[21:28:12] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5041
+[21:28:12] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5017
+[21:28:12] [DEBUG]   R101_FEED_PRES = 2.502 -> \Data\Blocks\R101\Input\PRES
+[21:28:12] [INFO] 变量设置完成
+[21:28:12] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:13] [DEBUG] 执行Reinit...
+[21:28:13] [DEBUG] 执行Run...
+[21:28:15] [DEBUG] Engine已停止运行
+[21:28:15] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:15] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:15] [INFO] 仿真运行成功 (第44次)
+[21:28:15] [INFO] 仿真成功完成 (耗时: 2.81秒)
+[21:28:15] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26616
+[21:28:15] [DEBUG] 获取结果: SA_FRAC = 0.266161
+[21:28:15] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.1077
+[21:28:15] [DEBUG] 获取结果: SA_FLOW = 91.1077
+[21:28:15] [DEBUG] 设置2个变量...
+[21:28:15] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.369
+[21:28:15] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 84.49
+[21:28:16] [DEBUG]   R101_FEED_TEMP = 84.49 -> \Data\Blocks\R101\Input\TEMP
+[21:28:16] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5017
+[21:28:16] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.6607
+[21:28:16] [DEBUG]   R101_FEED_PRES = 2.661 -> \Data\Blocks\R101\Input\PRES
+[21:28:16] [INFO] 变量设置完成
+[21:28:16] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:17] [DEBUG] 执行Reinit...
+[21:28:17] [DEBUG] 执行Run...
+[21:28:19] [DEBUG] Engine已停止运行
+[21:28:19] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:19] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:19] [INFO] 仿真运行成功 (第45次)
+[21:28:19] [INFO] 仿真成功完成 (耗时: 2.81秒)
+[21:28:19] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26993
+[21:28:19] [DEBUG] 获取结果: SA_FRAC = 0.269925
+[21:28:19] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 92.396
+[21:28:19] [DEBUG] 获取结果: SA_FLOW = 92.396
+[21:28:19] [DEBUG] 设置2个变量...
+[21:28:19] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 84.49
+[21:28:19] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 86.3117
+[21:28:20] [DEBUG]   R101_FEED_TEMP = 86.31 -> \Data\Blocks\R101\Input\TEMP
+[21:28:20] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.6607
+[21:28:20] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.8258
+[21:28:20] [DEBUG]   R101_FEED_PRES = 2.826 -> \Data\Blocks\R101\Input\PRES
+[21:28:20] [INFO] 变量设置完成
+[21:28:20] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:21] [DEBUG] 执行Reinit...
+[21:28:21] [DEBUG] 执行Run...
+[21:28:23] [DEBUG] Engine已停止运行
+[21:28:23] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:23] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:23] [INFO] 仿真运行成功 (第46次)
+[21:28:23] [INFO] 仿真成功完成 (耗时: 2.86秒)
+[21:28:23] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.2621
+[21:28:23] [DEBUG] 获取结果: SA_FRAC = 0.262098
+[21:28:23] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 89.7169
+[21:28:23] [DEBUG] 获取结果: SA_FLOW = 89.7169
+[21:28:23] [DEBUG] 设置2个变量...
+[21:28:23] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 86.3117
+[21:28:23] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 84.9329
+[21:28:24] [DEBUG]   R101_FEED_TEMP = 84.93 -> \Data\Blocks\R101\Input\TEMP
+[21:28:24] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.8258
+[21:28:24] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5872
+[21:28:24] [DEBUG]   R101_FEED_PRES = 2.587 -> \Data\Blocks\R101\Input\PRES
+[21:28:24] [INFO] 变量设置完成
+[21:28:24] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:25] [DEBUG] 执行Reinit...
+[21:28:25] [DEBUG] 执行Run...
+[21:28:27] [DEBUG] Engine已停止运行
+[21:28:27] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:27] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:27] [INFO] 仿真运行成功 (第47次)
+[21:28:27] [INFO] 仿真成功完成 (耗时: 2.85秒)
+[21:28:27] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26803
+[21:28:27] [DEBUG] 获取结果: SA_FRAC = 0.268032
+[21:28:27] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.7479
+[21:28:27] [DEBUG] 获取结果: SA_FLOW = 91.7479
+[21:28:27] [DEBUG] 设置2个变量...
+[21:28:27] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 84.9329
+[21:28:27] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.369
+[21:28:28] [DEBUG]   R101_FEED_TEMP = 85.37 -> \Data\Blocks\R101\Input\TEMP
+[21:28:28] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5872
+[21:28:28] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5767
+[21:28:28] [DEBUG]   R101_FEED_PRES = 2.577 -> \Data\Blocks\R101\Input\PRES
+[21:28:28] [INFO] 变量设置完成
+[21:28:28] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:29] [DEBUG] 执行Reinit...
+[21:28:29] [DEBUG] 执行Run...
+[21:28:31] [DEBUG] Engine已停止运行
+[21:28:31] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:31] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:31] [INFO] 仿真运行成功 (第48次)
+[21:28:31] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:28:31] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26616
+[21:28:31] [DEBUG] 获取结果: SA_FRAC = 0.266161
+[21:28:31] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.1077
+[21:28:31] [DEBUG] 获取结果: SA_FLOW = 91.1077
+[21:28:31] [DEBUG] 设置2个变量...
+[21:28:31] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.369
+[21:28:31] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.2167
+[21:28:31] [DEBUG]   R101_FEED_TEMP = 85.22 -> \Data\Blocks\R101\Input\TEMP
+[21:28:31] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5767
+[21:28:31] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.6746
+[21:28:32] [DEBUG]   R101_FEED_PRES = 2.675 -> \Data\Blocks\R101\Input\PRES
+[21:28:32] [INFO] 变量设置完成
+[21:28:32] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:32] [DEBUG] 执行Reinit...
+[21:28:33] [DEBUG] 执行Run...
+[21:28:35] [DEBUG] Engine已停止运行
+[21:28:35] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:35] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:35] [INFO] 仿真运行成功 (第49次)
+[21:28:35] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:28:35] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26682
+[21:28:35] [DEBUG] 获取结果: SA_FRAC = 0.266815
+[21:28:35] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.3315
+[21:28:35] [DEBUG] 获取结果: SA_FLOW = 91.3315
+[21:28:35] [DEBUG] 设置2个变量...
+[21:28:35] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.2167
+[21:28:35] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 86.2186
+[21:28:35] [DEBUG]   R101_FEED_TEMP = 86.22 -> \Data\Blocks\R101\Input\TEMP
+[21:28:35] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.6746
+[21:28:35] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.4874
+[21:28:36] [DEBUG]   R101_FEED_PRES = 2.487 -> \Data\Blocks\R101\Input\PRES
+[21:28:36] [INFO] 变量设置完成
+[21:28:36] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:36] [DEBUG] 执行Reinit...
+[21:28:37] [DEBUG] 执行Run...
+[21:28:39] [DEBUG] Engine已停止运行
+[21:28:39] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:39] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:39] [INFO] 仿真运行成功 (第50次)
+[21:28:39] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:28:39] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.2625
+[21:28:39] [DEBUG] 获取结果: SA_FRAC = 0.262501
+[21:28:39] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 89.8548
+[21:28:39] [DEBUG] 获取结果: SA_FLOW = 89.8548
+[21:28:39] [DEBUG] 设置2个变量...
+[21:28:39] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 86.2186
+[21:28:39] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.2167
+[21:28:39] [DEBUG]   R101_FEED_TEMP = 85.22 -> \Data\Blocks\R101\Input\TEMP
+[21:28:39] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.4874
+[21:28:39] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.6746
+[21:28:40] [DEBUG]   R101_FEED_PRES = 2.675 -> \Data\Blocks\R101\Input\PRES
+[21:28:40] [INFO] 变量设置完成
+[21:28:40] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:40] [DEBUG] 执行Reinit...
+[21:28:41] [DEBUG] 执行Run...
+[21:28:43] [DEBUG] Engine已停止运行
+[21:28:43] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:43] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:43] [INFO] 仿真运行成功 (第51次)
+[21:28:43] [INFO] 仿真成功完成 (耗时: 2.86秒)
+[21:28:43] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26682
+[21:28:43] [DEBUG] 获取结果: SA_FRAC = 0.266815
+[21:28:43] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.3315
+[21:28:43] [DEBUG] 获取结果: SA_FLOW = 91.3315
+[21:28:43] [DEBUG] 设置2个变量...
+[21:28:43] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.2167
+[21:28:43] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.036
+[21:28:43] [DEBUG]   R101_FEED_TEMP = 85.04 -> \Data\Blocks\R101\Input\TEMP
+[21:28:43] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.6746
+[21:28:43] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.4357
+[21:28:44] [DEBUG]   R101_FEED_PRES = 2.436 -> \Data\Blocks\R101\Input\PRES
+[21:28:44] [INFO] 变量设置完成
+[21:28:44] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:44] [DEBUG] 执行Reinit...
+[21:28:45] [DEBUG] 执行Run...
+[21:28:47] [DEBUG] Engine已停止运行
+[21:28:47] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:47] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:47] [INFO] 仿真运行成功 (第52次)
+[21:28:47] [INFO] 仿真成功完成 (耗时: 2.86秒)
+[21:28:47] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26759
+[21:28:47] [DEBUG] 获取结果: SA_FRAC = 0.26759
+[21:28:47] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.5968
+[21:28:47] [DEBUG] 获取结果: SA_FLOW = 91.5968
+[21:28:47] [DEBUG] 设置2个变量...
+[21:28:47] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.036
+[21:28:47] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 81.9017
+[21:28:47] [DEBUG]   R101_FEED_TEMP = 81.9 -> \Data\Blocks\R101\Input\TEMP
+[21:28:47] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.4357
+[21:28:47] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.4106
+[21:28:48] [DEBUG]   R101_FEED_PRES = 2.411 -> \Data\Blocks\R101\Input\PRES
+[21:28:48] [INFO] 变量设置完成
+[21:28:48] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:48] [DEBUG] 执行Reinit...
+[21:28:49] [DEBUG] 执行Run...
+[21:28:51] [DEBUG] Engine已停止运行
+[21:28:51] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:51] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:51] [INFO] 仿真运行成功 (第53次)
+[21:28:51] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:28:51] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.28085
+[21:28:51] [DEBUG] 获取结果: SA_FRAC = 0.280847
+[21:28:51] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 96.1345
+[21:28:51] [DEBUG] 获取结果: SA_FLOW = 96.1345
+[21:28:51] [DEBUG] 设置2个变量...
+[21:28:51] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 81.9017
+[21:28:51] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 86.132
+[21:28:51] [DEBUG]   R101_FEED_TEMP = 86.13 -> \Data\Blocks\R101\Input\TEMP
+[21:28:51] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.4106
+[21:28:51] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.6666
+[21:28:52] [DEBUG]   R101_FEED_PRES = 2.667 -> \Data\Blocks\R101\Input\PRES
+[21:28:52] [INFO] 变量设置完成
+[21:28:52] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:52] [DEBUG] 执行Reinit...
+[21:28:52] [DEBUG] 执行Run...
+[21:28:54] [DEBUG] Engine已停止运行
+[21:28:54] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:55] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:55] [INFO] 仿真运行成功 (第54次)
+[21:28:55] [INFO] 仿真成功完成 (耗时: 2.86秒)
+[21:28:55] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26287
+[21:28:55] [DEBUG] 获取结果: SA_FRAC = 0.262875
+[21:28:55] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 89.9827
+[21:28:55] [DEBUG] 获取结果: SA_FLOW = 89.9827
+[21:28:55] [DEBUG] 设置2个变量...
+[21:28:55] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 86.132
+[21:28:55] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 85.663
+[21:28:55] [DEBUG]   R101_FEED_TEMP = 85.66 -> \Data\Blocks\R101\Input\TEMP
+[21:28:55] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.6666
+[21:28:55] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.1636
+[21:28:56] [DEBUG]   R101_FEED_PRES = 2.164 -> \Data\Blocks\R101\Input\PRES
+[21:28:56] [INFO] 变量设置完成
+[21:28:56] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:28:56] [DEBUG] 执行Reinit...
+[21:28:56] [DEBUG] 执行Run...
+[21:28:58] [DEBUG] Engine已停止运行
+[21:28:58] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:28:58] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:28:58] [INFO] 仿真运行成功 (第55次)
+[21:28:58] [INFO] 仿真成功完成 (耗时: 2.85秒)
+[21:28:58] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.2649
+[21:28:58] [DEBUG] 获取结果: SA_FRAC = 0.264897
+[21:28:58] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 90.6748
+[21:28:58] [DEBUG] 获取结果: SA_FLOW = 90.6748
+[21:28:58] [DEBUG] 设置2个变量...
+[21:28:58] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 85.663
+[21:28:58] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 80.4141
+[21:28:59] [DEBUG]   R101_FEED_TEMP = 80.41 -> \Data\Blocks\R101\Input\TEMP
+[21:28:59] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.1636
+[21:28:59] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.5686
+[21:28:59] [DEBUG]   R101_FEED_PRES = 2.569 -> \Data\Blocks\R101\Input\PRES
+[21:28:59] [INFO] 变量设置完成
+[21:28:59] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:29:00] [DEBUG] 执行Reinit...
+[21:29:00] [DEBUG] 执行Run...
+[21:29:02] [DEBUG] Engine已停止运行
+[21:29:02] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:29:02] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:29:02] [INFO] 仿真运行成功 (第56次)
+[21:29:02] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:29:02] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.28699
+[21:29:02] [DEBUG] 获取结果: SA_FRAC = 0.286993
+[21:29:02] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 98.2385
+[21:29:02] [DEBUG] 获取结果: SA_FLOW = 98.2385
+[21:29:02] [DEBUG] 设置2个变量...
+[21:29:02] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 80.4141
+[21:29:02] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 83.0016
+[21:29:03] [DEBUG]   R101_FEED_TEMP = 83 -> \Data\Blocks\R101\Input\TEMP
+[21:29:03] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.5686
+[21:29:03] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.956
+[21:29:03] [DEBUG]   R101_FEED_PRES = 2.956 -> \Data\Blocks\R101\Input\PRES
+[21:29:03] [INFO] 变量设置完成
+[21:29:03] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:29:04] [DEBUG] 执行Reinit...
+[21:29:04] [DEBUG] 执行Run...
+[21:29:06] [DEBUG] Engine已停止运行
+[21:29:06] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:29:06] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:29:06] [INFO] 仿真运行成功 (第57次)
+[21:29:06] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:29:06] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.27624
+[21:29:06] [DEBUG] 获取结果: SA_FRAC = 0.276238
+[21:29:06] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 94.557
+[21:29:06] [DEBUG] 获取结果: SA_FLOW = 94.557
+[21:29:06] [DEBUG] 设置2个变量...
+[21:29:06] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 83.0016
+[21:29:06] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 84.9329
+[21:29:07] [DEBUG]   R101_FEED_TEMP = 84.93 -> \Data\Blocks\R101\Input\TEMP
+[21:29:07] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.956
+[21:29:07] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.663
+[21:29:07] [DEBUG]   R101_FEED_PRES = 2.663 -> \Data\Blocks\R101\Input\PRES
+[21:29:07] [INFO] 变量设置完成
+[21:29:07] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:29:08] [DEBUG] 执行Reinit...
+[21:29:08] [DEBUG] 执行Run...
+[21:29:10] [DEBUG] Engine已停止运行
+[21:29:10] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:29:10] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:29:10] [INFO] 仿真运行成功 (第58次)
+[21:29:10] [INFO] 仿真成功完成 (耗时: 2.85秒)
+[21:29:10] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.26803
+[21:29:10] [DEBUG] 获取结果: SA_FRAC = 0.268032
+[21:29:10] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 91.7479
+[21:29:10] [DEBUG] 获取结果: SA_FLOW = 91.7479
+[21:29:10] [DEBUG] 设置2个变量...
+[21:29:10] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 84.9329
+[21:29:10] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 84.4328
+[21:29:11] [DEBUG]   R101_FEED_TEMP = 84.43 -> \Data\Blocks\R101\Input\TEMP
+[21:29:11] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.663
+[21:29:11] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.7753
+[21:29:11] [DEBUG]   R101_FEED_PRES = 2.775 -> \Data\Blocks\R101\Input\PRES
+[21:29:11] [INFO] 变量设置完成
+[21:29:11] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:29:12] [DEBUG] 执行Reinit...
+[21:29:12] [DEBUG] 执行Run...
+[21:29:14] [DEBUG] Engine已停止运行
+[21:29:14] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:29:14] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:29:14] [INFO] 仿真运行成功 (第59次)
+[21:29:14] [INFO] 仿真成功完成 (耗时: 2.84秒)
+[21:29:14] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.27017
+[21:29:14] [DEBUG] 获取结果: SA_FRAC = 0.270169
+[21:29:14] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 92.4797
+[21:29:14] [DEBUG] 获取结果: SA_FLOW = 92.4797
+[21:29:14] [DEBUG] 设置2个变量...
+[21:29:14] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\TEMP = 84.4328
+[21:29:14] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\TEMP = 84.4328
+[21:29:15] [DEBUG]   R101_FEED_TEMP = 84.43 -> \Data\Blocks\R101\Input\TEMP
+[21:29:15] [DEBUG]   节点当前值: \Data\Blocks\R101\Input\PRES = 2.7753
+[21:29:15] [DEBUG]   节点设置成功: \Data\Blocks\R101\Input\PRES = 2.9475
+[21:29:15] [DEBUG]   R101_FEED_PRES = 2.948 -> \Data\Blocks\R101\Input\PRES
+[21:29:15] [INFO] 变量设置完成
+[21:29:15] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:29:16] [DEBUG] 执行Reinit...
+[21:29:16] [DEBUG] 执行Run...
+[21:29:18] [DEBUG] Engine已停止运行
+[21:29:18] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ASPL\_2504bmw.his
+[21:29:18] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:29:18] [INFO] 仿真运行成功 (第60次)
+[21:29:18] [INFO] 仿真成功完成 (耗时: 2.83秒)
+[21:29:18] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFRAC\MIXED\C7H6O3 = 0.27017
+[21:29:18] [DEBUG] 获取结果: SA_FRAC = 0.270169
+[21:29:18] [DEBUG]   节点读取成功: \Data\Streams\0106\Output\MASSFLOW\MIXED\C7H6O3 = 92.4797
+[21:29:18] [DEBUG] 获取结果: SA_FLOW = 92.4797
+[21:29:27] [INFO] 正在断开Aspen Plus连接...
+[21:29:27] [INFO] 仿真器已断开
+[21:29:27] [INFO] Aspen Plus已断开
+========================================
+日志结束时间: 11-Dec-2025 21:47:14
+========================================
+

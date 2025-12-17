@@ -32,6 +32,7 @@ classdef AspenPlusSimulator < SimulatorBase
         maxRetries;         % 最大重连次数
         retryDelay;         % 重连延迟（秒）
         autoSave;           % 是否自动保存
+        lastVariablesSet;   % 最近一次设置的变量（用于诊断）
     end
 
     methods
@@ -49,6 +50,7 @@ classdef AspenPlusSimulator < SimulatorBase
             obj.maxRetries = 3;
             obj.retryDelay = 2;
             obj.autoSave = false;
+            obj.lastVariablesSet = struct();
         end
 
         function connect(obj, config)
@@ -178,6 +180,9 @@ classdef AspenPlusSimulator < SimulatorBase
 
             try
                 if isstruct(variables)
+                    % 记录最近一次设置的变量（仅保留已映射字段）
+                    obj.lastVariablesSet = AspenPlusSimulator.pickStructFields(variables, varNames);
+
                     % 结构体形式
                     for i = 1:length(varNames)
                         varName = varNames{i};
@@ -194,6 +199,9 @@ classdef AspenPlusSimulator < SimulatorBase
                               '变量数量不匹配: 期望%d，实际%d', ...
                               length(varNames), length(variables));
                     end
+
+                    % 记录最近一次设置的变量（转为结构体，便于诊断）
+                    obj.lastVariablesSet = AspenPlusSimulator.vectorToStruct(varNames, variables);
 
                     for i = 1:length(varNames)
                         varName = varNames{i};
@@ -273,8 +281,23 @@ classdef AspenPlusSimulator < SimulatorBase
                     obj.logMessage('INFO', '仿真成功完成 (耗时: %.2f秒)', elapsed);
                 else
                     success = false;
-                    obj.setLastRunStatus(false, '仿真未收敛');
-                    obj.logMessage('WARNING', '仿真未收敛 (耗时: %.2f秒)', elapsed);
+                    [~, uosstat, perError] = obj.checkUOSSTAT();
+                    extra = '';
+                    if ~isempty(uosstat)
+                        extra = sprintf(' (UOSSTAT=%s', num2str(uosstat));
+                        if ~isempty(perError)
+                            extra = sprintf('%s, PER_ERROR=%s', extra, num2str(perError));
+                        end
+                        extra = [extra, ')'];
+                    end
+
+                    varsSummary = AspenPlusSimulator.formatVarsSummary(obj.lastVariablesSet);
+                    if ~isempty(varsSummary)
+                        extra = sprintf('%s | Vars: %s', extra, varsSummary);
+                    end
+
+                    obj.setLastRunStatus(false, ['仿真未收敛' extra]);
+                    obj.logMessage('WARNING', '仿真未收敛%s (耗时: %.2f秒)', extra, elapsed);
                 end
 
             catch ME
@@ -394,6 +417,8 @@ classdef AspenPlusSimulator < SimulatorBase
             %   value - 值
 
             try
+                nodePath = AspenPlusSimulator.normalizeAspenNodePath(nodePath);
+
                 % 查找节点
                 node = obj.aspenApp.Tree.FindNode(nodePath);
 
@@ -447,6 +472,8 @@ classdef AspenPlusSimulator < SimulatorBase
             %   value - 节点值
 
             try
+                nodePath = AspenPlusSimulator.normalizeAspenNodePath(nodePath);
+
                 % 查找节点
                 node = obj.aspenApp.Tree.FindNode(nodePath);
 
@@ -482,106 +509,141 @@ classdef AspenPlusSimulator < SimulatorBase
 
         function converged = checkConvergence(obj)
             % checkConvergence 检查仿真是否收敛
-            % 通过读取Aspen历史文件(.his)检查是否有错误信息
-            %
-            % 输出:
-            %   converged - 布尔值
+            % 说明：
+            %   1) 优先使用历史文件(.his)是否存在严重错误作为收敛判据（与脚本习惯一致）
+            %   2) 若无法读取历史文件，再回退到 UOSSTAT/PER_ERROR
+
+            converged = false;
+
+            % 优先：历史文件（仅判定严重错误，避免泛化 ERROR 误判）
+            try
+                [hasHis, hasSevereError, hasAnyError, hisFilePath] = obj.scanHistoryFileForErrors(); %#ok<ASGLU>
+                if hasHis
+                    converged = ~hasSevereError;
+                    return;
+                end
+            catch
+                % 读取历史文件失败则回退到 UOSSTAT
+            end
+
+            % 兜底：UOSSTAT / PER_ERROR
+            [converged, ~, ~] = obj.checkUOSSTAT();
+        end
+
+        function [hasFile, hasSevereError, hasAnyError, hisFilePath] = scanHistoryFileForErrors(obj)
+            hasFile = false;
+            hasSevereError = false;
+            hasAnyError = false;
+            hisFilePath = '';
 
             try
-                % 获取RUNID以确定历史文件名
                 runIdNode = obj.aspenApp.Tree.FindNode('\Data\Results Summary\Run-Status\Output\RUNID');
-                runId = runIdNode.Value;
+                runId = strtrim(char(string(runIdNode.Value)));
 
-                % 获取模型文件所在目录
                 modelPath = obj.getConfigValue('modelPath', '');
                 [modelDir, ~, ~] = fileparts(modelPath);
+                if isempty(modelDir)
+                    modelDir = pwd;
+                end
 
-                % 构建历史文件路径
                 hisFilePath = fullfile(modelDir, [runId, '.his']);
-
                 obj.logMessage('DEBUG', '检查历史文件: %s', hisFilePath);
 
-                % 检查文件是否存在
                 if ~exist(hisFilePath, 'file')
-                    obj.logMessage('WARNING', '历史文件不存在: %s', hisFilePath);
-                    % 如果历史文件不存在，退回到检查UOSSTAT
-                    converged = obj.checkUOSSTAT();
                     return;
                 end
 
-                % 读取历史文件
                 fid = fopen(hisFilePath, 'r');
                 if fid == -1
-                    obj.logMessage('WARNING', '无法打开历史文件: %s', hisFilePath);
-                    converged = obj.checkUOSSTAT();
                     return;
                 end
 
-                % 读取所有行
                 Data = textscan(fid, '%s', 'delimiter', '\n', 'whitespace', ' ');
                 fclose(fid);
                 contents = Data{1};
 
-                % 搜索错误字符串
-                SearchingStrings = {'SEVERE ERROR', 'ERROR'};
-                isError = false;
+                hasFile = true;
 
-                for i = 1:length(SearchingStrings)
-                    isStringExist = strfind(contents, SearchingStrings{i});
+                severeStrings = {'SEVERE ERROR', 'FATAL ERROR'};
+                for i = 1:length(severeStrings)
+                    isStringExist = strfind(contents, severeStrings{i});
                     if any(~cellfun('isempty', isStringExist))
-                        isError = true;
-                        obj.logMessage('DEBUG', '在历史文件中发现错误: %s', SearchingStrings{i});
+                        hasSevereError = true;
                         break;
                     end
                 end
 
-                % 收敛 = 没有错误
-                converged = ~isError;
-
-                if converged
-                    obj.logMessage('DEBUG', '仿真收敛成功（历史文件无错误）');
-                else
-                    obj.logMessage('WARNING', '仿真未收敛（历史文件包含错误）');
-                end
-
-            catch ME
-                % 如果无法读取历史文件，退回到检查UOSSTAT
-                obj.logMessage('WARNING', '读取历史文件时出错: %s，退回到UOSSTAT检查', ME.message);
-                converged = obj.checkUOSSTAT();
-            end
-        end
-
-        function converged = checkUOSSTAT(obj)
-            % checkUOSSTAT 通过UOSSTAT节点检查收敛状态（备用方法）
-            %
-            % 输出:
-            %   converged - 布尔值
-
-            try
-                runStatusNode = obj.aspenApp.Tree.FindNode('\Data\Results Summary\Run-Status\Output\UOSSTAT');
-                runStatus = runStatusNode.Value;
-
-                obj.logMessage('DEBUG', '运行状态 (UOSSTAT): %s', num2str(runStatus));
-
-                converged = (runStatus == 1);
-
-                if converged
-                    obj.logMessage('DEBUG', '仿真收敛成功 (UOSSTAT)');
-                else
-                    obj.logMessage('WARNING', '仿真未收敛，UOSSTAT = %s', num2str(runStatus));
-
-                    % 获取额外的错误信息
-                    try
-                        perErrorNode = obj.aspenApp.Tree.FindNode('\Data\Results Summary\Run-Status\Output\PER_ERROR');
-                        perError = perErrorNode.Value;
-                        obj.logMessage('DEBUG', 'PER_ERROR = %s', num2str(perError));
-                    catch
+                errorStrings = {'ERROR'};
+                for i = 1:length(errorStrings)
+                    isStringExist = strfind(contents, errorStrings{i});
+                    if any(~cellfun('isempty', isStringExist))
+                        hasAnyError = true;
+                        break;
                     end
                 end
 
+            catch
+                hasFile = false;
+                hasSevereError = false;
+                hasAnyError = false;
+                hisFilePath = '';
+            end
+        end
+
+        function [converged, runStatus, perError] = checkUOSSTAT(obj)
+            % checkUOSSTAT 通过UOSSTAT节点检查收敛状态
+
+            converged = false;
+            runStatus = [];
+            perError = [];
+
+            try
+                runStatusNode = obj.aspenApp.Tree.FindNode('\Data\Results Summary\Run-Status\Output\UOSSTAT');
+                rawStatus = runStatusNode.Value;
+                [numStatus, ok] = AspenPlusSimulator.coerceNumericScalar(rawStatus);
+
+                if ~ok
+                    obj.logMessage('DEBUG', '无法解析 UOSSTAT 值: %s', char(string(rawStatus)));
+                    return;
+                end
+
+                runStatus = numStatus;
+                obj.logMessage('DEBUG', '运行状态 (UOSSTAT): %s', num2str(runStatus));
+
+                % 先尝试读取 PER_ERROR（可选）
+                try
+                    perErrorNode = obj.aspenApp.Tree.FindNode('\Data\Results Summary\Run-Status\Output\PER_ERROR');
+                    perErrorRaw = perErrorNode.Value;
+                    [perError, ok2] = AspenPlusSimulator.coerceNumericScalar(perErrorRaw);
+                    if ok2
+                        obj.logMessage('DEBUG', 'PER_ERROR = %s', num2str(perError));
+                    else
+                        perError = [];
+                    end
+                catch
+                    perError = [];
+                end
+
+                % 收敛判定（保守 + 兼容）：
+                %   - UOSSTAT==1 -> 收敛
+                %   - UOSSTAT==0 且 PER_ERROR==0 -> 视为收敛（部分模型会用该组合表示“无误差”）
+                converged = (runStatus == 1);
+                if ~converged && runStatus == 0 && ~isempty(perError) && perError == 0
+                    converged = true;
+                    obj.logMessage('DEBUG', 'UOSSTAT=0 且 PER_ERROR=0，按收敛处理');
+                end
+
+                if converged
+                    obj.logMessage('DEBUG', '仿真收敛成功 (UOSSTAT/PER_ERROR)');
+                else
+                    obj.logMessage('DEBUG', '仿真未收敛 (UOSSTAT=%s)', num2str(runStatus));
+                end
+
             catch ME
-                obj.logMessage('WARNING', '无法获取收敛状态: %s', ME.message);
+                obj.logMessage('DEBUG', '无法获取收敛状态 (UOSSTAT): %s', ME.message);
                 converged = false;
+                runStatus = [];
+                perError = [];
             end
         end
 
@@ -680,6 +742,141 @@ classdef AspenPlusSimulator < SimulatorBase
             end
 
             success = true;
+        end
+    end
+
+    methods (Static, Access = private)
+        function nodePath = normalizeAspenNodePath(nodePath)
+            if isstring(nodePath) && isscalar(nodePath)
+                nodePath = char(nodePath);
+            elseif ~ischar(nodePath)
+                try
+                    nodePath = char(string(nodePath));
+                catch
+                    nodePath = '';
+                end
+            end
+
+            nodePath = strtrim(nodePath);
+            if isempty(nodePath)
+                return;
+            end
+
+            nodePath = strrep(nodePath, '/', '\');
+
+            while contains(nodePath, '\\')
+                nodePath = strrep(nodePath, '\\', '\');
+            end
+
+            if startsWith(nodePath, 'Data\')
+                nodePath = ['\' nodePath];
+            end
+        end
+
+        function [num, ok] = coerceNumericScalar(value)
+            num = [];
+            ok = false;
+
+            try
+                if isempty(value)
+                    return;
+                end
+
+                if isnumeric(value) && isscalar(value)
+                    num = double(value);
+                    ok = true;
+                    return;
+                end
+
+                if islogical(value) && isscalar(value)
+                    num = double(value);
+                    ok = true;
+                    return;
+                end
+
+                if ischar(value)
+                    s = strtrim(value);
+                elseif isstring(value) && isscalar(value)
+                    s = strtrim(char(value));
+                else
+                    s = strtrim(char(string(value)));
+                end
+
+                if isempty(s)
+                    return;
+                end
+
+                tmp = str2double(s);
+                if ~isnan(tmp)
+                    num = tmp;
+                    ok = true;
+                end
+            catch
+                num = [];
+                ok = false;
+            end
+        end
+
+        function out = pickStructFields(in, fieldNames)
+            out = struct();
+            if ~isstruct(in) || isempty(fieldNames)
+                return;
+            end
+            for i = 1:length(fieldNames)
+                name = fieldNames{i};
+                try
+                    if isfield(in, name)
+                        out.(name) = in.(name);
+                    end
+                catch
+                end
+            end
+        end
+
+        function s = vectorToStruct(varNames, values)
+            s = struct();
+            if isempty(varNames) || isempty(values)
+                return;
+            end
+            n = min(length(varNames), numel(values));
+            for i = 1:n
+                name = varNames{i};
+                try
+                    s.(name) = values(i);
+                catch
+                end
+            end
+        end
+
+        function summary = formatVarsSummary(vars)
+            summary = '';
+            if isempty(vars) || ~isstruct(vars)
+                return;
+            end
+
+            names = fieldnames(vars);
+            if isempty(names)
+                return;
+            end
+
+            parts = cell(1, length(names));
+            for i = 1:length(names)
+                name = names{i};
+                try
+                    val = vars.(name);
+                    if isnumeric(val) && isscalar(val)
+                        parts{i} = sprintf('%s=%g', name, val);
+                    elseif ischar(val)
+                        parts{i} = sprintf('%s=%s', name, val);
+                    else
+                        parts{i} = sprintf('%s=%s', name, char(string(val)));
+                    end
+                catch
+                    parts{i} = sprintf('%s=?', name);
+                end
+            end
+
+            summary = strjoin(parts, ', ');
         end
     end
 

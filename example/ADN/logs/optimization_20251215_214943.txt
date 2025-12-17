@@ -1,0 +1,77 @@
+
+========================================
+日志开始时间: 15-Dec-2025 21:49:43
+========================================
+[21:49:43] [INFO] 正在连接Aspen Plus...
+[21:49:43] [INFO] 模型文件: E:\Project\Chemical Design Competition\MAPO\example\ADN\二级氢氰化工段.bkp
+[21:49:43] [INFO] Aspen窗口可见性: true
+[21:49:56] [INFO] 正在进行首次初始化运行...
+[21:50:08] [INFO] 仿真器已连接
+[21:50:08] [INFO] Aspen Plus连接成功
+[21:50:08] [DEBUG] 设置3个变量...
+[21:50:08] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\B:F = 0.87
+[21:50:08] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\B:F = 0.78883
+[21:50:09] [DEBUG]   T0301_BF = 0.7888 -> \Data\Blocks\T0301\Input\B:F
+[21:50:09] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\FEED_STAGE\0318 = 12
+[21:50:09] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\FEED_STAGE\0318 = 19
+[21:50:09] [DEBUG]   T0301_FEED_STAGE = 19 -> \Data\Blocks\T0301\Input\FEED_STAGE\0318
+[21:50:09] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\BASIS_RR = 0.2
+[21:50:09] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\BASIS_RR = 1.254
+[21:50:10] [DEBUG]   T0301_BASIS_RR = 1.254 -> \Data\Blocks\T0301\Input\BASIS_RR
+[21:50:10] [INFO] 变量设置完成
+[21:50:10] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:50:10] [DEBUG] 执行Reinit...
+[21:50:11] [DEBUG] 执行Run...
+[21:50:13] [DEBUG] Engine已停止运行
+[21:50:13] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ADN\_4944rmi.his
+[21:50:13] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:50:13] [INFO] 仿真运行成功 (第1次)
+[21:50:13] [INFO] 仿真成功完成 (耗时: 3.06秒)
+[21:50:13] [DEBUG]   节点读取成功: \Data\Streams\ADN\Output\MASSFRAC\MIXED\ADN = 0.99989
+[21:50:13] [DEBUG] 获取结果: ADN_FRAC = 0.999893
+[21:50:13] [DEBUG]   节点读取成功: \Data\Streams\ADN\Output\MASSFLOW\MIXED\ADN = 20194.4857
+[21:50:13] [DEBUG] 获取结果: ADN_FLOW = 20194.5
+[21:50:13] [DEBUG] 设置3个变量...
+[21:50:13] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\B:F = 0.78883
+[21:50:13] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\B:F = 0.84803
+[21:50:13] [DEBUG]   T0301_BF = 0.848 -> \Data\Blocks\T0301\Input\B:F
+[21:50:13] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\FEED_STAGE\0318 = 19
+[21:50:13] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\FEED_STAGE\0318 = 16
+[21:50:14] [DEBUG]   T0301_FEED_STAGE = 16 -> \Data\Blocks\T0301\Input\FEED_STAGE\0318
+[21:50:14] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\BASIS_RR = 1.254
+[21:50:14] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\BASIS_RR = 1.1951
+[21:50:14] [DEBUG]   T0301_BASIS_RR = 1.195 -> \Data\Blocks\T0301\Input\BASIS_RR
+[21:50:14] [INFO] 变量设置完成
+[21:50:14] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:50:15] [DEBUG] 执行Reinit...
+[21:50:15] [DEBUG] 执行Run...
+[21:50:17] [DEBUG] Engine已停止运行
+[21:50:17] [DEBUG] 检查历史文件: E:\Project\Chemical Design Competition\MAPO\example\ADN\_4944rmi.his
+[21:50:17] [DEBUG] 仿真收敛成功（历史文件无错误）
+[21:50:17] [INFO] 仿真运行成功 (第2次)
+[21:50:17] [INFO] 仿真成功完成 (耗时: 3.02秒)
+[21:50:17] [DEBUG]   节点读取成功: \Data\Streams\ADN\Output\MASSFRAC\MIXED\ADN = 0.9999
+[21:50:17] [DEBUG] 获取结果: ADN_FRAC = 0.9999
+[21:50:17] [DEBUG]   节点读取成功: \Data\Streams\ADN\Output\MASSFLOW\MIXED\ADN = 21709.8353
+[21:50:17] [DEBUG] 获取结果: ADN_FLOW = 21709.8
+[21:50:17] [DEBUG] 设置3个变量...
+[21:50:18] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\B:F = 0.84803
+[21:50:18] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\B:F = 0.4671
+[21:50:18] [DEBUG]   T0301_BF = 0.4671 -> \Data\Blocks\T0301\Input\B:F
+[21:50:18] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\FEED_STAGE\0318 = 16
+[21:50:18] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\FEED_STAGE\0318 = 15
+[21:50:19] [DEBUG]   T0301_FEED_STAGE = 15 -> \Data\Blocks\T0301\Input\FEED_STAGE\0318
+[21:50:19] [DEBUG]   节点当前值: \Data\Blocks\T0301\Input\BASIS_RR = 1.1951
+[21:50:19] [DEBUG]   节点设置成功: \Data\Blocks\T0301\Input\BASIS_RR = 2.915
+[21:50:19] [DEBUG]   T0301_BASIS_RR = 2.915 -> \Data\Blocks\T0301\Input\BASIS_RR
+[21:50:19] [INFO] 变量设置完成
+[21:50:19] [INFO] 开始运行仿真 (超时: 300秒)...
+[21:50:20] [DEBUG] 执行Reinit...
+[21:50:20] [DEBUG] 执行Run...
+[21:50:28] [INFO] 正在断开Aspen Plus连接...
+[21:50:29] [INFO] 仿真器已断开
+[21:50:29] [INFO] Aspen Plus已断开
+========================================
+日志结束时间: 15-Dec-2025 22:34:16
+========================================
+

@@ -39,6 +39,9 @@ classdef DistillationEvaluator < handle
         feedRate;           % 进料流量(kmol/hr)
         feedComposition;    % 进料组成
 
+        % 仿真超时（秒）
+        timeout;            % 仿真超时时间（秒）
+
         % 惩罚系数
         constraintPenalty;  % 约束违反惩罚
     end
@@ -70,6 +73,9 @@ classdef DistillationEvaluator < handle
             % 惩罚系数
             obj.constraintPenalty = 1e8;
 
+            % 默认超时时间
+            obj.timeout = 300;
+
             % 创建logger
             if exist('Logger', 'class')
                 obj.logger = Logger.getLogger('DistillationEvaluator');
@@ -78,7 +84,7 @@ classdef DistillationEvaluator < handle
             end
         end
 
-        function objectives = evaluate(obj, x)
+        function result = evaluate(obj, x)
             % evaluate 评估给定设计的目标函数值
             %
             % 输入:
@@ -88,14 +94,22 @@ classdef DistillationEvaluator < handle
             %       feedStage - 进料位置
             %
             % 输出:
-            %   objectives - 目标函数值 [TAC, CO2]
-            %       TAC - 总年化成本 (USD/year)
-            %       CO2 - CO2排放量 (ton/year)
+            %   result - 评估结果结构体
+            %       result.objectives  - 目标函数值 [TAC, CO2]
+            %       result.constraints - 约束值（可选）
+            %       result.success     - 是否成功
+            %       result.message     - 消息
             %
             % 示例:
-            %   objectives = evaluator.evaluate([25, 2.5, 15]);
+            %   result = evaluator.evaluate([25, 2.5, 15]);
 
             obj.evaluationCount = obj.evaluationCount + 1;
+
+            % 初始化结果结构体
+            result = struct();
+            result.success = true;
+            result.message = '';
+            result.constraints = [];
 
             % 提取设计变量
             numStages = round(x(1));      % 板数必须是整数
@@ -111,14 +125,18 @@ classdef DistillationEvaluator < handle
 
                 if ~simResults.success
                     obj.logWarning('仿真失败，返回惩罚值');
-                    objectives = [obj.constraintPenalty, obj.constraintPenalty];
+                    result.success = false;
+                    result.message = '仿真失败或未收敛';
+                    result.objectives = [obj.constraintPenalty, obj.constraintPenalty];
                     return;
                 end
 
                 % 步骤2: 检查约束
                 if ~obj.checkConstraints(simResults)
                     obj.logWarning('约束不满足，返回惩罚值');
-                    objectives = [obj.constraintPenalty, obj.constraintPenalty];
+                    result.success = false;
+                    result.message = '约束不满足';
+                    result.objectives = [obj.constraintPenalty, obj.constraintPenalty];
                     return;
                 end
 
@@ -129,13 +147,15 @@ classdef DistillationEvaluator < handle
                 CO2 = obj.calculateEmission(simResults);
 
                 % 返回目标值
-                objectives = [TAC, CO2];
+                result.objectives = [TAC, CO2];
 
                 obj.logInfo(sprintf('  结果: TAC=%.2e USD/year, CO2=%.2f ton/year', TAC, CO2));
 
             catch ME
                 obj.logError(sprintf('评估异常: %s', ME.message));
-                objectives = [obj.constraintPenalty, obj.constraintPenalty];
+                result.success = false;
+                result.message = ME.message;
+                result.objectives = [obj.constraintPenalty, obj.constraintPenalty];
             end
         end
 
@@ -178,7 +198,7 @@ classdef DistillationEvaluator < handle
                 obj.simulator.setVariables(x);
 
                 % 运行仿真
-                success = obj.simulator.run(300);  % 300秒超时
+                success = obj.simulator.run(obj.timeout);
 
                 if ~success
                     obj.logWarning('Aspen仿真运行失败');
