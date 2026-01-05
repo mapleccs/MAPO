@@ -1,0 +1,19 @@
+{
+  "type": "NSGA-II",
+  "displayName": "NSGA-II",
+  "class": "NSGAII",
+  "description": "NSGA-II：快速非支配排序遗传算法，多目标优化（SBX 交叉 + 多项式变异）。",
+  "aliases": [
+    "NSGA2",
+    "NSGAII"
+  ],
+  "defaultParameters": {
+    "populationSize": 50,
+    "maxGenerations": 30,
+    "crossoverRate": 0.9,
+    "mutationRate": 1.0,
+    "crossoverDistIndex": 20,
+    "mutationDistIndex": 20
+  }
+}
+

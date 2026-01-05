@@ -581,15 +581,25 @@ function [problem, algorithm, simulator] = buildOptimizationComponents(config, d
     sendLogData(dataQueue, 'INFO', '初始化算法...');
 
     algType = config.algorithm.type;
-    algTypeNorm = upper(strrep(algType, '-', ''));
 
-    switch algTypeNorm
-        case 'NSGAII'
-            algorithm = NSGAII();
-        case 'PSO'
-            algorithm = PSO();
-        otherwise
-            error('Unknown algorithm type: %s', algType);
+    % Prefer AlgorithmFactory to reduce GUI-framework coupling
+    try
+        if exist('AlgorithmFactory', 'class') == 8
+            algorithm = AlgorithmFactory.create(algType);
+        else
+            error('AlgorithmFactory not found');
+        end
+    catch
+        % Backward-compatible fallback (legacy behavior)
+        algTypeNorm = upper(regexprep(char(string(algType)), '[-_\\s]', ''));
+        switch algTypeNorm
+            case 'NSGAII'
+                algorithm = NSGAII();
+            case 'PSO'
+                algorithm = PSO();
+            otherwise
+                error('Unknown algorithm type: %s', algType);
+        end
     end
 
     fprintf('  Algorithm: %s\n', algType);

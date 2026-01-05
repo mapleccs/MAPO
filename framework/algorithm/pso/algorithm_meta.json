@@ -1,0 +1,16 @@
+{
+  "type": "PSO",
+  "displayName": "PSO",
+  "class": "PSO",
+  "description": "PSO：粒子群优化，适用于连续变量优化（支持惯性权重与速度限制）。",
+  "aliases": [],
+  "defaultParameters": {
+    "swarmSize": 50,
+    "maxIterations": 200,
+    "inertiaWeight": 0.7,
+    "cognitiveCoeff": 1.5,
+    "socialCoeff": 1.5,
+    "maxVelocityRatio": 0.2
+  }
+}
+

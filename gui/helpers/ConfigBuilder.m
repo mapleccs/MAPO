@@ -257,17 +257,12 @@ classdef ConfigBuilder
                         ConfigBuilder.getFieldOrDefault(inputParams, 'maxVelocityRatio', 0.2), 'maxVelocityRatio');
 
                 otherwise
-                    % 未知算法 - 直接复制所有数值参数
+                    % 未知算法 - 直接复制所有参数（支持嵌套 struct/char/logical/数组）
                     if isstruct(inputParams)
-                        fields = fieldnames(inputParams);
-                        for i = 1:length(fields)
-                            val = inputParams.(fields{i});
-                            if isnumeric(val)
-                                params.(fields{i}) = val;
-                            end
-                        end
+                        params = inputParams;
                     end
-                    % 确保至少有基本参数
+
+                    % 兼容：如果后续流程依赖通用字段，则补齐默认值
                     if ~isfield(params, 'populationSize')
                         params.populationSize = 50;
                     end
@@ -656,9 +651,11 @@ classdef ConfigBuilder
                 return;
             end
 
-            upperType = upper(strrep(char(algType), '-', ''));
+            upperType = upper(regexprep(char(algType), '[-_\\s]', ''));
 
-            if contains(upperType, 'NSGA')
+            if (contains(upperType, 'ANN') || contains(upperType, 'SURROGATE')) && contains(upperType, 'NSGA')
+                algType = 'ANN-NSGA-II';
+            elseif contains(upperType, 'NSGA')
                 algType = 'NSGA-II';
             elseif contains(upperType, 'PSO')
                 algType = 'PSO';

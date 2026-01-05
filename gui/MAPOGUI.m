@@ -67,9 +67,15 @@ classdef MAPOGUI < handle
         % Tab 4: 算法配置
         AlgorithmTab                % 算法配置标签页
         AlgorithmDropDown           % 算法选择下拉框
+        AlgorithmRefreshButton      % 刷新算法列表按钮
         AlgorithmDescArea           % 算法说明文本框
         NSGAIIPanel                 % NSGA-II 参数面板
         PSOPanel                    % PSO 参数面板
+        GenericAlgorithmPanel       % 通用算法参数面板（新算法/自定义）
+        AlgorithmParamsTable        % 通用算法参数表
+        AddAlgorithmParamButton     % 添加算法参数
+        DeleteAlgorithmParamButton  % 删除算法参数
+        AutoFillAlgorithmParamsButton % 填充默认算法参数
         PopSizeSpinner_NSGAII       % NSGA-II 种群大小
         MaxGenSpinner_NSGAII        % NSGA-II 最大代数
         CrossoverSlider_NSGAII      % NSGA-II 交叉概率
@@ -867,7 +873,7 @@ classdef MAPOGUI < handle
 
             leftGrid = uigridlayout(leftPanel);
             leftGrid.RowHeight = {30, 25, '1x'};
-            leftGrid.ColumnWidth = {100, '1x'};
+            leftGrid.ColumnWidth = {100, '1x', 70};
             leftGrid.Padding = [15, 10, 15, 10];
             leftGrid.RowSpacing = 8;
             leftGrid.ColumnSpacing = 10;
@@ -879,21 +885,36 @@ classdef MAPOGUI < handle
             algLabel.Layout.Column = 1;
 
             app.AlgorithmDropDown = uidropdown(leftGrid);
-            app.AlgorithmDropDown.Items = {'NSGA-II', 'PSO'};
-            app.AlgorithmDropDown.Value = 'NSGA-II';
+            app.AlgorithmDropDown.Items = getAvailableAlgorithmTypes(app);
+            if isempty(app.AlgorithmDropDown.Items)
+                app.AlgorithmDropDown.Items = {'NSGA-II', 'PSO'};
+            end
+            if ismember('NSGA-II', app.AlgorithmDropDown.Items)
+                app.AlgorithmDropDown.Value = 'NSGA-II';
+            else
+                app.AlgorithmDropDown.Value = app.AlgorithmDropDown.Items{1};
+            end
             app.AlgorithmDropDown.Layout.Row = 1;
             app.AlgorithmDropDown.Layout.Column = 2;
+            app.AlgorithmDropDown.Editable = 'on';
+            app.AlgorithmDropDown.Tooltip = '算法类型（支持自定义），例如: NSGA-II, PSO, ANN-NSGA-II';
             app.AlgorithmDropDown.ValueChangedFcn = @(src, event) algorithmDropDownValueChanged(app);
+
+            app.AlgorithmRefreshButton = uibutton(leftGrid, 'push');
+            app.AlgorithmRefreshButton.Text = '刷新';
+            app.AlgorithmRefreshButton.Layout.Row = 1;
+            app.AlgorithmRefreshButton.Layout.Column = 3;
+            app.AlgorithmRefreshButton.ButtonPushedFcn = @(src, event) refreshAlgorithmList(app);
 
             descLabel = uilabel(leftGrid);
             descLabel.Text = '算法说明:';
             descLabel.FontWeight = 'bold';
             descLabel.Layout.Row = 2;
-            descLabel.Layout.Column = [1, 2];
+            descLabel.Layout.Column = [1, 3];
 
             app.AlgorithmDescArea = uitextarea(leftGrid);
             app.AlgorithmDescArea.Layout.Row = 3;
-            app.AlgorithmDescArea.Layout.Column = [1, 2];
+            app.AlgorithmDescArea.Layout.Column = [1, 3];
             app.AlgorithmDescArea.Editable = 'off';
 
             % 右侧：参数面板容器
@@ -1137,6 +1158,54 @@ classdef MAPOGUI < handle
             app.MaxVelValueLabel_PSO.Text = sprintf('%.2f', app.MaxVelSlider_PSO.Value);
             app.MaxVelValueLabel_PSO.Layout.Row = 6;
             app.MaxVelValueLabel_PSO.Layout.Column = 3;
+
+            % 通用算法参数面板（用于新算法/自定义算法，默认隐藏）
+            app.GenericAlgorithmPanel = uipanel(rightGrid);
+            app.GenericAlgorithmPanel.Title = '通用参数';
+            app.GenericAlgorithmPanel.FontWeight = 'bold';
+            app.GenericAlgorithmPanel.Layout.Row = 1;
+            app.GenericAlgorithmPanel.Layout.Column = 1;
+            app.GenericAlgorithmPanel.Visible = 'off';
+
+            genericGrid = uigridlayout(app.GenericAlgorithmPanel, [2, 4]);
+            genericGrid.RowHeight = {35, '1x'};
+            genericGrid.ColumnWidth = {90, 90, 120, '1x'};
+            genericGrid.Padding = [15, 10, 15, 10];
+            genericGrid.RowSpacing = 8;
+            genericGrid.ColumnSpacing = 10;
+
+            app.AddAlgorithmParamButton = uibutton(genericGrid, 'push');
+            app.AddAlgorithmParamButton.Text = '添加';
+            app.AddAlgorithmParamButton.Layout.Row = 1;
+            app.AddAlgorithmParamButton.Layout.Column = 1;
+            app.AddAlgorithmParamButton.ButtonPushedFcn = @(src, event) addAlgorithmParamButtonPushed(app);
+
+            app.DeleteAlgorithmParamButton = uibutton(genericGrid, 'push');
+            app.DeleteAlgorithmParamButton.Text = '删除';
+            app.DeleteAlgorithmParamButton.Layout.Row = 1;
+            app.DeleteAlgorithmParamButton.Layout.Column = 2;
+            app.DeleteAlgorithmParamButton.ButtonPushedFcn = @(src, event) deleteAlgorithmParamButtonPushed(app);
+
+            app.AutoFillAlgorithmParamsButton = uibutton(genericGrid, 'push');
+            app.AutoFillAlgorithmParamsButton.Text = '填充默认';
+            app.AutoFillAlgorithmParamsButton.Layout.Row = 1;
+            app.AutoFillAlgorithmParamsButton.Layout.Column = 3;
+            app.AutoFillAlgorithmParamsButton.ButtonPushedFcn = @(src, event) autoFillAlgorithmParamsButtonPushed(app);
+
+            hint = uilabel(genericGrid);
+            hint.Text = '提示: 支持 dotted key（如 surrogate.type），数组用 JSON 形式 [1,2]';
+            hint.FontColor = [0.35, 0.35, 0.35];
+            hint.HorizontalAlignment = 'left';
+            hint.Layout.Row = 1;
+            hint.Layout.Column = 4;
+
+            app.AlgorithmParamsTable = uitable(genericGrid);
+            app.AlgorithmParamsTable.Data = cell(0, 2);
+            app.AlgorithmParamsTable.ColumnName = {'参数', '值'};
+            app.AlgorithmParamsTable.ColumnEditable = [true, true];
+            app.AlgorithmParamsTable.Layout.Row = 2;
+            app.AlgorithmParamsTable.Layout.Column = [1, 4];
+            app.AlgorithmParamsTable.CellEditCallback = @(src, event) algorithmParamsTableEdited(app);
 
             % 底部：预估信息（跨两列）
             estPanel = uipanel(outerGrid);
@@ -1384,6 +1453,7 @@ classdef MAPOGUI < handle
             % 算法面板默认可见性
             app.NSGAIIPanel.Visible = 'on';
             app.PSOPanel.Visible = 'off';
+            app.GenericAlgorithmPanel.Visible = 'off';
 
             % 按钮默认状态
             app.StopButton.Enable = 'off';
@@ -1669,6 +1739,68 @@ classdef MAPOGUI < handle
                 end
             catch
                 % ignore
+            end
+
+            % Normalize to cellstr and sort
+            if isstring(types)
+                types = cellstr(types);
+            end
+            if ~iscell(types)
+                types = {};
+            end
+            types = unique(types, 'stable');
+            types = sort(types);
+        end
+
+        function types = getAvailableAlgorithmTypes(app) %#ok<MANU>
+            types = {};
+
+            % 1) Prefer metadata-driven list (low coupling)
+            if exist('AlgorithmMetadata', 'class') == 8
+                try
+                    types = AlgorithmMetadata.listTypes();
+                catch
+                    types = {};
+                end
+            end
+
+            % 2) Fallback to common built-ins / registered algorithms
+            if isempty(types) && exist('AlgorithmFactory', 'class') == 8
+                candidates = {'NSGA-II', 'PSO', 'ANN-NSGA-II'};
+                for i = 1:length(candidates)
+                    t = candidates{i};
+                    try
+                        if AlgorithmFactory.isRegistered(t)
+                            types{end+1} = t; %#ok<AGROW>
+                        end
+                    catch
+                    end
+                end
+
+                if isempty(types)
+                    try
+                        types = AlgorithmFactory.listAvailableAlgorithms();
+                    catch
+                        types = {};
+                    end
+                end
+            end
+
+            % 3) If factory is available, only keep registered algorithms
+            if exist('AlgorithmFactory', 'class') == 8 && ~isempty(types)
+                filtered = {};
+                for i = 1:length(types)
+                    t = types{i};
+                    try
+                        if AlgorithmFactory.isRegistered(t)
+                            filtered{end+1} = t; %#ok<AGROW>
+                        end
+                    catch
+                    end
+                end
+                if ~isempty(filtered)
+                    types = filtered;
+                end
             end
 
             % Normalize to cellstr and sort
@@ -2115,6 +2247,118 @@ classdef MAPOGUI < handle
         %% Tab 4: 算法配置 - 回调函数
         %% ========================================
 
+        function refreshAlgorithmList(app)
+            % Force reload metadata cache so newly added algorithms can show up
+            if exist('AlgorithmMetadata', 'class') == 8
+                try
+                    AlgorithmMetadata.getAll(true);
+                catch
+                end
+            end
+
+            % Also refresh AlgorithmFactory registry from metadata (no restart needed)
+            if exist('AlgorithmFactory', 'class') == 8
+                try
+                    AlgorithmFactory.refreshFromMetadata();
+                catch
+                end
+            end
+
+            currentValue = char(string(app.AlgorithmDropDown.Value));
+            types = getAvailableAlgorithmTypes(app);
+            if isempty(types)
+                types = {'NSGA-II', 'PSO'};
+            end
+
+            if ~ismember(currentValue, types)
+                types{end+1} = currentValue; %#ok<AGROW>
+            end
+
+            app.AlgorithmDropDown.Items = types;
+            app.AlgorithmDropDown.Value = currentValue;
+
+            updateAlgorithmDescription(app);
+            updateEstimations(app);
+            logMessage(app, '已刷新算法列表');
+        end
+
+        function addAlgorithmParamButtonPushed(app)
+            currentData = app.AlgorithmParamsTable.Data;
+            if isempty(currentData)
+                currentData = cell(0, 2);
+            end
+            app.AlgorithmParamsTable.Data = [currentData; {'', ''}];
+            updateConfigStatus(app);
+            updateEstimations(app);
+        end
+
+        function deleteAlgorithmParamButtonPushed(app)
+            selection = app.AlgorithmParamsTable.Selection;
+            if isempty(selection)
+                uialert(app.UIFigure, '请先选择要删除的参数行', '删除参数');
+                return;
+            end
+
+            currentData = app.AlgorithmParamsTable.Data;
+            rowsToDelete = unique(selection(:, 1));
+            currentData(rowsToDelete, :) = [];
+            app.AlgorithmParamsTable.Data = currentData;
+
+            updateConfigStatus(app);
+            updateEstimations(app);
+        end
+
+        function autoFillAlgorithmParamsButtonPushed(app)
+            algType = char(string(app.AlgorithmDropDown.Value));
+
+            defaults = struct();
+            if exist('AlgorithmMetadata', 'class') == 8
+                try
+                    defaults = AlgorithmMetadata.getDefaultParameters(algType);
+                catch
+                    defaults = struct();
+                end
+            end
+
+            if isempty(fieldnames(defaults))
+                uialert(app.UIFigure, sprintf('未找到 %s 的默认参数（可通过 algorithm_meta.json 提供）。', algType), ...
+                    '默认参数', 'Icon', 'info');
+                return;
+            end
+
+            defaultRows = AlgorithmMetadata.toTableData(defaults);
+            data = app.AlgorithmParamsTable.Data;
+            if isempty(data)
+                data = cell(0, 2);
+            end
+
+            existingKeys = strings(0, 1);
+            if ~isempty(data)
+                existingKeys = string(data(:, 1));
+            end
+
+            for i = 1:size(defaultRows, 1)
+                key = char(string(defaultRows{i, 1}));
+                value = defaultRows{i, 2};
+                idx = find(existingKeys == string(key), 1);
+                if isempty(idx)
+                    data(end+1, :) = {key, value}; %#ok<AGROW>
+                    existingKeys(end+1, 1) = string(key); %#ok<AGROW>
+                else
+                    data{idx, 2} = value;
+                end
+            end
+
+            app.AlgorithmParamsTable.Data = data;
+            updateConfigStatus(app);
+            updateEstimations(app);
+        end
+
+        function algorithmParamsTableEdited(app)
+            updateConfigStatus(app);
+            updateEstimations(app);
+        end
+
         function algorithmDropDownValueChanged(app)
             value = app.AlgorithmDropDown.Value;
 
@@ -2122,9 +2366,33 @@ classdef MAPOGUI < handle
                 case 'NSGA-II'
                     app.NSGAIIPanel.Visible = 'on';
                     app.PSOPanel.Visible = 'off';
+                    app.GenericAlgorithmPanel.Visible = 'off';
                 case 'PSO'
                     app.NSGAIIPanel.Visible = 'off';
                     app.PSOPanel.Visible = 'on';
+                    app.GenericAlgorithmPanel.Visible = 'off';
+                otherwise
+                    app.NSGAIIPanel.Visible = 'off';
+                    app.PSOPanel.Visible = 'off';
+                    app.GenericAlgorithmPanel.Visible = 'on';
+
+                    % 自动填充默认参数（仅在表为空时）
+                    try
+                        data = app.AlgorithmParamsTable.Data;
+                        isEmpty = isempty(data) || all(cellfun(@(x) isempty(strtrim(char(string(x)))), data(:, 1)));
+                    catch
+                        isEmpty = true;
+                    end
+
+                    if isEmpty && exist('AlgorithmMetadata', 'class') == 8
+                        try
+                            defaults = AlgorithmMetadata.getDefaultParameters(value);
+                            if ~isempty(fieldnames(defaults))
+                                app.AlgorithmParamsTable.Data = AlgorithmMetadata.toTableData(defaults);
+                            end
+                        catch
+                        end
+                    end
             end
 
             updateAlgorithmDescription(app);
@@ -2605,7 +2873,28 @@ classdef MAPOGUI < handle
                         };
 
                 otherwise
-                    desc = {'请选择算法类型'};
+                    info = '';
+                    if exist('AlgorithmMetadata', 'class') == 8
+                        try
+                            info = AlgorithmMetadata.getDescription(algType);
+                        catch
+                            info = '';
+                        end
+                    end
+                    if isempty(info) && exist('AlgorithmFactory', 'class') == 8
+                        try
+                            info = AlgorithmFactory.getAlgorithmInfo(algType);
+                        catch
+                            info = '';
+                        end
+                    end
+
+                    if isempty(info)
+                        desc = {sprintf('算法: %s', algType)};
+                    else
+                        lines = regexp(char(string(info)), '\\r?\\n', 'split');
+                        desc = [{sprintf('算法: %s', algType)}; {''}; lines(:)];
+                    end
             end
 
             app.AlgorithmDescArea.Value = desc;
@@ -2629,6 +2918,20 @@ classdef MAPOGUI < handle
 
                 otherwise
                     totalEvals = 0;
+                    if exist('AlgorithmMetadata', 'class') == 8
+                        try
+                            params = AlgorithmMetadata.fromTableData(app.AlgorithmParamsTable.Data);
+
+                            if isfield(params, 'populationSize') && isfield(params, 'maxGenerations')
+                                totalEvals = params.populationSize * (params.maxGenerations + 1);
+                            elseif isfield(params, 'swarmSize') && isfield(params, 'maxIterations')
+                                totalEvals = params.swarmSize * (params.maxIterations + 1);
+                            elseif isfield(params, 'populationSize') && isfield(params, 'maxIterations')
+                                totalEvals = params.populationSize * (params.maxIterations + 1);
+                            end
+                        catch
+                        end
+                    end
             end
 
             app.TotalEvalsLabel.Text = sprintf('预估总评估次数: %d', totalEvals);
@@ -2747,6 +3050,7 @@ classdef MAPOGUI < handle
 
             % 算法
             app.guiData.algorithm.type = app.AlgorithmDropDown.Value;
+            app.guiData.algorithm.parameters = struct();
 
             switch app.AlgorithmDropDown.Value
                 case 'NSGA-II'
@@ -2764,6 +3068,15 @@ classdef MAPOGUI < handle
                     app.guiData.algorithm.parameters.cognitiveCoeff = app.CognitiveSlider_PSO.Value;
                     app.guiData.algorithm.parameters.socialCoeff = app.SocialSlider_PSO.Value;
                     app.guiData.algorithm.parameters.maxVelocityRatio = app.MaxVelSlider_PSO.Value;
+
+                otherwise
+                    if exist('AlgorithmMetadata', 'class') == 8
+                        try
+                            app.guiData.algorithm.parameters = AlgorithmMetadata.fromTableData(app.AlgorithmParamsTable.Data);
+                        catch
+                            app.guiData.algorithm.parameters = struct();
+                        end
+                    end
             end
         end
 
@@ -2906,12 +3219,20 @@ classdef MAPOGUI < handle
 
             % 算法
             if isfield(guiData.algorithm, 'type')
-                app.AlgorithmDropDown.Value = guiData.algorithm.type;
+                algTypeValue = guiData.algorithm.type;
+                try
+                    if ~ismember(algTypeValue, app.AlgorithmDropDown.Items)
+                        app.AlgorithmDropDown.Items{end+1} = algTypeValue; %#ok<AGROW>
+                    end
+                catch
+                end
+                app.AlgorithmDropDown.Value = algTypeValue;
 
                 switch guiData.algorithm.type
                     case 'NSGA-II'
                         app.NSGAIIPanel.Visible = 'on';
                         app.PSOPanel.Visible = 'off';
+                        app.GenericAlgorithmPanel.Visible = 'off';
 
                         if isfield(guiData.algorithm, 'parameters')
                             params = guiData.algorithm.parameters;
@@ -2940,6 +3261,7 @@ classdef MAPOGUI < handle
                     case 'PSO'
                         app.NSGAIIPanel.Visible = 'off';
                         app.PSOPanel.Visible = 'on';
+                        app.GenericAlgorithmPanel.Visible = 'off';
 
                         if isfield(guiData.algorithm, 'parameters')
                             params = guiData.algorithm.parameters;
@@ -2965,6 +3287,21 @@ classdef MAPOGUI < handle
                                 app.MaxVelSlider_PSO.Value = params.maxVelocityRatio;
                                 app.MaxVelValueLabel_PSO.Text = sprintf('%.2f', params.maxVelocityRatio);
                             end
+                        end
+
+                    otherwise
+                        app.NSGAIIPanel.Visible = 'off';
+                        app.PSOPanel.Visible = 'off';
+                        app.GenericAlgorithmPanel.Visible = 'on';
+
+                        if isfield(guiData.algorithm, 'parameters') && isstruct(guiData.algorithm.parameters) && exist('AlgorithmMetadata', 'class') == 8
+                            try
+                                app.AlgorithmParamsTable.Data = AlgorithmMetadata.toTableData(guiData.algorithm.parameters);
+                            catch
+                                app.AlgorithmParamsTable.Data = cell(0, 2);
+                            end
+                        else
+                            app.AlgorithmParamsTable.Data = cell(0, 2);
                         end
                 end
             end

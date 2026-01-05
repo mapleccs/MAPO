@@ -1,0 +1,54 @@
+{
+  "type": "ANN-NSGA-II",
+  "displayName": "ANN-NSGA-II",
+  "class": "ANNNSGAII",
+  "description": "ANN-NSGA-II：基于代理模型（ANN/二次多项式）的 NSGA-II，多目标优化可选 TOPSIS 折中解与精确回代验证。",
+  "aliases": [
+    "ANNNSGA2",
+    "ANNNSGAII",
+    "ANN-NSGA2",
+    "SURROGATE-NSGA2",
+    "SURROGATE-NSGA-II"
+  ],
+  "defaultParameters": {
+    "populationSize": 50,
+    "maxGenerations": 30,
+    "crossoverRate": 0.9,
+    "mutationRate": 1.0,
+    "operators": {
+      "useDynamicOperators": true,
+      "crossoverDistIndex": 20,
+      "mutationDistIndex": 20,
+      "crossoverDistIndexStart": 5,
+      "crossoverDistIndexEnd": 30,
+      "mutationDistIndexStart": 5,
+      "mutationDistIndexEnd": 30
+    },
+    "training": {
+      "samples": 200,
+      "maxAttempts": 2000,
+      "samplingMethod": "lhs",
+      "requireSuccess": true,
+      "requireFeasible": false,
+      "randomSeed": null
+    },
+    "surrogate": {
+      "type": "poly2",
+      "ridgeLambda": 1e-6,
+      "annHiddenLayers": [25, 25],
+      "annTrainFcn": "trainscg",
+      "annMaxEpochs": 500,
+      "annTrainRatio": 0.7,
+      "annValRatio": 0.2,
+      "annTestRatio": 0.1
+    },
+    "verification": {
+      "enabled": true,
+      "verifyParetoFront": false,
+      "verifyParetoLimit": 0,
+      "verifyTOPSIS": true,
+      "topsisWeights": null
+    }
+  }
+}
+

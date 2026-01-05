@@ -231,6 +231,20 @@ classdef AlgorithmFactory
             types = keys(registry);
         end
 
+        function refreshFromMetadata()
+            % refreshFromMetadata 重新扫描 metadata 并补充注册表
+            %
+            % 说明:
+            %   在 MATLAB 会话中新增/修改 algorithm_meta.json 后，可调用此方法，
+            %   无需重启即可让 AlgorithmFactory 识别新算法。
+
+            try
+                registry = AlgorithmFactory.getRegistry();
+                AlgorithmFactory.registerFromMetadata(registry);
+            catch
+            end
+        end
+
         function info = getAlgorithmInfo(type)
             % getAlgorithmInfo 获取算法类型信息
             %
@@ -252,6 +266,8 @@ classdef AlgorithmFactory
                     info = '粒子群优化算法 (Particle Swarm Optimization) - 基于群体智能的优化算法';
                 case {'NSGA2', 'NSGAII', 'NSGA-II'}
                     info = 'NSGA-II算法 - 快速非支配排序遗传算法，多目标优化';
+                case {'ANNNSGA2', 'ANNNSGAII', 'ANN-NSGA2', 'ANN-NSGA-II', 'SURROGATE-NSGA2', 'SURROGATE-NSGA-II'}
+                    info = 'ANN-NSGA-II算法 - 基于代理模型的NSGA-II（可配置动态交叉/变异算子）';
                 case {'NSGA3', 'NSGAIII', 'NSGA-III'}
                     info = 'NSGA-III算法 - 基于参考点的多目标优化算法';
                 case 'MOEAD'
@@ -324,6 +340,14 @@ classdef AlgorithmFactory
                 algorithmRegistry('NSGAII') = @NSGAII;
                 algorithmRegistry('NSGA-II') = @NSGAII;
 
+                % ANN-NSGA-II (surrogate-assisted NSGA-II)
+                algorithmRegistry('ANNNSGA2') = @ANNNSGAII;
+                algorithmRegistry('ANNNSGAII') = @ANNNSGAII;
+                algorithmRegistry('ANN-NSGA2') = @ANNNSGAII;
+                algorithmRegistry('ANN-NSGA-II') = @ANNNSGAII;
+                algorithmRegistry('SURROGATE-NSGA2') = @ANNNSGAII;
+                algorithmRegistry('SURROGATE-NSGA-II') = @ANNNSGAII;
+
                 % NSGA-III - 待实现
                 % algorithmRegistry('NSGA3') = @NSGAIII;
                 % algorithmRegistry('NSGAIII') = @NSGAIII;
@@ -340,9 +364,119 @@ classdef AlgorithmFactory
 
                 % MOEA/D - 待实现
                 % algorithmRegistry('MOEAD') = @MOEAD;
+
+                % Auto-register algorithms declared via metadata files
+                % (framework/algorithm/**/algorithm_meta.json)
+                try
+                    AlgorithmFactory.registerFromMetadata(algorithmRegistry);
+                catch
+                end
             end
 
             registry = algorithmRegistry;
+        end
+
+        function registerFromMetadata(algorithmRegistry)
+            % registerFromMetadata 从 algorithm_meta.json 自动注册算法
+            %
+            % 说明:
+            %   - 仅在 key 未注册时补充注册，避免覆盖内置映射
+            %   - metadata 文件位置: framework/algorithm/**/algorithm_meta.json
+
+            if isempty(algorithmRegistry) || ~isa(algorithmRegistry, 'containers.Map')
+                return;
+            end
+
+            baseDir = fileparts(mfilename('fullpath')); % framework/algorithm
+            if isempty(baseDir) || ~exist(baseDir, 'dir')
+                return;
+            end
+
+            dirs = strsplit(genpath(baseDir), pathsep);
+            for i = 1:length(dirs)
+                dirPath = dirs{i};
+                if isempty(dirPath)
+                    continue;
+                end
+
+                metaPath = fullfile(dirPath, 'algorithm_meta.json');
+                if ~exist(metaPath, 'file')
+                    continue;
+                end
+
+                try
+                    meta = jsondecode(fileread(metaPath));
+                catch
+                    continue;
+                end
+
+                if ~isstruct(meta) || ~isfield(meta, 'type')
+                    continue;
+                end
+
+                try
+                    typeStr = char(string(meta.type));
+                catch
+                    continue;
+                end
+
+                className = '';
+                if isfield(meta, 'class')
+                    try
+                        className = char(string(meta.class));
+                    catch
+                        className = '';
+                    end
+                elseif isfield(meta, 'className')
+                    try
+                        className = char(string(meta.className));
+                    catch
+                        className = '';
+                    end
+                end
+
+                if isempty(strtrim(className))
+                    continue;
+                end
+
+                if exist(className, 'class') ~= 8
+                    continue;
+                end
+
+                constructor = str2func(className);
+
+                % Canonical type
+                key = upper(typeStr);
+                if ~algorithmRegistry.isKey(key)
+                    algorithmRegistry(key) = constructor;
+                end
+
+                % Aliases
+                if isfield(meta, 'aliases') && ~isempty(meta.aliases)
+                    aliases = meta.aliases;
+                    if ischar(aliases)
+                        aliases = {aliases};
+                    elseif isstring(aliases)
+                        aliases = cellstr(aliases);
+                    end
+
+                    if iscell(aliases)
+                        for j = 1:length(aliases)
+                            try
+                                aliasKey = upper(char(string(aliases{j})));
+                            catch
+                                continue;
+                            end
+                            if isempty(strtrim(aliasKey))
+                                continue;
+                            end
+                            if ~algorithmRegistry.isKey(aliasKey)
+                                algorithmRegistry(aliasKey) = constructor;
+                            end
+                        end
+                    end
+                end
+            end
         end
 
         function configureAlgorithm(algorithm, config)

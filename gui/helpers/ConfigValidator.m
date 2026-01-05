@@ -467,35 +467,85 @@ classdef ConfigValidator
             errors = {};
             warnings = {};
 
-            % 检查通用参数
-            if ~isfield(params, 'populationSize')
-                errors{end+1} = 'populationSize is required';
-            elseif isnan(params.populationSize)
-                errors{end+1} = 'populationSize is NaN (invalid numeric input)';
-            elseif params.populationSize < 2
-                errors{end+1} = sprintf('populationSize (%d) must be at least 2', params.populationSize);
-            elseif params.populationSize > 1000
-                warnings{end+1} = sprintf('populationSize (%d) is very large, may be slow', params.populationSize);
+            if nargin < 2
+                algType = '';
             end
 
-            if ~isfield(params, 'maxGenerations')
-                errors{end+1} = 'maxGenerations is required';
-            elseif isnan(params.maxGenerations)
-                errors{end+1} = 'maxGenerations is NaN (invalid numeric input)';
-            elseif params.maxGenerations < 1
-                errors{end+1} = sprintf('maxGenerations (%d) must be at least 1', params.maxGenerations);
-            end
+            upperAlgType = upper(regexprep(char(string(algType)), '[-_\\s]', ''));
 
-            % 根据算法类型检查特定参数
-            upperAlgType = upper(strrep(algType, '-', ''));
+            % 根据算法类型检查关键参数（尽量减少对新算法的耦合）
             if contains(upperAlgType, 'NSGA')
-                [validNSGA, errNSGA, warnNSGA] = ConfigValidator.validateNSGAIIParameters(params);
+                % NSGA 系列要求 populationSize / maxGenerations
+                if ~isfield(params, 'populationSize')
+                    errors{end+1} = 'populationSize is required';
+                elseif isnan(params.populationSize)
+                    errors{end+1} = 'populationSize is NaN (invalid numeric input)';
+                elseif params.populationSize < 2
+                    errors{end+1} = sprintf('populationSize (%d) must be at least 2', params.populationSize);
+                elseif params.populationSize > 1000
+                    warnings{end+1} = sprintf('populationSize (%d) is very large, may be slow', params.populationSize);
+                end
+
+                if ~isfield(params, 'maxGenerations')
+                    errors{end+1} = 'maxGenerations is required';
+                elseif isnan(params.maxGenerations)
+                    errors{end+1} = 'maxGenerations is NaN (invalid numeric input)';
+                elseif params.maxGenerations < 1
+                    errors{end+1} = sprintf('maxGenerations (%d) must be at least 1', params.maxGenerations);
+                end
+
+                [~, errNSGA, warnNSGA] = ConfigValidator.validateNSGAIIParameters(params);
                 errors = [errors, errNSGA];
                 warnings = [warnings, warnNSGA];
+
             elseif contains(upperAlgType, 'PSO')
-                [validPSO, errPSO, warnPSO] = ConfigValidator.validatePSOParameters(params);
+                % PSO 要求 swarmSize/maxIterations（允许使用 populationSize/maxGenerations 回退）
+                if isfield(params, 'swarmSize')
+                    swarmSize = params.swarmSize;
+                elseif isfield(params, 'populationSize')
+                    swarmSize = params.populationSize;
+                else
+                    swarmSize = NaN;
+                end
+
+                if isfield(params, 'maxIterations')
+                    maxIter = params.maxIterations;
+                elseif isfield(params, 'maxGenerations')
+                    maxIter = params.maxGenerations;
+                else
+                    maxIter = NaN;
+                end
+
+                if isnan(swarmSize)
+                    errors{end+1} = 'swarmSize (or populationSize) is required';
+                elseif swarmSize < 2
+                    errors{end+1} = sprintf('swarmSize (%d) must be at least 2', swarmSize);
+                elseif swarmSize > 2000
+                    warnings{end+1} = sprintf('swarmSize (%d) is very large, may be slow', swarmSize);
+                end
+
+                if isnan(maxIter)
+                    errors{end+1} = 'maxIterations (or maxGenerations) is required';
+                elseif maxIter < 1
+                    errors{end+1} = sprintf('maxIterations (%d) must be at least 1', maxIter);
+                end
+
+                [~, errPSO, warnPSO] = ConfigValidator.validatePSOParameters(params);
                 errors = [errors, errPSO];
                 warnings = [warnings, warnPSO];
+
+            else
+                % 未知算法：不强制任何特定字段，仅做弱校验（如果存在就检查）
+                if isfield(params, 'populationSize') && isnumeric(params.populationSize) && ~isnan(params.populationSize)
+                    if params.populationSize < 2
+                        warnings{end+1} = sprintf('populationSize (%d) must be at least 2', params.populationSize);
+                    end
+                end
+                if isfield(params, 'maxGenerations') && isnumeric(params.maxGenerations) && ~isnan(params.maxGenerations)
+                    if params.maxGenerations < 1
+                        warnings{end+1} = sprintf('maxGenerations (%d) must be at least 1', params.maxGenerations);
+                    end
+                end
             end
 
             valid = isempty(errors);
