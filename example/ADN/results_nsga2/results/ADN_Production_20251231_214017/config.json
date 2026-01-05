@@ -1,0 +1,93 @@
+{
+  "problem": {
+    "name": "ADN_Production",
+    "description": "ADN生产工艺多目标优化",
+    "variables": [
+      {
+        "name": "T0301_BF",
+        "type": "continuous",
+        "lowerBound": 0.3,
+        "upperBound": 0.9,
+        "unit": "-",
+        "description": "塔底采出比",
+        "initialValue": 0.6
+      },
+      {
+        "name": "T0301_FEED_STAGE",
+        "type": "integer",
+        "lowerBound": 10,
+        "upperBound": 20,
+        "unit": "-",
+        "description": "进料板位置",
+        "initialValue": 15
+      },
+      {
+        "name": "T0301_BASIS_RR",
+        "type": "continuous",
+        "lowerBound": 1,
+        "upperBound": 3,
+        "unit": "-",
+        "description": "回流比",
+        "initialValue": 2
+      }
+    ],
+    "objectives": [
+      {
+        "name": "ADN_FRAC",
+        "type": "maximize",
+        "weight": 1,
+        "description": "ADN质量分数",
+        "unit": ""
+      },
+      {
+        "name": "ADN_FLOW",
+        "type": "maximize",
+        "weight": 1,
+        "description": "ADN质量流量",
+        "unit": ""
+      }
+    ],
+    "constraints": [],
+    "evaluator": {
+      "type": "ADNProductionEvaluator",
+      "timeout": 300
+    }
+  },
+  "simulator": {
+    "type": "Aspen",
+    "settings": {
+      "modelPath": "E:\\Project\\Chemical Design Competition\\MAPO\\example\\ADN\\二级氢氰化工段.bkp",
+      "timeout": 300,
+      "visible": false,
+      "autoSave": false,
+      "suppressWarnings": true,
+      "maxRetries": 3,
+      "retryDelay": 2
+    },
+    "nodeMapping": {
+      "variables": {
+        "T0301_BF": "\\Data\\Blocks\\T0301\\Input\\B:F",
+        "T0301_FEED_STAGE": "\\Data\\Blocks\\T0301\\Input\\FEED_STAGE\\0318",
+        "T0301_BASIS_RR": "\\Data\\Blocks\\T0301\\Input\\BASIS_RR"
+      },
+      "results": {
+        "ADN_FRAC": "\\Data\\Streams\\ADN\\Output\\MASSFRAC\\MIXED\\ADN",
+        "ADN_FLOW": "\\Data\\Streams\\ADN\\Output\\MASSFLOW\\MIXED\\ADN"
+      }
+    }
+  },
+  "algorithm": {
+    "type": "NSGA-II",
+    "parameters": {
+      "populationSize": 10,
+      "maxGenerations": 10,
+      "crossoverRate": 0.9,
+      "mutationRate": 1,
+      "crossoverDistIndex": 20,
+      "mutationDistIndex": 20
+    }
+  },
+  "runtime": {
+    "baseDir": "E:\\Project\\Chemical Design Competition\\MAPO\\example\\ADN"
+  }
+}

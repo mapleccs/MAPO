@@ -175,7 +175,7 @@ function launchGUI(varargin)
 
         % 如果需要加载测试配置
         if loadTest
-            fprintf('尝试加载测试配置...\n');
+            fprint('尝试加载测试配置...\n');
 
             % 查找示例配置文件
             exampleConfig = fullfile(scriptPath, 'example', 'R601', 'case_config.json');

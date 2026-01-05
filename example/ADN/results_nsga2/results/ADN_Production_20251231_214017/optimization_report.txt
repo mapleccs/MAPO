@@ -1,0 +1,30 @@
+========================================
+MAPO Optimization Results Report
+========================================
+
+Project Information:
+  Name: ADN_Production
+  Description: ADN生产工艺多目标优化
+  Generated: 31-Dec-2025 21:40:18
+
+Optimization Configuration:
+  Algorithm: NSGA-II
+  Population Size: 10
+  Max Generations: 10
+  Number of Variables: 3
+  Number of Objectives: 2
+
+Execution Statistics:
+  Total Time: 604.00 seconds (10.07 minutes)
+  Evaluations: 110
+  Iterations: 10
+  Pareto Solutions: 2
+
+Variable Ranges:
+  T0301_BF: [0.3000, 0.9000] -
+  T0301_FEED_STAGE: [10.0000, 20.0000] -
+  T0301_BASIS_RR: [1.0000, 3.0000] -
+
+Optimization Objectives:
+  ADN_FRAC (maximize) - ADN质量分数
+  ADN_FLOW (maximize) - ADN质量流量
