@@ -1,5 +1,0 @@
-错误信息: 备份文件不存在: my_model.bkp
-
-调用栈:
-  E:\Project\Chemical Design Competition\MAPO\framework\simulator\aspen\AspenPlusSimulator.m (第 77 行)
-  E:\Project\Chemical Design Competition\MAPO\example\_template\run_case.m (第 124 行)
