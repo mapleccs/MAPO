@@ -51,9 +51,9 @@ function [future, dataQueue] = runOptimizationAsync(configFilePath, guiCallbacks
 %   - Supports "temporary run" without disk writes
 %
 % CONSTRAINT HANDLING:
-%   Constraint expressions (e.g., "T1 <= 350") are metadata only.
-%   Actual constraint evaluation is performed by the Evaluator class.
-%   This matches run_case.m behavior (see line 227-235).
+%   Constraint expressions (e.g., "T1 <= 350") are parsed to derive bounds/targets
+%   when explicit bounds are missing; evaluator still computes constraint values.
+%   This matches run_case.m behavior.
 %
 % ITERATION DATA:
 %   Data structure depends on algorithm implementation:
@@ -286,7 +286,14 @@ function [problem, algorithm, simulator] = buildOptimizationComponents(config, d
     simConfig = SimulatorConfig(config.simulator.type);
 
     % Set all settings
-    settings = config.simulator.settings;
+    if isfield(config.simulator, 'settings')
+        settings = config.simulator.settings;
+    elseif isfield(config.simulator, 'config')
+        settings = config.simulator.config;
+    else
+        error('runOptimizationAsync:MissingSimulatorSettings', ...
+            'Simulator settings missing (expected simulator.settings or simulator.config)');
+    end
     resolvedModelPath = '';
     resolvedVisible = [];
     settingFields = fieldnames(settings);
@@ -437,17 +444,21 @@ function [problem, algorithm, simulator] = buildOptimizationComponents(config, d
     evaluator = [];
     createErr1 = [];
 
-    try
-        evaluator = feval(evaluatorType, simulator);
-    catch ME1
-        createErr1 = ME1;
+    if strcmpi(evaluatorType, 'ExpressionEvaluator')
+        evaluator = ExpressionEvaluator(simulator, config);
+    else
         try
-            evaluator = feval(evaluatorType);
-        catch ME2
-            error('runOptimizationAsync:EvaluatorCreationFailed', ...
-                ['Failed to create evaluator: %s\n' ...
-                 'Tried:\n  1) %s(simulator) -> %s\n  2) %s() -> %s'], ...
-                evaluatorType, evaluatorType, createErr1.message, evaluatorType, ME2.message);
+            evaluator = feval(evaluatorType, simulator);
+        catch ME1
+            createErr1 = ME1;
+            try
+                evaluator = feval(evaluatorType);
+            catch ME2
+                error('runOptimizationAsync:EvaluatorCreationFailed', ...
+                    ['Failed to create evaluator: %s\n' ...
+                     'Tried:\n  1) %s(simulator) -> %s\n  2) %s() -> %s'], ...
+                    evaluatorType, evaluatorType, createErr1.message, evaluatorType, ME2.message);
+            end
         end
     end
 
@@ -485,7 +496,17 @@ function [problem, algorithm, simulator] = buildOptimizationComponents(config, d
     % Add variables (using correct constructor: name, type, [lb, ub])
     for i = 1:length(config.problem.variables)
         var = config.problem.variables(i);
-        variable = Variable(var.name, var.type, [var.lowerBound, var.upperBound]);
+        bounds = [var.lowerBound, var.upperBound];
+        if isfield(var, 'values') && ~isempty(var.values) && ...
+                (strcmpi(var.type, 'discrete') || strcmpi(var.type, 'categorical'))
+            bounds = var.values;
+            if isstring(bounds)
+                bounds = cellstr(bounds);
+            elseif ischar(bounds)
+                bounds = {bounds};
+            end
+        end
+        variable = Variable(var.name, var.type, bounds);
 
         if isfield(var, 'unit')
             variable.unit = var.unit;
@@ -524,19 +545,11 @@ function [problem, algorithm, simulator] = buildOptimizationComponents(config, d
         for i = 1:length(config.problem.constraints)
             con = config.problem.constraints(i);
 
-            % Use factory methods to create constraints
-            switch con.type
-                case 'inequality'
-                    if isfield(con, 'expression') && contains(con.expression, '<=')
-                        constraint = Constraint.createLessEqual(con.name, 0);
-                    else
-                        constraint = Constraint.createGreaterEqual(con.name, 0);
-                    end
-                case 'equality'
-                    constraint = Constraint.createEqual(con.name, 0);
-                otherwise
-                    warning('Unknown constraint type: %s', con.type);
-                    continue;
+            [constraint, ok] = buildConstraintFromConfig(con);
+            if ~ok
+                warning('runOptimizationAsync:ConstraintConfig', ...
+                    'Skipping constraint "%s" (invalid expression or type)', con.name);
+                continue;
             end
 
             if isfield(con, 'description')
@@ -732,5 +745,176 @@ function tf = isAbsolutePath(path)
     else
         % Unix/Mac: /...
         tf = startsWith(path, '/');
+    end
+end
+
+
+function [constraint, ok] = buildConstraintFromConfig(con)
+    ok = true;
+    constraint = [];
+
+    if ~isfield(con, 'type')
+        ok = false;
+        return;
+    end
+
+    conType = lower(strtrim(char(string(con.type))));
+    parsed = struct('lowerBound', -inf, 'upperBound', inf, 'target', [], 'isEquality', false);
+    parsedOk = false;
+
+    exprText = '';
+    if isfield(con, 'expression')
+        try
+            exprText = char(string(con.expression));
+        catch
+            exprText = '';
+        end
+        [parsed, parsedOk] = parseConstraintExpression(exprText);
+    end
+
+    switch conType
+        case 'inequality'
+            lowerBound = [];
+            upperBound = [];
+
+            if isfield(con, 'lowerBound')
+                lowerBound = con.lowerBound;
+            end
+            if isfield(con, 'upperBound')
+                upperBound = con.upperBound;
+            end
+
+            if isempty(lowerBound) && isempty(upperBound) && parsedOk
+                if parsed.isEquality
+                    lowerBound = parsed.target;
+                    upperBound = parsed.target;
+                else
+                    if isfinite(parsed.lowerBound)
+                        lowerBound = parsed.lowerBound;
+                    end
+                    if isfinite(parsed.upperBound)
+                        upperBound = parsed.upperBound;
+                    end
+                end
+            end
+
+            if isempty(lowerBound) && isempty(upperBound) && ~isempty(exprText)
+                if contains(exprText, '<=') || contains(exprText, '<')
+                    upperBound = 0;
+                elseif contains(exprText, '>=') || contains(exprText, '>')
+                    lowerBound = 0;
+                end
+            end
+
+            if ~isempty(lowerBound) && isfinite(lowerBound) && ~isempty(upperBound) && isfinite(upperBound)
+                constraint = Constraint(con.name, 'inequality', ...
+                    'LowerBound', lowerBound, 'UpperBound', upperBound);
+            elseif ~isempty(upperBound) && isfinite(upperBound)
+                constraint = Constraint.createLessEqual(con.name, upperBound);
+            elseif ~isempty(lowerBound) && isfinite(lowerBound)
+                constraint = Constraint.createGreaterEqual(con.name, lowerBound);
+            else
+                constraint = Constraint(con.name, 'inequality');
+            end
+
+        case 'equality'
+            target = [];
+            if isfield(con, 'target')
+                target = con.target;
+            elseif parsedOk && parsed.isEquality
+                target = parsed.target;
+            elseif parsedOk && ~parsed.isEquality
+                if isfinite(parsed.lowerBound) && isfinite(parsed.upperBound) && ...
+                        parsed.lowerBound == parsed.upperBound
+                    target = parsed.lowerBound;
+                elseif isfinite(parsed.lowerBound)
+                    target = parsed.lowerBound;
+                elseif isfinite(parsed.upperBound)
+                    target = parsed.upperBound;
+                end
+            end
+            if isempty(target)
+                target = 0;
+            end
+
+            if isfield(con, 'tolerance')
+                constraint = Constraint(con.name, 'equality', ...
+                    'Target', target, 'Tolerance', con.tolerance);
+            else
+                constraint = Constraint.createEqual(con.name, target);
+            end
+
+        otherwise
+            ok = false;
+            warning('runOptimizationAsync:ConstraintType', 'Unknown constraint type: %s', con.type);
+    end
+end
+
+
+function [parsed, ok] = parseConstraintExpression(expression)
+    parsed = struct('lowerBound', -inf, 'upperBound', inf, 'target', [], 'isEquality', false);
+    ok = false;
+
+    if isempty(expression)
+        return;
+    end
+
+    try
+        expr = char(string(expression));
+    catch
+        expr = '';
+    end
+
+    expr = strtrim(expr);
+    if isempty(expr)
+        return;
+    end
+
+    tokens = regexp(expr, '^\s*(?<lhs>[^<>=]+?)\s*(?<op><=|>=|==|=|<|>)\s*(?<rhs>.+)\s*$', 'names');
+    if isempty(tokens)
+        return;
+    end
+
+    lhs = strtrim(tokens.lhs);
+    rhs = strtrim(tokens.rhs);
+    op = tokens.op;
+
+    lhsVal = str2double(lhs);
+    rhsVal = str2double(rhs);
+    lhsIsNum = isfinite(lhsVal);
+    rhsIsNum = isfinite(rhsVal);
+
+    if strcmp(op, '=') || strcmp(op, '==')
+        parsed.isEquality = true;
+        if lhsIsNum && ~rhsIsNum
+            parsed.target = lhsVal;
+            ok = true;
+        elseif rhsIsNum && ~lhsIsNum
+            parsed.target = rhsVal;
+            ok = true;
+        end
+        return;
+    end
+
+    if strcmp(op, '<=') || strcmp(op, '<')
+        if rhsIsNum && ~lhsIsNum
+            parsed.upperBound = rhsVal;
+            ok = true;
+        elseif lhsIsNum && ~rhsIsNum
+            parsed.lowerBound = lhsVal;
+            ok = true;
+        end
+        return;
+    end
+
+    if strcmp(op, '>=') || strcmp(op, '>')
+        if rhsIsNum && ~lhsIsNum
+            parsed.lowerBound = rhsVal;
+            ok = true;
+        elseif lhsIsNum && ~rhsIsNum
+            parsed.upperBound = lhsVal;
+            ok = true;
+        end
+        return;
     end
 end

@@ -102,6 +102,13 @@ classdef ConfigValidator
                 warnings = [warnings, warnCon];
             end
 
+            % 检查派生表达式（可选）
+            if isfield(problem, 'derived') && ~isempty(problem.derived)
+                [validDer, errDer, warnDer] = ConfigValidator.validateDerived(problem.derived);
+                errors = [errors, errDer];
+                warnings = [warnings, warnDer];
+            end
+
             % 检查评估器
             if ~isfield(problem, 'evaluator')
                 errors{end+1} = 'Evaluator configuration is required';
@@ -128,40 +135,82 @@ classdef ConfigValidator
                     errors{end+1} = sprintf('%s: name is required', prefix);
                 end
 
+                varType = '';
                 if ~isfield(var, 'type') || isempty(var.type)
                     errors{end+1} = sprintf('%s: type is required', prefix);
-                elseif ~ismember(var.type, {'continuous', 'integer', 'discrete'})
-                    errors{end+1} = sprintf('%s: invalid type "%s"', prefix, var.type);
-                end
-
-                % 检查边界
-                if ~isfield(var, 'lowerBound')
-                    errors{end+1} = sprintf('%s (%s): lowerBound is required', prefix, var.name);
-                elseif isnan(var.lowerBound)
-                    errors{end+1} = sprintf('%s (%s): lowerBound is NaN (invalid numeric input)', prefix, var.name);
-                end
-
-                if ~isfield(var, 'upperBound')
-                    errors{end+1} = sprintf('%s (%s): upperBound is required', prefix, var.name);
-                elseif isnan(var.upperBound)
-                    errors{end+1} = sprintf('%s (%s): upperBound is NaN (invalid numeric input)', prefix, var.name);
-                end
-
-                % 检查边界合理性
-                if isfield(var, 'lowerBound') && isfield(var, 'upperBound') && ...
-                   ~isnan(var.lowerBound) && ~isnan(var.upperBound)
-                    if var.lowerBound >= var.upperBound
-                        errors{end+1} = sprintf('%s (%s): lowerBound (%.4f) must be < upperBound (%.4f)', ...
-                            prefix, var.name, var.lowerBound, var.upperBound);
+                else
+                    varType = lower(char(string(var.type)));
+                    if ~ismember(varType, {'continuous', 'integer', 'discrete', 'categorical'})
+                        errors{end+1} = sprintf('%s: invalid type "%s"', prefix, var.type);
                     end
                 end
 
-                % 检查初始值
-                if isfield(var, 'initialValue') && ~isnan(var.initialValue)
-                    if isfield(var, 'lowerBound') && isfield(var, 'upperBound')
-                        if var.initialValue < var.lowerBound || var.initialValue > var.upperBound
-                            warnings{end+1} = sprintf('%s (%s): initialValue (%.4f) outside bounds [%.4f, %.4f]', ...
-                                prefix, var.name, var.initialValue, var.lowerBound, var.upperBound);
+                if ismember(varType, {'continuous', 'integer'})
+                    % 检查边界
+                    if ~isfield(var, 'lowerBound')
+                        errors{end+1} = sprintf('%s (%s): lowerBound is required', prefix, var.name);
+                    elseif ~isnumeric(var.lowerBound) || isnan(var.lowerBound)
+                        errors{end+1} = sprintf('%s (%s): lowerBound is NaN (invalid numeric input)', prefix, var.name);
+                    end
+
+                    if ~isfield(var, 'upperBound')
+                        errors{end+1} = sprintf('%s (%s): upperBound is required', prefix, var.name);
+                    elseif ~isnumeric(var.upperBound) || isnan(var.upperBound)
+                        errors{end+1} = sprintf('%s (%s): upperBound is NaN (invalid numeric input)', prefix, var.name);
+                    end
+
+                    % 检查边界合理性
+                    if isfield(var, 'lowerBound') && isfield(var, 'upperBound') && ...
+                       isnumeric(var.lowerBound) && isnumeric(var.upperBound) && ...
+                       ~isnan(var.lowerBound) && ~isnan(var.upperBound)
+                        if var.lowerBound >= var.upperBound
+                            errors{end+1} = sprintf('%s (%s): lowerBound (%.4f) must be < upperBound (%.4f)', ...
+                                prefix, var.name, var.lowerBound, var.upperBound);
+                        end
+                    end
+
+                    % 检查初始值
+                    if isfield(var, 'initialValue') && ~isempty(var.initialValue)
+                        if ~isnumeric(var.initialValue) || ~isscalar(var.initialValue) || isnan(var.initialValue)
+                            warnings{end+1} = sprintf('%s (%s): initialValue is invalid numeric input', prefix, var.name);
+                        elseif isfield(var, 'lowerBound') && isfield(var, 'upperBound') && ...
+                               isnumeric(var.lowerBound) && isnumeric(var.upperBound)
+                            if var.initialValue < var.lowerBound || var.initialValue > var.upperBound
+                                warnings{end+1} = sprintf('%s (%s): initialValue (%.4f) outside bounds [%.4f, %.4f]', ...
+                                    prefix, var.name, var.initialValue, var.lowerBound, var.upperBound);
+                            end
+                        end
+                    end
+                elseif ismember(varType, {'discrete', 'categorical'})
+                    values = [];
+                    if isfield(var, 'values') && ~isempty(var.values)
+                        values = ConfigValidator.parseValueList(var.values);
+                    end
+
+                    if isempty(values) && strcmp(varType, 'discrete')
+                        if isfield(var, 'lowerBound') && isfield(var, 'upperBound') && ...
+                           isnumeric(var.lowerBound) && isnumeric(var.upperBound) && ...
+                           isfinite(var.lowerBound) && isfinite(var.upperBound)
+                            values = [var.lowerBound, var.upperBound];
+                            warnings{end+1} = sprintf('%s (%s): discrete variable uses lower/upper as value set', ...
+                                prefix, var.name);
+                        end
+                    end
+
+                    if isempty(values)
+                        errors{end+1} = sprintf('%s (%s): values are required for %s variable', ...
+                            prefix, var.name, varType);
+                    elseif strcmp(varType, 'categorical')
+                        if isnumeric(values)
+                            errors{end+1} = sprintf('%s (%s): categorical values must be strings', prefix, var.name);
+                        elseif iscell(values)
+                            for j = 1:numel(values)
+                                if ~(ischar(values{j}) || isstring(values{j}))
+                                    errors{end+1} = sprintf('%s (%s): categorical value at #%d must be string', ...
+                                        prefix, var.name, j);
+                                    break;
+                                end
+                            end
                         end
                     end
                 end
@@ -199,6 +248,14 @@ classdef ConfigValidator
                             prefix, obj.name, obj.weight);
                     end
                 end
+
+                if isfield(obj, 'expression') && ~isempty(obj.expression)
+                    [ok, msg] = ConfigValidator.validateExpression(obj.expression);
+                    if ~ok
+                        warnings{end+1} = sprintf('%s (%s): expression invalid (%s)', ...
+                            prefix, obj.name, msg);
+                    end
+                end
             end
 
             valid = isempty(errors);
@@ -226,10 +283,177 @@ classdef ConfigValidator
 
                 if ~isfield(con, 'expression') || isempty(con.expression)
                     warnings{end+1} = sprintf('%s (%s): expression is empty', prefix, con.name);
+                else
+                    if ~ConfigValidator.isConstraintExpressionValid(con.expression)
+                        exprText = '';
+                        try
+                            exprText = char(string(con.expression));
+                        catch
+                            exprText = '';
+                        end
+                        warnings{end+1} = sprintf('%s (%s): expression not parseable "%s"', ...
+                            prefix, con.name, exprText);
+                    end
                 end
             end
 
             valid = isempty(errors);
+        end
+
+        function [valid, errors, warnings] = validateDerived(derived)
+            %% validateDerived - 验证派生表达式配置
+            errors = {};
+            warnings = {};
+
+            for i = 1:length(derived)
+                d = derived(i);
+                prefix = sprintf('Derived #%d', i);
+
+                if ~isfield(d, 'name') || isempty(d.name)
+                    errors{end+1} = sprintf('%s: name is required', prefix);
+                end
+
+                if ~isfield(d, 'expression') || isempty(d.expression)
+                    warnings{end+1} = sprintf('%s (%s): expression is empty', prefix, d.name);
+                else
+                    [ok, msg] = ConfigValidator.validateExpression(d.expression);
+                    if ~ok
+                        warnings{end+1} = sprintf('%s (%s): expression invalid (%s)', ...
+                            prefix, d.name, msg);
+                    end
+                end
+            end
+
+            valid = isempty(errors);
+        end
+
+        function ok = isConstraintExpressionValid(expression)
+            ok = false;
+
+            if isempty(expression)
+                return;
+            end
+
+            try
+                expr = char(string(expression));
+            catch
+                expr = '';
+            end
+
+            expr = strtrim(expr);
+            if isempty(expr)
+                return;
+            end
+
+            tokens = regexp(expr, '^\s*(?<lhs>[^<>=]+?)\s*(?<op><=|>=|==|=|<|>)\s*(?<rhs>.+)\s*$', 'names');
+            if isempty(tokens)
+                [ok, ~] = ConfigValidator.validateExpression(expr);
+                return;
+            end
+
+            lhs = strtrim(tokens.lhs);
+            rhs = strtrim(tokens.rhs);
+
+            [okL, ~] = ConfigValidator.validateExpression(lhs);
+            [okR, ~] = ConfigValidator.validateExpression(rhs);
+            ok = okL && okR;
+        end
+
+        function [ok, msg] = validateExpression(expression)
+            ok = true;
+            msg = '';
+
+            if isempty(expression)
+                return;
+            end
+
+            try
+                expr = char(string(expression));
+            catch
+                expr = '';
+            end
+
+            expr = strtrim(expr);
+            if isempty(expr)
+                return;
+            end
+
+            if exist('ExpressionEngine', 'class') ~= 8
+                return;
+            end
+
+            try
+                compiled = ExpressionEngine.compile(expr);
+            catch ME
+                ok = false;
+                msg = ME.message;
+                return;
+            end
+
+            ids = compiled.identifiers;
+            allowed = {'x.', 'param.', 'result.', 'derived.'};
+            for i = 1:length(ids)
+                name = ids{i};
+                matches = false;
+                for j = 1:numel(allowed)
+                    if startsWith(name, allowed{j})
+                        matches = true;
+                        break;
+                    end
+                end
+                if ~matches
+                    ok = false;
+                    msg = sprintf('invalid symbol "%s"', name);
+                    return;
+                end
+            end
+        end
+
+        function values = parseValueList(rawValues)
+            values = [];
+
+            if isempty(rawValues)
+                return;
+            end
+
+            if isstring(rawValues)
+                if isscalar(rawValues)
+                    rawValues = char(rawValues);
+                else
+                    rawValues = cellstr(rawValues);
+                end
+            end
+
+            if ischar(rawValues)
+                text = strtrim(rawValues);
+                if isempty(text)
+                    return;
+                end
+                if (startsWith(text, '[') && endsWith(text, ']')) || ...
+                   (startsWith(text, '{') && endsWith(text, '}'))
+                    text = strtrim(text(2:end-1));
+                end
+                tokens = regexp(text, '[^,;\s]+', 'match');
+                if isempty(tokens)
+                    return;
+                end
+                nums = str2double(tokens);
+                if all(isfinite(nums))
+                    values = nums;
+                else
+                    values = tokens;
+                end
+                return;
+            end
+
+            if isnumeric(rawValues)
+                values = rawValues;
+                return;
+            end
+
+            if iscell(rawValues)
+                values = rawValues;
+            end
         end
 
         function [valid, errors, warnings] = validateEvaluator(evaluator)
@@ -260,10 +484,22 @@ classdef ConfigValidator
                 for i = 1:length(fields)
                     fieldName = fields{i};
                     value = evaluator.economicParameters.(fieldName);
-                    if ~isnumeric(value) || isempty(value) || ~isscalar(value)
-                        errors{end+1} = sprintf('Economic parameter "%s" must be a numeric scalar', fieldName);
-                    elseif isnan(value)
-                        errors{end+1} = sprintf('Economic parameter "%s" is NaN (invalid numeric input)', fieldName);
+                    if isnumeric(value)
+                        if isempty(value) || ~isscalar(value)
+                            errors{end+1} = sprintf('Economic parameter "%s" must be a numeric scalar', fieldName);
+                        elseif isnan(value)
+                            errors{end+1} = sprintf('Economic parameter "%s" is NaN (invalid numeric input)', fieldName);
+                        end
+                    elseif islogical(value)
+                        if isempty(value) || ~isscalar(value)
+                            errors{end+1} = sprintf('Economic parameter "%s" must be a scalar logical', fieldName);
+                        end
+                    elseif ischar(value) || isstring(value)
+                        if strlength(strtrim(string(value))) == 0
+                            errors{end+1} = sprintf('Economic parameter "%s" must be a non-empty string', fieldName);
+                        end
+                    else
+                        errors{end+1} = sprintf('Economic parameter "%s" must be numeric, logical, or string', fieldName);
                     end
                 end
             end

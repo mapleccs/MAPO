@@ -49,19 +49,78 @@ classdef ConfigBuilder
                         ConfigBuilder.getFieldOrDefault(vars(i), 'name', sprintf('VAR%d', i)));
                     vars(i).description = ConfigBuilder.ensureString(...
                         ConfigBuilder.getFieldOrDefault(vars(i), 'description', ''));
-                    vars(i).type = ConfigBuilder.ensureString(...
+
+                    rawType = ConfigBuilder.ensureString(...
                         ConfigBuilder.getFieldOrDefault(vars(i), 'type', 'continuous'));
-                    vars(i).lowerBound = ConfigBuilder.ensureNumericStrict(...
-                        ConfigBuilder.getFieldOrDefault(vars(i), 'lowerBound', 0), 'lowerBound');
-                    vars(i).upperBound = ConfigBuilder.ensureNumericStrict(...
-                        ConfigBuilder.getFieldOrDefault(vars(i), 'upperBound', 100), 'upperBound');
+                    varType = lower(strtrim(rawType));
+                    vars(i).type = varType;
+
                     vars(i).unit = ConfigBuilder.ensureString(...
                         ConfigBuilder.getFieldOrDefault(vars(i), 'unit', ''));
-                    if isfield(vars(i), 'initialValue') && ~isempty(vars(i).initialValue)
-                        vars(i).initialValue = ConfigBuilder.ensureNumericStrict(...
-                            vars(i).initialValue, 'initialValue');
+
+                    parsedValues = [];
+                    if isfield(vars(i), 'values')
+                        parsedValues = ConfigBuilder.parseVariableValues(vars(i).values, varType);
+                    end
+
+                    if ismember(varType, {'continuous', 'integer'})
+                        if isfield(vars(i), 'values')
+                            vars(i).values = [];
+                        end
+                        vars(i).lowerBound = ConfigBuilder.ensureNumericStrict(...
+                            ConfigBuilder.getFieldOrDefault(vars(i), 'lowerBound', 0), 'lowerBound');
+                        vars(i).upperBound = ConfigBuilder.ensureNumericStrict(...
+                            ConfigBuilder.getFieldOrDefault(vars(i), 'upperBound', 100), 'upperBound');
+
+                        if isfield(vars(i), 'initialValue') && ~isempty(vars(i).initialValue)
+                            vars(i).initialValue = ConfigBuilder.ensureNumericStrict(...
+                                vars(i).initialValue, 'initialValue');
+                        else
+                            vars(i).initialValue = (vars(i).lowerBound + vars(i).upperBound) / 2;
+                        end
                     else
-                        vars(i).initialValue = (vars(i).lowerBound + vars(i).upperBound) / 2;
+                        if isempty(parsedValues) && strcmp(varType, 'discrete')
+                            lbFallback = ConfigBuilder.ensureNumericStrict(...
+                                ConfigBuilder.getFieldOrDefault(vars(i), 'lowerBound', 0), 'lowerBound');
+                            ubFallback = ConfigBuilder.ensureNumericStrict(...
+                                ConfigBuilder.getFieldOrDefault(vars(i), 'upperBound', 100), 'upperBound');
+                            if isfinite(lbFallback) && isfinite(ubFallback)
+                                parsedValues = [lbFallback, ubFallback];
+                            end
+                        end
+
+                        vars(i).values = parsedValues;
+                        if ~isempty(parsedValues)
+                            if isnumeric(parsedValues)
+                                vars(i).lowerBound = min(parsedValues);
+                                vars(i).upperBound = max(parsedValues);
+                            else
+                                vars(i).lowerBound = [];
+                                vars(i).upperBound = [];
+                            end
+
+                            if ~isfield(vars(i), 'initialValue') || isempty(vars(i).initialValue)
+                                if isnumeric(parsedValues)
+                                    vars(i).initialValue = parsedValues(1);
+                                elseif iscell(parsedValues) && ~isempty(parsedValues)
+                                    vars(i).initialValue = parsedValues{1};
+                                else
+                                    vars(i).initialValue = parsedValues;
+                                end
+                            end
+                        else
+                            vars(i).lowerBound = ConfigBuilder.ensureNumericStrict(...
+                                ConfigBuilder.getFieldOrDefault(vars(i), 'lowerBound', 0), 'lowerBound');
+                            vars(i).upperBound = ConfigBuilder.ensureNumericStrict(...
+                                ConfigBuilder.getFieldOrDefault(vars(i), 'upperBound', 100), 'upperBound');
+
+                            if isfield(vars(i), 'initialValue') && ~isempty(vars(i).initialValue)
+                                vars(i).initialValue = ConfigBuilder.ensureNumericStrict(...
+                                    vars(i).initialValue, 'initialValue');
+                            else
+                                vars(i).initialValue = (vars(i).lowerBound + vars(i).upperBound) / 2;
+                            end
+                        end
                     end
                 end
                 config.problem.variables = vars;
@@ -82,6 +141,8 @@ classdef ConfigBuilder
                         ConfigBuilder.getFieldOrDefault(objs(i), 'type', 'minimize'));
                     objs(i).unit = ConfigBuilder.ensureString(...
                         ConfigBuilder.getFieldOrDefault(objs(i), 'unit', ''));
+                    objs(i).expression = ConfigBuilder.ensureString(...
+                        ConfigBuilder.getFieldOrDefault(objs(i), 'expression', ''));
                     objs(i).weight = ConfigBuilder.ensureNumericStrict(...
                         ConfigBuilder.getFieldOrDefault(objs(i), 'weight', 1.0), 'weight');
                 end
@@ -111,6 +172,25 @@ classdef ConfigBuilder
                 config.problem.constraints = [];
             end
 
+            % 派生表达式
+            if isfield(guiData.problem, 'derived') && ~isempty(guiData.problem.derived)
+                derived = guiData.problem.derived;
+                numDerived = length(derived);
+                for i = 1:numDerived
+                    derived(i).name = ConfigBuilder.ensureString(...
+                        ConfigBuilder.getFieldOrDefault(derived(i), 'name', sprintf('D%d', i)));
+                    derived(i).expression = ConfigBuilder.ensureString(...
+                        ConfigBuilder.getFieldOrDefault(derived(i), 'expression', ''));
+                    derived(i).unit = ConfigBuilder.ensureString(...
+                        ConfigBuilder.getFieldOrDefault(derived(i), 'unit', ''));
+                    derived(i).description = ConfigBuilder.ensureString(...
+                        ConfigBuilder.getFieldOrDefault(derived(i), 'description', ''));
+                end
+                config.problem.derived = derived;
+            else
+                config.problem.derived = [];
+            end
+
             % 评估器配置
             config.problem.evaluator = struct();
             if isfield(guiData.problem, 'evaluator')
@@ -130,6 +210,17 @@ classdef ConfigBuilder
                             ecoParams.(fields{i}), fields{i});
                     end
                     config.problem.evaluator.economicParameters = ecoParams;
+                end
+
+                if isfield(guiData.problem.evaluator, 'parameterUnits') && ...
+                   isstruct(guiData.problem.evaluator.parameterUnits) && ...
+                   ~isempty(fieldnames(guiData.problem.evaluator.parameterUnits))
+                    unitParams = guiData.problem.evaluator.parameterUnits;
+                    fields = fieldnames(unitParams);
+                    for i = 1:length(fields)
+                        unitParams.(fields{i}) = ConfigBuilder.ensureString(unitParams.(fields{i}));
+                    end
+                    config.problem.evaluator.parameterUnits = unitParams;
                 end
             else
                 config.problem.evaluator.type = 'MyCaseEvaluator';
@@ -179,6 +270,10 @@ classdef ConfigBuilder
                 ConfigBuilder.getFieldOrDefault(...
                     ConfigBuilder.getFieldOrDefault(guiData.simulator, 'nodeMapping', struct()), ...
                     'results', struct()));
+            config.simulator.nodeMapping.resultUnits = ConfigBuilder.ensureNodeMappingStruct(...
+                ConfigBuilder.getFieldOrDefault(...
+                    ConfigBuilder.getFieldOrDefault(guiData.simulator, 'nodeMapping', struct()), ...
+                    'resultUnits', struct()));
 
             %% ==================== algorithm 部分 ====================
             config.algorithm = struct();
@@ -431,6 +526,13 @@ classdef ConfigBuilder
                 guiData.problem.constraints = struct([]);
             end
 
+            % 派生表达式
+            if isfield(config.problem, 'derived') && ~isempty(config.problem.derived)
+                guiData.problem.derived = ConfigBuilder.ensureStructArray(config.problem.derived);
+            else
+                guiData.problem.derived = struct([]);
+            end
+
             % 评估器
             guiData.problem.evaluator = struct();
             if isfield(config.problem, 'evaluator')
@@ -444,10 +546,16 @@ classdef ConfigBuilder
                 else
                     guiData.problem.evaluator.economicParameters = struct();
                 end
+                if isfield(config.problem.evaluator, 'parameterUnits')
+                    guiData.problem.evaluator.parameterUnits = config.problem.evaluator.parameterUnits;
+                else
+                    guiData.problem.evaluator.parameterUnits = struct();
+                end
             else
                 guiData.problem.evaluator.type = 'MyCaseEvaluator';
                 guiData.problem.evaluator.timeout = 300;
                 guiData.problem.evaluator.economicParameters = struct();
+                guiData.problem.evaluator.parameterUnits = struct();
             end
 
             %% 仿真器部分
@@ -476,9 +584,12 @@ classdef ConfigBuilder
                     ConfigBuilder.getFieldOrDefault(config.simulator.nodeMapping, 'variables', struct()));
                 guiData.simulator.nodeMapping.results = ConfigBuilder.ensureNodeMappingStruct(...
                     ConfigBuilder.getFieldOrDefault(config.simulator.nodeMapping, 'results', struct()));
+                guiData.simulator.nodeMapping.resultUnits = ConfigBuilder.ensureNodeMappingStruct(...
+                    ConfigBuilder.getFieldOrDefault(config.simulator.nodeMapping, 'resultUnits', struct()));
             else
                 guiData.simulator.nodeMapping.variables = struct();
                 guiData.simulator.nodeMapping.results = struct();
+                guiData.simulator.nodeMapping.resultUnits = struct();
             end
 
             %% 算法部分
@@ -566,12 +677,14 @@ classdef ConfigBuilder
             defaultConfig.problem.variables = struct([]);
             defaultConfig.problem.objectives = struct([]);
             defaultConfig.problem.constraints = struct([]);
+            defaultConfig.problem.derived = struct([]);
 
             % 默认评估器
             defaultConfig.problem.evaluator = struct();
             defaultConfig.problem.evaluator.type = 'MyCaseEvaluator';
             defaultConfig.problem.evaluator.timeout = 300;
             defaultConfig.problem.evaluator.economicParameters = struct();
+            defaultConfig.problem.evaluator.parameterUnits = struct();
 
             %% 仿真器配置
             defaultConfig.simulator = struct();
@@ -588,6 +701,7 @@ classdef ConfigBuilder
             defaultConfig.simulator.nodeMapping = struct();
             defaultConfig.simulator.nodeMapping.variables = struct();
             defaultConfig.simulator.nodeMapping.results = struct();
+            defaultConfig.simulator.nodeMapping.resultUnits = struct();
 
             %% 算法配置
             defaultConfig.algorithm = struct();
@@ -617,16 +731,18 @@ classdef ConfigBuilder
             newVar.initialValue = (lb + ub) / 2;
         end
 
-        function newObj = createObjective(name, type, unit, desc, weight)
+        function newObj = createObjective(name, type, unit, desc, weight, expression)
             %% createObjective - 创建目标结构
             if nargin < 3, unit = ''; end
             if nargin < 4, desc = ''; end
             if nargin < 5, weight = 1.0; end
+            if nargin < 6, expression = ''; end
 
             newObj = struct();
             newObj.name = name;
             newObj.type = type;
             newObj.unit = unit;
+            newObj.expression = expression;
             newObj.description = desc;
             newObj.weight = weight;
         end
@@ -667,6 +783,85 @@ classdef ConfigBuilder
     end
 
     methods (Static, Access = private)
+
+        function values = parseVariableValues(rawValues, varType)
+            values = [];
+
+            if nargin < 2
+                varType = '';
+            end
+
+            if isempty(rawValues)
+                return;
+            end
+
+            if isstring(rawValues)
+                if isscalar(rawValues)
+                    rawValues = char(rawValues);
+                else
+                    rawValues = cellstr(rawValues);
+                end
+            end
+
+            if ischar(rawValues)
+                text = strtrim(rawValues);
+                if isempty(text)
+                    return;
+                end
+
+                if (startsWith(text, '[') && endsWith(text, ']')) || ...
+                   (startsWith(text, '{') && endsWith(text, '}'))
+                    text = strtrim(text(2:end-1));
+                end
+
+                tokens = regexp(text, '[^,;\s]+', 'match');
+                if isempty(tokens)
+                    return;
+                end
+
+                if ~strcmpi(varType, 'categorical')
+                    nums = str2double(tokens);
+                    if all(isfinite(nums))
+                        values = nums;
+                        return;
+                    end
+                end
+
+                values = tokens;
+            elseif isnumeric(rawValues)
+                values = rawValues;
+            elseif iscell(rawValues)
+                flat = rawValues(:)';
+                if all(cellfun(@(x) isnumeric(x) && isscalar(x) && isfinite(x), flat))
+                    values = cellfun(@(x) double(x), flat);
+                else
+                    cleaned = cell(size(flat));
+                    for i = 1:numel(flat)
+                        v = flat{i};
+                        if isstring(v)
+                            v = char(v);
+                        elseif isnumeric(v)
+                            v = num2str(v);
+                        elseif ~ischar(v)
+                            v = '';
+                        end
+                        cleaned{i} = v;
+                    end
+                    cleaned = cleaned(~cellfun(@isempty, cleaned));
+                    values = cleaned;
+                end
+            end
+
+            if strcmpi(varType, 'categorical')
+                if isnumeric(values)
+                    values = arrayfun(@(x) num2str(x), values(:)', 'UniformOutput', false);
+                elseif ischar(values)
+                    values = {values};
+                elseif iscell(values)
+                    values = cellfun(@(x) char(string(x)), values, 'UniformOutput', false);
+                end
+            end
+        end
 
         function val = ensureNumericStrict(val, fieldName)
             %% ensureNumericStrict - 确保值为数值类型（严格模式）

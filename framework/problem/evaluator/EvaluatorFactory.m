@@ -106,6 +106,13 @@ classdef EvaluatorFactory
 
                         evaluator = SimpleTemplateEvaluator(simulator, objectives, economicParams);
 
+                    case 'ExpressionEvaluator'
+                        cfg = struct();
+                        if isfield(additionalParams, 'config')
+                            cfg = additionalParams.config;
+                        end
+                        evaluator = ExpressionEvaluator(simulator, cfg);
+
                     otherwise
                         % 尝试动态创建自定义评估器
                         try
@@ -145,7 +152,7 @@ classdef EvaluatorFactory
                         if ismember(field, {'objectives', 'economicParams', ...
                                            'electricityPrice', 'operatingHours', ...
                                            'coolingWaterCost', 'productPrice', ...
-                                           'rawMaterialCost'})
+                                           'rawMaterialCost', 'config'})
                             continue;
                         end
 

@@ -1,0 +1,213 @@
+{
+  "problem": {
+    "name": "BraytonCycle_Optimization",
+    "description": "布雷顿循环多目标优化 - 最大化热效率和净输出功率",
+    "variables": [
+      {
+        "name": "P_HP_in",
+        "description": "高压透平入口压力",
+        "type": "continuous",
+        "lowerBound": 17,
+        "upperBound": 35,
+        "unit": "MPa",
+        "initialValue": 26
+      },
+      {
+        "name": "T_LP_in",
+        "description": "低压透平入口温度",
+        "type": "continuous",
+        "lowerBound": 500,
+        "upperBound": 600,
+        "unit": "C",
+        "initialValue": 550
+      },
+      {
+        "name": "split_ratio",
+        "description": "分流比",
+        "type": "continuous",
+        "lowerBound": 0.2,
+        "upperBound": 0.5,
+        "unit": "-",
+        "initialValue": 0.35
+      },
+      {
+        "name": "P_LP_in",
+        "description": "低压透平入口压力",
+        "type": "continuous",
+        "lowerBound": 8,
+        "upperBound": 16,
+        "unit": "MPa",
+        "initialValue": 12
+      },
+      {
+        "name": "P_inter",
+        "description": "中间压力",
+        "type": "continuous",
+        "lowerBound": 8,
+        "upperBound": 16,
+        "unit": "MPa",
+        "initialValue": 12
+      },
+      {
+        "name": "T_comp_in",
+        "description": "压缩机入口温度",
+        "type": "continuous",
+        "lowerBound": 32,
+        "upperBound": 46,
+        "unit": "C",
+        "initialValue": 39
+      }
+    ],
+    "objectives": [
+      {
+        "name": "thermal_efficiency",
+        "description": "热效率",
+        "type": "maximize",
+        "expression": "result.W_net / result.Q_in * 100",
+        "unit": "%",
+        "weight": 1.0
+      },
+      {
+        "name": "net_power",
+        "description": "净输出功率",
+        "type": "maximize",
+        "expression": "result.W_net",
+        "unit": "kW",
+        "weight": 1.0
+      }
+    ],
+    "derived": [
+      {
+        "name": "power_ratio",
+        "expression": "result.W_turbine / result.W_compressor",
+        "unit": "-",
+        "description": "功率比(透平功率/压缩机功率)"
+      },
+      {
+        "name": "specific_work",
+        "expression": "result.W_net / result.mass_flow",
+        "unit": "kJ/kg",
+        "description": "比功"
+      }
+    ],
+    "constraints": [
+      {
+        "name": "min_efficiency",
+        "type": "inequality",
+        "expression": "result.W_net / result.Q_in >= 0.30",
+        "unit": "-",
+        "description": "最小热效率30%"
+      },
+      {
+        "name": "min_power",
+        "type": "inequality",
+        "expression": "result.W_net >= 1000",
+        "unit": "kW",
+        "description": "最小净输出功率1000kW"
+      },
+      {
+        "name": "pressure_consistency",
+        "type": "inequality",
+        "expression": "x.P_HP_in >= x.P_LP_in",
+        "unit": "MPa",
+        "description": "高压透平入口压力应大于低压透平入口压力"
+      },
+      {
+        "name": "inter_pressure_range",
+        "type": "inequality",
+        "expression": "x.P_inter >= x.P_LP_in && x.P_inter <= x.P_HP_in",
+        "unit": "MPa",
+        "description": "中间压力应在低压和高压之间"
+      }
+    ],
+    "evaluator": {
+      "type": "BraytonCycleEvaluator",
+      "timeout": 300,
+      "economicParameters": {
+        "interestRate": 0.12,
+        "systemLifetime": 20,
+        "maintenanceFactor": 0.06,
+        "operatingHours": 7200,
+        "electricityPrice": 0.1
+      }
+    }
+  },
+  "simulator": {
+    "type": "Aspen",
+    "settings": {
+      "modelPath": "中间冷却再热布雷顿循环.bkp",
+      "timeout": 300,
+      "visible": false,
+      "autoSave": false,
+      "maxRetries": 3,
+      "retryDelay": 2
+    },
+    "nodeMapping": {
+      "variables": {
+        "P_HP_in": "\\Data\\Streams\\7\\Input\\PRES\\MIXED",
+        "T_LP_in": "\\Data\\Streams\\7\\Input\\TEMP\\MIXED",
+        "split_ratio": "\\Data\\Blocks\\F\\Input\\FRAC\\10-2",
+        "P_LP_in": "\\Data\\Blocks\\T\\Input\\PRES",
+        "P_inter": "\\Data\\Blocks\\MC1\\Input\\PRES",
+        "T_comp_in": "\\Data\\Blocks\\PRE\\Input\\VALUE"
+      },
+      "results": {
+        "W_turbine_HP": "\\Data\\Blocks\\T\\Output\\WNET",
+        "W_turbine_LP": "\\Data\\Blocks\\LT\\Output\\WNET",
+        "W_compressor_1": "\\Data\\Blocks\\MC1\\Output\\WNET",
+        "W_compressor_2": "\\Data\\Blocks\\MC2\\Output\\WNET",
+        "W_compressor_RC": "\\Data\\Blocks\\RC\\Output\\WNET",
+        "Q_heater_1": "\\Data\\Blocks\\HEATER\\Output\\HX_DUTY",
+        "Q_heater_2": "\\Data\\Blocks\\HEATER2\\Output\\HX_DUTY",
+        "mass_flow": "\\Data\\Streams\\7\\Output\\MASSFLOW\\MIXED",
+        "T_HP_out": "\\Data\\Streams\\8\\Input\\TEMP\\MIXED",
+        "P_HP_out": "\\Data\\Streams\\8\\Input\\PRES\\MIXED"
+      },
+      "resultUnits": {
+        "W_turbine_HP": "kW",
+        "W_turbine_LP": "kW",
+        "W_compressor_1": "kW",
+        "W_compressor_2": "kW",
+        "W_compressor_RC": "kW",
+        "Q_heater_1": "kW",
+        "Q_heater_2": "kW",
+        "mass_flow": "kg/s",
+        "T_HP_out": "C",
+        "P_HP_out": "MPa"
+      }
+    }
+  },
+  "algorithm": {
+    "type": "NSGA-II",
+    "parameters": {
+      "populationSize": 50,
+      "maxGenerations": 30,
+      "crossoverRate": 0.9,
+      "mutationRate": 1.0,
+      "crossoverDistIndex": 20,
+      "mutationDistIndex": 20
+    }
+  },
+  "_comments": {
+    "note": "布雷顿循环多目标优化配置",
+    "usage": "运行: run_brayton_optimization('brayton_config.json')",
+    "objectives": [
+      "thermal_efficiency: 最大化热效率 (W_net/Q_in)",
+      "net_power: 最大化净输出功率"
+    ],
+    "variables": [
+      "P_HP_in: 高压透平入口压力 [17-35 MPa]",
+      "T_LP_in: 低压透平入口温度 [500-600 °C]",
+      "split_ratio: 分流比 [0.2-0.5]",
+      "P_LP_in: 低压透平入口压力 [8-16 MPa]",
+      "P_inter: 中间压力 [8-16 MPa]",
+      "T_comp_in: 压缩机入口温度 [32-46 °C]"
+    ],
+    "constraints": [
+      "最小热效率: 30%",
+      "最小净功率: 1000 kW",
+      "压力一致性: P_HP_in >= P_LP_in",
+      "中间压力范围: P_LP_in <= P_inter <= P_HP_in"
+    ]
+  }
+}

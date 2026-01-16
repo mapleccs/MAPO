@@ -503,20 +503,71 @@ classdef OptimizationProblem < handle
 
                 % 构建参数
                 args = {};
+                parsed = struct('lowerBound', -inf, 'upperBound', inf, 'target', [], 'isEquality', false);
+                parsedOk = false;
+                hasExplicitBounds = isfield(conConfig, 'lowerBound') || isfield(conConfig, 'upperBound') || ...
+                                    isfield(conConfig, 'target');
 
-                if strcmp(conConfig.type, 'equality')
-                    if isfield(conConfig, 'target')
-                        args = [args, {'Target', conConfig.target}];
+                if ~hasExplicitBounds && isfield(conConfig, 'expression')
+                    [parsed, parsedOk] = obj.parseConstraintExpression(conConfig.expression);
+                    if ~parsedOk
+                        warning('OptimizationProblem:ConstraintExpression', ...
+                            'Unable to parse constraint expression: %s', conConfig.expression);
                     end
+                end
+
+                if strcmpi(conConfig.type, 'equality')
+                    target = [];
+                    if isfield(conConfig, 'target')
+                        target = conConfig.target;
+                    elseif parsedOk && parsed.isEquality
+                        target = parsed.target;
+                    elseif parsedOk && ~parsed.isEquality
+                        if isfinite(parsed.lowerBound) && isfinite(parsed.upperBound) && ...
+                                parsed.lowerBound == parsed.upperBound
+                            target = parsed.lowerBound;
+                        elseif isfinite(parsed.lowerBound)
+                            target = parsed.lowerBound;
+                        elseif isfinite(parsed.upperBound)
+                            target = parsed.upperBound;
+                        end
+                    end
+                    if isempty(target)
+                        target = 0;
+                    end
+                    args = [args, {'Target', target}];
                     if isfield(conConfig, 'tolerance')
                         args = [args, {'Tolerance', conConfig.tolerance}];
                     end
                 else % inequality
+                    lowerBound = [];
+                    upperBound = [];
                     if isfield(conConfig, 'lowerBound')
-                        args = [args, {'LowerBound', conConfig.lowerBound}];
+                        lowerBound = conConfig.lowerBound;
                     end
                     if isfield(conConfig, 'upperBound')
-                        args = [args, {'UpperBound', conConfig.upperBound}];
+                        upperBound = conConfig.upperBound;
+                    end
+
+                    if isempty(lowerBound) && isempty(upperBound) && parsedOk
+                        if parsed.isEquality
+                            lowerBound = parsed.target;
+                            upperBound = parsed.target;
+                        else
+                            if isfinite(parsed.lowerBound)
+                                lowerBound = parsed.lowerBound;
+                            end
+                            if isfinite(parsed.upperBound)
+                                upperBound = parsed.upperBound;
+                            end
+                        end
+                    end
+
+                    if ~isempty(lowerBound) && isfinite(lowerBound)
+                        args = [args, {'LowerBound', lowerBound}];
+                    end
+                    if ~isempty(upperBound) && isfinite(upperBound)
+                        args = [args, {'UpperBound', upperBound}];
                     end
                 end
 
@@ -527,6 +578,74 @@ classdef OptimizationProblem < handle
                 % 创建约束
                 constraint = Constraint(conConfig.name, conConfig.type, args{:});
                 obj.addConstraint(constraint);
+            end
+        end
+
+        function [parsed, ok] = parseConstraintExpression(~, expression)
+            parsed = struct('lowerBound', -inf, 'upperBound', inf, 'target', [], 'isEquality', false);
+            ok = false;
+
+            if isempty(expression)
+                return;
+            end
+
+            try
+                expr = char(string(expression));
+            catch
+                expr = '';
+            end
+
+            expr = strtrim(expr);
+            if isempty(expr)
+                return;
+            end
+
+            tokens = regexp(expr, '^\s*(?<lhs>[^<>=]+?)\s*(?<op><=|>=|==|=|<|>)\s*(?<rhs>.+)\s*$', 'names');
+            if isempty(tokens)
+                return;
+            end
+
+            lhs = strtrim(tokens.lhs);
+            rhs = strtrim(tokens.rhs);
+            op = tokens.op;
+
+            lhsVal = str2double(lhs);
+            rhsVal = str2double(rhs);
+            lhsIsNum = isfinite(lhsVal);
+            rhsIsNum = isfinite(rhsVal);
+
+            if strcmp(op, '=') || strcmp(op, '==')
+                parsed.isEquality = true;
+                if lhsIsNum && ~rhsIsNum
+                    parsed.target = lhsVal;
+                    ok = true;
+                elseif rhsIsNum && ~lhsIsNum
+                    parsed.target = rhsVal;
+                    ok = true;
+                end
+                return;
+            end
+
+            if strcmp(op, '<=') || strcmp(op, '<')
+                if rhsIsNum && ~lhsIsNum
+                    parsed.upperBound = rhsVal;
+                    ok = true;
+                elseif lhsIsNum && ~rhsIsNum
+                    parsed.lowerBound = lhsVal;
+                    ok = true;
+                end
+                return;
+            end
+
+            if strcmp(op, '>=') || strcmp(op, '>')
+                if rhsIsNum && ~lhsIsNum
+                    parsed.lowerBound = rhsVal;
+                    ok = true;
+                elseif lhsIsNum && ~rhsIsNum
+                    parsed.upperBound = lhsVal;
+                    ok = true;
+                end
+                return;
             end
         end
     end

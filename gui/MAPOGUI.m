@@ -23,6 +23,9 @@ classdef MAPOGUI < handle
         ObjectivesTable             % 优化目标表格
         AddObjectiveButton          % 添加目标按钮
         DeleteObjectiveButton       % 删除目标按钮
+        DerivedTable                % 派生目标表格
+        AddDerivedButton            % 添加派生目标按钮
+        DeleteDerivedButton         % 删除派生目标按钮
         ConstraintsTable            % 约束条件表格
         AddConstraintButton         % 添加约束按钮
         DeleteConstraintButton      % 删除约束按钮
@@ -32,10 +35,15 @@ classdef MAPOGUI < handle
         EvaluatorTypeDropDown           % 评估器类型下拉框（可编辑）
         EvaluatorRefreshButton          % 刷新评估器列表
         EvaluatorTimeoutSpinner         % 评估器超时时间选择器
+        EvaluatorModeDropDown           % 评估器参数模式（简易/高级）
+        EvaluatorParamsGrid             % 评估器参数高级面板容器
         EvaluatorParamsTable            % 评估器参数表（写入 economicParameters）
         AddEvaluatorParamButton         % 添加参数
         DeleteEvaluatorParamButton      % 删除参数
         AutoFillEvaluatorParamsButton   % 推荐参数填充
+        EvaluatorSimplePanel            % 评估器简易参数面板
+        EvaluatorSimpleGrid             % 评估器简易参数布局
+        evaluatorParamControls          % 简易模式参数控件缓存
         EvaluatorInfoArea               % 评估器说明/状态
 
         % Tab 3: 仿真器配置
@@ -221,10 +229,10 @@ classdef MAPOGUI < handle
 
             % 创建可滚动的网格布局
             % 使用固定像素高度，总高度超过窗口高度会自动显示滚动条
-            gridLayout = uigridlayout(app.ProblemTab, [4, 1]);
+            gridLayout = uigridlayout(app.ProblemTab, [5, 1]);
             gridLayout.ColumnWidth = {'1x'};
             % 每个面板给予充足空间，总高度约 1150px，超过窗口高度（约 750px）
-            gridLayout.RowHeight = {180, 350, 300, 280};
+            gridLayout.RowHeight = {180, 350, 300, 240, 280};
             gridLayout.Padding = [20, 20, 20, 20];
             gridLayout.RowSpacing = 15;
             gridLayout.Scrollable = 'on';  % 启用垂直滚动条
@@ -238,8 +246,11 @@ classdef MAPOGUI < handle
             % Panel 3: 优化目标
             createObjectivesPanel(app, gridLayout, 3);
 
-            % Panel 4: 约束条件
-            createConstraintsPanel(app, gridLayout, 4);
+            % Panel 4: 派生目标配置
+            createDerivedPanel(app, gridLayout, 4);
+
+            % Panel 5: 约束条件
+            createConstraintsPanel(app, gridLayout, 5);
         end
 
         function createBasicInfoPanel(app, parent, row)
@@ -329,13 +340,13 @@ classdef MAPOGUI < handle
             app.VariablesTable = uitable(innerGrid);
             app.VariablesTable.Layout.Row = 2;
             app.VariablesTable.Layout.Column = 1;
-            app.VariablesTable.ColumnName = {'变量名', '类型', '下界', '上界', '单位', '描述'};
-            app.VariablesTable.ColumnEditable = [true, true, true, true, true, true];
-            app.VariablesTable.ColumnFormat = {'char', {'continuous', 'integer', 'discrete'}, ...
-                                                'numeric', 'numeric', 'char', 'char'};
+            app.VariablesTable.ColumnName = {'变量名', '类型', '下界', '上界', '值集', '单位', '描述'};
+            app.VariablesTable.ColumnEditable = [true, true, true, true, true, true, true];
+            app.VariablesTable.ColumnFormat = {'char', {'continuous', 'integer', 'discrete', 'categorical'}, ...
+                                                'numeric', 'numeric', 'char', 'char', 'char'};
             % 让表格列宽稍微智能一点，描述列宽一些
-            app.VariablesTable.ColumnWidth = {150, 100, 80, 80, 80, 'auto'}; 
-            app.VariablesTable.Data = cell(0, 6);
+            app.VariablesTable.ColumnWidth = {150, 110, 80, 80, 140, 80, 'auto'}; 
+            app.VariablesTable.Data = cell(0, 7);
             app.VariablesTable.RowName = 'numbered';
             app.VariablesTable.CellEditCallback = @(src, event) updateConfigStatus(app);
         end
@@ -382,13 +393,64 @@ classdef MAPOGUI < handle
             app.ObjectivesTable = uitable(innerGrid);
             app.ObjectivesTable.Layout.Row = 2;
             app.ObjectivesTable.Layout.Column = 1;
-            app.ObjectivesTable.ColumnName = {'目标名', '类型', '权重', '描述'};
-            app.ObjectivesTable.ColumnEditable = [true, true, true, true];
-            app.ObjectivesTable.ColumnFormat = {'char', {'minimize', 'maximize'}, 'numeric', 'char'};
-            app.ObjectivesTable.ColumnWidth = {200, 100, 80, 'auto'};
-            app.ObjectivesTable.Data = cell(0, 4);
+            app.ObjectivesTable.ColumnName = {'目标名', '类型', '表达式', '单位', '权重', '描述'};
+            app.ObjectivesTable.ColumnEditable = [true, true, true, true, true, true];
+            app.ObjectivesTable.ColumnFormat = {'char', {'minimize', 'maximize'}, 'char', 'char', 'numeric', 'char'};
+            app.ObjectivesTable.ColumnWidth = {160, 90, 260, 80, 70, 'auto'};
+            app.ObjectivesTable.Data = cell(0, 6);
             app.ObjectivesTable.RowName = 'numbered';
             app.ObjectivesTable.CellEditCallback = @(src, event) updateConfigStatus(app);
+        end
+
+        function createDerivedPanel(app, parent, row)
+            % 创建派生目标面板
+            panel = uipanel(parent);
+            panel.Title = '派生目标配置';
+            panel.Layout.Row = row;
+            panel.Layout.Column = 1;
+            panel.FontWeight = 'bold';
+            panel.BackgroundColor = [0.95, 0.95, 1];
+
+            innerGrid = uigridlayout(panel);
+            innerGrid.ColumnWidth = {'1x'};
+            innerGrid.RowHeight = {35, '1x'};
+            innerGrid.Padding = [10, 5, 10, 10];
+            innerGrid.RowSpacing = 5;
+
+            % 按钮区域
+            btnGrid = uigridlayout(innerGrid);
+            btnGrid.Layout.Row = 1;
+            btnGrid.Layout.Column = 1;
+            btnGrid.RowHeight = {'1x'};
+            btnGrid.ColumnWidth = {110, 110, '1x'};
+            btnGrid.Padding = [0,0,0,0];
+            btnGrid.BackgroundColor = [0.95, 0.95, 1];
+
+            app.AddDerivedButton = uibutton(btnGrid, 'push');
+            app.AddDerivedButton.Text = '+ 添加派生目标';
+            app.AddDerivedButton.BackgroundColor = [0.2, 0.7, 0.3];
+            app.AddDerivedButton.FontColor = [1, 1, 1];
+            app.AddDerivedButton.FontWeight = 'bold';
+            app.AddDerivedButton.ButtonPushedFcn = @(src, event) addDerivedButtonPushed(app);
+
+            app.DeleteDerivedButton = uibutton(btnGrid, 'push');
+            app.DeleteDerivedButton.Text = '- 删除派生目标';
+            app.DeleteDerivedButton.BackgroundColor = [0.8, 0.2, 0.2];
+            app.DeleteDerivedButton.FontColor = [1, 1, 1];
+            app.DeleteDerivedButton.FontWeight = 'bold';
+            app.DeleteDerivedButton.ButtonPushedFcn = @(src, event) deleteDerivedButtonPushed(app);
+
+            % 表格
+            app.DerivedTable = uitable(innerGrid);
+            app.DerivedTable.Layout.Row = 2;
+            app.DerivedTable.Layout.Column = 1;
+            app.DerivedTable.ColumnName = {'派生名', '计算式', '单位', '描述'};
+            app.DerivedTable.ColumnEditable = [true, true, true, true];
+            app.DerivedTable.ColumnFormat = {'char', 'char', 'char', 'char'};
+            app.DerivedTable.ColumnWidth = {150, 260, 80, 'auto'};
+            app.DerivedTable.Data = cell(0, 4);
+            app.DerivedTable.RowName = 'numbered';
+            app.DerivedTable.CellEditCallback = @(src, event) updateConfigStatus(app);
         end
 
         function createConstraintsPanel(app, parent, row)
@@ -433,11 +495,11 @@ classdef MAPOGUI < handle
             app.ConstraintsTable = uitable(innerGrid);
             app.ConstraintsTable.Layout.Row = 2;
             app.ConstraintsTable.Layout.Column = 1;
-            app.ConstraintsTable.ColumnName = {'约束名', '类型', '表达式', '描述'};
-            app.ConstraintsTable.ColumnEditable = [true, true, true, true];
-            app.ConstraintsTable.ColumnFormat = {'char', {'inequality', 'equality'}, 'char', 'char'};
-            app.ConstraintsTable.ColumnWidth = {150, 100, 300, 'auto'};
-            app.ConstraintsTable.Data = cell(0, 4);
+            app.ConstraintsTable.ColumnName = {'约束名', '类型', '表达式', '容差', '描述'};
+            app.ConstraintsTable.ColumnEditable = [true, true, true, true, true];
+            app.ConstraintsTable.ColumnFormat = {'char', {'inequality', 'equality'}, 'char', 'char', 'char'};
+            app.ConstraintsTable.ColumnWidth = {140, 90, 260, 80, 'auto'};
+            app.ConstraintsTable.Data = cell(0, 5);
             app.ConstraintsTable.RowName = 'numbered';
             app.ConstraintsTable.CellEditCallback = @(src, event) updateConfigStatus(app);
         end
@@ -463,8 +525,8 @@ classdef MAPOGUI < handle
             settingsPanel.Layout.Row = 1;
             settingsPanel.Layout.Column = 1;
 
-            settingsGrid = uigridlayout(settingsPanel, [2, 3]);
-            settingsGrid.RowHeight = {35, 35};
+            settingsGrid = uigridlayout(settingsPanel, [3, 3]);
+            settingsGrid.RowHeight = {35, 35, 35};
             settingsGrid.ColumnWidth = {110, '1x', 110};
             settingsGrid.Padding = [15, 10, 15, 10];
             settingsGrid.RowSpacing = 10;
@@ -479,14 +541,27 @@ classdef MAPOGUI < handle
             app.EvaluatorTypeDropDown = uidropdown(settingsGrid);
             app.EvaluatorTypeDropDown.Layout.Row = 1;
             app.EvaluatorTypeDropDown.Layout.Column = 2;
-            app.EvaluatorTypeDropDown.Items = getAvailableEvaluatorTypes(app);
-            if isempty(app.EvaluatorTypeDropDown.Items)
-                app.EvaluatorTypeDropDown.Items = {'MyCaseEvaluator'};
+            [evalItems, evalItemsData] = getEvaluatorDropdownItems(app);
+            if isempty(evalItems)
+                evalItems = {'MyCaseEvaluator'};
+                evalItemsData = {};
             end
-            if ismember('ORCEvaluator', app.EvaluatorTypeDropDown.Items)
-                app.EvaluatorTypeDropDown.Value = 'ORCEvaluator';
+            app.EvaluatorTypeDropDown.Items = evalItems;
+            if ~isempty(evalItemsData)
+                app.EvaluatorTypeDropDown.ItemsData = evalItemsData;
+            end
+            if ~isempty(evalItemsData)
+                if ismember('ORCEvaluator', evalItemsData)
+                    app.EvaluatorTypeDropDown.Value = 'ORCEvaluator';
+                else
+                    app.EvaluatorTypeDropDown.Value = evalItemsData{1};
+                end
             else
-                app.EvaluatorTypeDropDown.Value = app.EvaluatorTypeDropDown.Items{1};
+                if ismember('ORCEvaluator', evalItems)
+                    app.EvaluatorTypeDropDown.Value = 'ORCEvaluator';
+                else
+                    app.EvaluatorTypeDropDown.Value = evalItems{1};
+                end
             end
             app.EvaluatorTypeDropDown.Editable = 'on';
             app.EvaluatorTypeDropDown.Tooltip = '评估器类名（支持自定义），例如: ORCEvaluator, MyCaseEvaluator';
@@ -518,6 +593,21 @@ classdef MAPOGUI < handle
             hintLabel.Layout.Row = 2;
             hintLabel.Layout.Column = 3;
 
+            modeLabel = uilabel(settingsGrid);
+            modeLabel.Text = '参数模式';
+            modeLabel.FontWeight = 'bold';
+            modeLabel.Layout.Row = 3;
+            modeLabel.Layout.Column = 1;
+
+            app.EvaluatorModeDropDown = uidropdown(settingsGrid);
+            app.EvaluatorModeDropDown.Layout.Row = 3;
+            app.EvaluatorModeDropDown.Layout.Column = 2;
+            app.EvaluatorModeDropDown.Items = {'简易模式', '高级模式'};
+            app.EvaluatorModeDropDown.ItemsData = {'simple', 'advanced'};
+            app.EvaluatorModeDropDown.Value = 'simple';
+            app.EvaluatorModeDropDown.Tooltip = '简易模式使用元数据表单，高级模式可手工编辑参数表';
+            app.EvaluatorModeDropDown.ValueChangedFcn = @(src, event) evaluatorModeChanged(app);
+
             %% 左下：评估器参数表
             paramsPanel = uipanel(outerGrid);
             paramsPanel.Title = '评估器参数';
@@ -526,13 +616,22 @@ classdef MAPOGUI < handle
             paramsPanel.Layout.Row = 2;
             paramsPanel.Layout.Column = 1;
 
-            paramsGrid = uigridlayout(paramsPanel, [2, 1]);
-            paramsGrid.RowHeight = {35, '1x'};
-            paramsGrid.ColumnWidth = {'1x'};
-            paramsGrid.Padding = [15, 10, 15, 10];
-            paramsGrid.RowSpacing = 10;
+            paramsContainer = uigridlayout(paramsPanel, [1, 1]);
+            paramsContainer.RowHeight = {'1x'};
+            paramsContainer.ColumnWidth = {'1x'};
+            paramsContainer.Padding = [15, 10, 15, 10];
+            paramsContainer.RowSpacing = 0;
+            paramsContainer.ColumnSpacing = 0;
 
-            controlGrid = uigridlayout(paramsGrid, [1, 4]);
+            app.EvaluatorParamsGrid = uigridlayout(paramsContainer, [2, 1]);
+            app.EvaluatorParamsGrid.RowHeight = {35, '1x'};
+            app.EvaluatorParamsGrid.ColumnWidth = {'1x'};
+            app.EvaluatorParamsGrid.Padding = [0, 0, 0, 0];
+            app.EvaluatorParamsGrid.RowSpacing = 10;
+            app.EvaluatorParamsGrid.Layout.Row = 1;
+            app.EvaluatorParamsGrid.Layout.Column = 1;
+
+            controlGrid = uigridlayout(app.EvaluatorParamsGrid, [1, 4]);
             controlGrid.RowHeight = {'1x'};
             controlGrid.ColumnWidth = {'1x', 'fit', 'fit', 'fit'};
             controlGrid.Padding = [0, 0, 0, 0];
@@ -562,16 +661,27 @@ classdef MAPOGUI < handle
             app.AutoFillEvaluatorParamsButton.Layout.Column = 4;
             app.AutoFillEvaluatorParamsButton.ButtonPushedFcn = @(src, event) autoFillEvaluatorParamsButtonPushed(app);
 
-            app.EvaluatorParamsTable = uitable(paramsGrid);
+            app.EvaluatorParamsTable = uitable(app.EvaluatorParamsGrid);
             app.EvaluatorParamsTable.Layout.Row = 2;
             app.EvaluatorParamsTable.Layout.Column = 1;
-            app.EvaluatorParamsTable.ColumnName = {'参数名', '值'};
-            app.EvaluatorParamsTable.ColumnEditable = [true, true];
-            app.EvaluatorParamsTable.ColumnFormat = {'char', 'numeric'};
-            app.EvaluatorParamsTable.ColumnWidth = {200, 'auto'};
-            app.EvaluatorParamsTable.Data = cell(0, 2);
+            app.EvaluatorParamsTable.ColumnName = {'参数名', '值', '说明'};
+            app.EvaluatorParamsTable.ColumnEditable = [true, true, true];
+            app.EvaluatorParamsTable.ColumnFormat = {'char', 'numeric', 'char'};
+            app.EvaluatorParamsTable.ColumnWidth = {160, 120, 'auto'};
+            app.EvaluatorParamsTable.Data = cell(0, 3);
             app.EvaluatorParamsTable.RowName = 'numbered';
             app.EvaluatorParamsTable.CellEditCallback = @(src, event) updateConfigStatus(app);
+
+            app.EvaluatorSimplePanel = uipanel(paramsContainer);
+            app.EvaluatorSimplePanel.Layout.Row = 1;
+            app.EvaluatorSimplePanel.Layout.Column = 1;
+            app.EvaluatorSimplePanel.BorderType = 'none';
+            app.EvaluatorSimplePanel.BackgroundColor = [0.97, 0.97, 0.97];
+
+            app.EvaluatorSimpleGrid = uigridlayout(app.EvaluatorSimplePanel, [1, 1]);
+            app.EvaluatorSimpleGrid.RowHeight = {'1x'};
+            app.EvaluatorSimpleGrid.ColumnWidth = {'1x'};
+            app.EvaluatorSimpleGrid.Padding = [0, 0, 0, 0];
 
             %% 右侧：说明/状态
             infoPanel = uipanel(outerGrid);
@@ -590,6 +700,9 @@ classdef MAPOGUI < handle
             app.EvaluatorInfoArea.Layout.Row = 1;
             app.EvaluatorInfoArea.Layout.Column = 1;
             app.EvaluatorInfoArea.Editable = 'off';
+
+            app.evaluatorParamControls = struct('name', {}, 'control', {}, 'type', {}, 'meta', {});
+            applyEvaluatorMode(app);
 
             updateEvaluatorInfo(app);
         end
@@ -808,11 +921,11 @@ classdef MAPOGUI < handle
             app.ResMappingTable = uitable(resGrid);
             app.ResMappingTable.Layout.Row = 2;
             app.ResMappingTable.Layout.Column = 1;
-            app.ResMappingTable.ColumnName = {'结果名', '节点路径'};
-            app.ResMappingTable.ColumnEditable = [true, true];
-            app.ResMappingTable.ColumnFormat = {'char', 'char'};
-            app.ResMappingTable.ColumnWidth = {140, 'auto'};
-            app.ResMappingTable.Data = cell(0, 2);
+            app.ResMappingTable.ColumnName = {'目标名', '节点路径', '说明'};
+            app.ResMappingTable.ColumnEditable = [true, true, true];
+            app.ResMappingTable.ColumnFormat = {'char', 'char', 'char'};
+            app.ResMappingTable.ColumnWidth = {140, 'auto', 80};
+            app.ResMappingTable.Data = cell(0, 3);
             app.ResMappingTable.RowName = 'numbered';
             app.ResMappingTable.CellEditCallback = @(src, event) updateConfigStatus(app);
             refreshResMappingDropdown(app);
@@ -1442,13 +1555,17 @@ classdef MAPOGUI < handle
             app.optimizationStartTime = [];
 
             % 初始化表格数据（防御：确保为 cell）
-            app.VariablesTable.Data = cell(0, 6);
-            app.ObjectivesTable.Data = cell(0, 4);
-            app.ConstraintsTable.Data = cell(0, 4);
-            app.EvaluatorParamsTable.Data = cell(0, 2);
+            app.VariablesTable.Data = cell(0, 7);
+            app.ObjectivesTable.Data = cell(0, 6);
+            app.DerivedTable.Data = cell(0, 4);
+            app.ConstraintsTable.Data = cell(0, 5);
+            app.EvaluatorParamsTable.Data = cell(0, 3);
             app.VarMappingTable.Data = cell(0, 2);
-            app.ResMappingTable.Data = cell(0, 2);
+            app.ResMappingTable.Data = cell(0, 3);
             app.ResultsTable.Data = cell(0, 0);
+
+            app.evaluatorParamControls = struct('name', {}, 'control', {}, 'type', {}, 'meta', {});
+            applyEvaluatorMode(app);
 
             % 算法面板默认可见性
             app.NSGAIIPanel.Visible = 'on';
@@ -1467,7 +1584,7 @@ classdef MAPOGUI < handle
 
         function addVariableButtonPushed(app)
             currentData = app.VariablesTable.Data;
-            newRow = {'Var1', 'continuous', 0, 100, '', ''};
+            newRow = {'Var1', 'continuous', 0, 100, '', '', ''};
             app.VariablesTable.Data = [currentData; newRow];
             updateStatus(app, '已添加变量');
             logMessage(app, '添加新变量');
@@ -1493,7 +1610,7 @@ classdef MAPOGUI < handle
 
         function addObjectiveButtonPushed(app)
             currentData = app.ObjectivesTable.Data;
-            newRow = {'Obj1', 'minimize', 1.0, ''};
+            newRow = {'Obj1', 'minimize', '', '', 1.0, ''};
             app.ObjectivesTable.Data = [currentData; newRow];
             updateStatus(app, '已添加目标');
             logMessage(app, '添加新目标');
@@ -1517,12 +1634,39 @@ classdef MAPOGUI < handle
             updateConfigStatus(app);
         end
 
+        function addDerivedButtonPushed(app)
+            currentData = app.DerivedTable.Data;
+            newRow = {'D1', '', '', ''};
+            app.DerivedTable.Data = [currentData; newRow];
+            updateStatus(app, '已添加派生目标');
+            logMessage(app, '已添加派生目标');
+            updateConfigStatus(app);
+        end
+
+        function deleteDerivedButtonPushed(app)
+            selection = app.DerivedTable.Selection;
+            if isempty(selection)
+                uialert(app.UIFigure, '请先选择要删除的派生目标行', '未选择行', 'Icon', 'warning');
+                return;
+            end
+
+            currentData = app.DerivedTable.Data;
+            rowsToDelete = unique(selection(:, 1));
+            currentData(rowsToDelete, :) = [];
+            app.DerivedTable.Data = currentData;
+
+            updateStatus(app, '已删除派生目标');
+            logMessage(app, sprintf('已删除 %d 个派生目标', length(rowsToDelete)));
+            updateConfigStatus(app);
+        end
+
         function addConstraintButtonPushed(app)
             currentData = app.ConstraintsTable.Data;
-            newRow = {'Con1', 'inequality', 'x <= 100', ''};
+            newRow = {'Con1', 'inequality', 'x <= 100', '', ''};
             app.ConstraintsTable.Data = [currentData; newRow];
             updateStatus(app, '已添加约束');
             logMessage(app, '添加新约束');
+            updateConfigStatus(app);
         end
 
         function deleteConstraintButtonPushed(app)
@@ -1546,22 +1690,41 @@ classdef MAPOGUI < handle
         %% ========================================
 
         function evaluatorTypeChanged(app)
+            params = getEvaluatorParamsFromActiveView(app);
+            buildEvaluatorSimpleForm(app);
+            fillSimpleFormFromParams(app, params);
             updateEvaluatorInfo(app);
+            updateConfigStatus(app);
+        end
+
+        function evaluatorModeChanged(app)
+            params = getEvaluatorParamsFromActiveView(app);
+            applyEvaluatorMode(app, params);
             updateConfigStatus(app);
         end
 
         function refreshEvaluatorList(app)
             currentValue = char(string(app.EvaluatorTypeDropDown.Value));
-            types = getAvailableEvaluatorTypes(app);
-            if isempty(types)
-                types = {'MyCaseEvaluator'};
+            [items, itemsData] = getEvaluatorDropdownItems(app);
+            if isempty(items)
+                items = {'MyCaseEvaluator'};
+                itemsData = {};
             end
 
-            if ~ismember(currentValue, types)
-                types{end+1} = currentValue; %#ok<AGROW>
+            if ~isempty(itemsData)
+                if ~ismember(currentValue, itemsData)
+                    itemsData{end+1} = currentValue; %#ok<AGROW>
+                    items{end+1} = currentValue; %#ok<AGROW>
+                end
+                app.EvaluatorTypeDropDown.Items = items;
+                app.EvaluatorTypeDropDown.ItemsData = itemsData;
+            else
+                if ~ismember(currentValue, items)
+                    items{end+1} = currentValue; %#ok<AGROW>
+                end
+                app.EvaluatorTypeDropDown.Items = items;
+                app.EvaluatorTypeDropDown.ItemsData = {};
             end
-
-            app.EvaluatorTypeDropDown.Items = types;
             app.EvaluatorTypeDropDown.Value = currentValue;
             updateEvaluatorInfo(app);
             updateConfigStatus(app);
@@ -1571,9 +1734,9 @@ classdef MAPOGUI < handle
         function addEvaluatorParamButtonPushed(app)
             currentData = app.EvaluatorParamsTable.Data;
             if isempty(currentData)
-                currentData = cell(0, 2);
+                currentData = cell(0, 3);
             end
-            newRow = {'', 0};
+            newRow = {'', 0, ''};
             app.EvaluatorParamsTable.Data = [currentData; newRow];
             updateStatus(app, '已添加评估器参数');
             updateConfigStatus(app);
@@ -1601,14 +1764,36 @@ classdef MAPOGUI < handle
             fields = fieldnames(recommended);
 
             if isempty(fields)
-                uialert(app.UIFigure, sprintf('未找到 %s 的推荐参数。', evaluatorType), ...
-                    '推荐填充', 'Icon', 'info');
+                uialert(app.UIFigure, sprintf('已为%s填充推荐参数', evaluatorType), ...
+                    '填充成功', 'Icon', 'info');
                 return;
+            end
+
+            if isEvaluatorSimpleMode(app) && ~isempty(app.evaluatorParamControls)
+                fillSimpleFormFromParams(app, recommended);
+                updateStatus(app, '已填充推荐参数');
+                updateConfigStatus(app);
+                return;
+            end
+
+            unitMap = struct();
+            meta = getEvaluatorMeta(app);
+            if isstruct(meta) && isfield(meta, 'parameters') && ~isempty(meta.parameters)
+                for i = 1:numel(meta.parameters)
+                    p = meta.parameters(i);
+                    if isfield(p, 'name') && isfield(p, 'unit')
+                        nameStr = char(string(p.name));
+                        unitStr = char(string(p.unit));
+                        if ~isempty(strtrim(nameStr)) && ~isempty(strtrim(unitStr))
+                            unitMap.(nameStr) = unitStr;
+                        end
+                    end
+                end
             end
 
             data = app.EvaluatorParamsTable.Data;
             if isempty(data)
-                data = cell(0, 2);
+                data = cell(0, 3);
             end
 
             existingNames = strings(0, 1);
@@ -1619,22 +1804,45 @@ classdef MAPOGUI < handle
             for i = 1:length(fields)
                 name = fields{i};
                 value = recommended.(name);
+                unitStr = '';
+                if isfield(unitMap, name)
+                    unitStr = unitMap.(name);
+                end
                 idx = find(existingNames == string(name), 1);
                 if isempty(idx)
-                    data(end+1, :) = {name, value}; %#ok<AGROW>
+                    data(end+1, :) = {name, value, unitStr}; %#ok<AGROW>
                     existingNames(end+1, 1) = string(name); %#ok<AGROW>
                 else
                     data{idx, 2} = value;
+                    if size(data, 2) >= 3 && isempty(strtrim(char(string(data{idx, 3})))) && ~isempty(strtrim(unitStr))
+                        data{idx, 3} = unitStr;
+                    end
                 end
             end
 
             app.EvaluatorParamsTable.Data = data;
-            updateStatus(app, '已填充推荐参数');
+            updateStatus(app, '???????');
             updateConfigStatus(app);
         end
 
         function updateEvaluatorInfo(app)
             evaluatorType = char(string(app.EvaluatorTypeDropDown.Value));
+
+            meta = getEvaluatorMeta(app);
+            metaName = '';
+            metaDesc = '';
+            metaParamCount = 0;
+            if ~isempty(meta) && isstruct(meta)
+                if isfield(meta, 'displayName')
+                    metaName = char(string(meta.displayName));
+                end
+                if isfield(meta, 'description')
+                    metaDesc = char(string(meta.description));
+                end
+                if isfield(meta, 'parameters') && ~isempty(meta.parameters)
+                    metaParamCount = numel(meta.parameters);
+                end
+            end
 
             classExists = exist(evaluatorType, 'class') == 8;
             classPath = '';
@@ -1677,7 +1885,18 @@ classdef MAPOGUI < handle
             end
 
             lines = {};
-            lines{end+1} = sprintf('当前评估器: %s', evaluatorType); %#ok<AGROW>
+            if ~isempty(metaName) && ~strcmp(metaName, evaluatorType)
+                lines{end+1} = sprintf('当前评估器: %s (%s)', metaName, evaluatorType); %#ok<AGROW>
+            else
+                lines{end+1} = sprintf('当前评估器: %s', evaluatorType); %#ok<AGROW>
+            end
+            if ~isempty(metaDesc)
+                lines{end+1} = sprintf('评估器说明: %s', metaDesc); %#ok<AGROW>
+            end
+            if metaParamCount > 0
+                lines{end+1} = sprintf('参数模板: %d 个', metaParamCount); %#ok<AGROW>
+            end
+
             lines{end+1} = sprintf('类存在: %s', existsText); %#ok<AGROW>
             if classExists
                 lines{end+1} = sprintf('类文件: %s', classPath); %#ok<AGROW>
@@ -1702,7 +1921,16 @@ classdef MAPOGUI < handle
                 lines{end+1} = '推荐参数:'; %#ok<AGROW>
                 for i = 1:length(recFields)
                     name = recFields{i};
-                    lines{end+1} = sprintf('  - %s = %g', name, recommended.(name)); %#ok<AGROW>
+                    value = recommended.(name);
+                    valueStr = '';
+                    if isnumeric(value)
+                        valueStr = num2str(value);
+                    elseif islogical(value)
+                        valueStr = mat2str(value);
+                    else
+                        valueStr = char(string(value));
+                    end
+                    lines{end+1} = sprintf('  - %s = %s', name, valueStr); %#ok<AGROW>
                 end
             end
 
@@ -1817,6 +2045,17 @@ classdef MAPOGUI < handle
         function params = getRecommendedEvaluatorParams(app, evaluatorType) %#ok<MANU>
             params = struct();
 
+            if exist('EvaluatorMetadata', 'class') == 8
+                try
+                    params = EvaluatorMetadata.getDefaultParameters(evaluatorType);
+                catch
+                    params = struct();
+                end
+                if ~isempty(fieldnames(params))
+                    return;
+                end
+            end
+
             switch char(evaluatorType)
                 case 'ORCEvaluator'
                     params.electricityPrice = 0.1;
@@ -1834,6 +2073,691 @@ classdef MAPOGUI < handle
                     params.maxEnergyRatio = 10.0;
                 otherwise
                     % no defaults
+            end
+        end
+        function [items, itemsData] = getEvaluatorDropdownItems(app) %#ok<MANU>
+            items = {};
+            itemsData = {};
+
+            if exist('EvaluatorMetadata', 'class') == 8
+                try
+                    [items, itemsData] = EvaluatorMetadata.getDropdownItems();
+                catch
+                    items = {};
+                    itemsData = {};
+                end
+            end
+
+            if isempty(items)
+                items = getAvailableEvaluatorTypes(app);
+                itemsData = {};
+            end
+        end
+
+        function ensureEvaluatorTypeInDropdown(app, evalType)
+            if nargin < 2 || isempty(evalType)
+                return;
+            end
+
+            items = app.EvaluatorTypeDropDown.Items;
+            if isstring(items)
+                items = cellstr(items);
+            end
+            if ~iscell(items)
+                items = {};
+            end
+
+            itemsData = {};
+            if isprop(app.EvaluatorTypeDropDown, 'ItemsData')
+                itemsData = app.EvaluatorTypeDropDown.ItemsData;
+                if isstring(itemsData)
+                    itemsData = cellstr(itemsData);
+                elseif isnumeric(itemsData) || islogical(itemsData)
+                    itemsData = num2cell(itemsData);
+                end
+                if ~iscell(itemsData)
+                    itemsData = {};
+                end
+            end
+
+            if ~isempty(itemsData)
+                if ~ismember(evalType, itemsData)
+                    itemsData{end+1} = evalType; %#ok<AGROW>
+                    items{end+1} = evalType; %#ok<AGROW>
+                end
+                app.EvaluatorTypeDropDown.Items = items;
+                app.EvaluatorTypeDropDown.ItemsData = itemsData;
+            else
+                if ~ismember(evalType, items)
+                    items{end+1} = evalType; %#ok<AGROW>
+                    app.EvaluatorTypeDropDown.Items = items;
+                end
+            end
+
+            app.EvaluatorTypeDropDown.Value = evalType;
+        end
+
+        function tf = isEvaluatorSimpleMode(app)
+            tf = false;
+            try
+                tf = strcmp(char(string(app.EvaluatorModeDropDown.Value)), 'simple');
+            catch
+            end
+        end
+
+        function applyEvaluatorMode(app, params)
+            if nargin < 2 || isempty(params)
+                params = struct();
+            end
+
+            if isEvaluatorSimpleMode(app)
+                if ~isempty(app.EvaluatorParamsGrid) && isvalid(app.EvaluatorParamsGrid)
+                    app.EvaluatorParamsGrid.Visible = 'off';
+                end
+                if ~isempty(app.EvaluatorSimplePanel) && isvalid(app.EvaluatorSimplePanel)
+                    app.EvaluatorSimplePanel.Visible = 'on';
+                end
+                buildEvaluatorSimpleForm(app);
+                if ~isempty(fieldnames(params))
+                    fillSimpleFormFromParams(app, params);
+                end
+            else
+                if ~isempty(app.EvaluatorSimplePanel) && isvalid(app.EvaluatorSimplePanel)
+                    app.EvaluatorSimplePanel.Visible = 'off';
+                end
+                if ~isempty(app.EvaluatorParamsGrid) && isvalid(app.EvaluatorParamsGrid)
+                    app.EvaluatorParamsGrid.Visible = 'on';
+                end
+                if ~isempty(fieldnames(params))
+                    fillEvaluatorParamsTable(app, params);
+                end
+            end
+        end
+
+        function meta = getEvaluatorMeta(app)
+            meta = struct();
+            if exist('EvaluatorMetadata', 'class') ~= 8
+                return;
+            end
+            evalType = char(string(app.EvaluatorTypeDropDown.Value));
+            try
+                meta = EvaluatorMetadata.getByType(evalType);
+            catch
+                meta = struct();
+            end
+        end
+
+        function buildEvaluatorSimpleForm(app)
+            app.evaluatorParamControls = struct('name', {}, 'control', {}, 'type', {}, 'meta', {});
+
+            if isempty(app.EvaluatorSimpleGrid) || ~isvalid(app.EvaluatorSimpleGrid)
+                return;
+            end
+
+            delete(app.EvaluatorSimpleGrid.Children);
+
+            meta = getEvaluatorMeta(app);
+            if isempty(meta) || ~isstruct(meta) || ~isfield(meta, 'parameters') || isempty(meta.parameters)
+                hint = uilabel(app.EvaluatorSimpleGrid);
+                hint.Text = '未找到评估器参数元数据，请切换到高级模式手动填写。';
+                hint.FontColor = [0.4, 0.4, 0.4];
+                hint.Layout.Row = 1;
+                hint.Layout.Column = 1;
+                app.EvaluatorSimpleGrid.RowHeight = {'1x'};
+                app.EvaluatorSimpleGrid.ColumnWidth = {'1x'};
+                return;
+            end
+
+            params = meta.parameters;
+            paramCount = numel(params);
+            isAdvanced = false(1, paramCount);
+            for i = 1:paramCount
+                p = params(i);
+                if isfield(p, 'advanced') && ~isempty(p.advanced)
+                    try
+                        isAdvanced(i) = logical(p.advanced);
+                    catch
+                        isAdvanced(i) = false;
+                    end
+                end
+            end
+
+            useIdx = find(~isAdvanced);
+            showAdvancedTag = false(1, numel(useIdx));
+            if isempty(useIdx)
+                useIdx = 1:paramCount;
+                showAdvancedTag = isAdvanced(useIdx);
+            end
+
+            numParams = numel(useIdx);
+            app.EvaluatorSimpleGrid.RowHeight = [{22}, repmat({30}, 1, numParams), {'1x'}];
+            app.EvaluatorSimpleGrid.ColumnWidth = {140, '1x', 80};
+            app.EvaluatorSimpleGrid.RowSpacing = 8;
+            app.EvaluatorSimpleGrid.ColumnSpacing = 10;
+
+            hintLabel = uilabel(app.EvaluatorSimpleGrid);
+            hintLabel.Text = '简易模式：根据元数据生成。未列出的参数请切换到高级模式。';
+            hintLabel.FontColor = [0.4, 0.4, 0.4];
+            hintLabel.Layout.Row = 1;
+            hintLabel.Layout.Column = [1, 3];
+
+            for idx = 1:numParams
+                p = params(useIdx(idx));
+                row = idx + 1;
+
+                nameStr = '';
+                if isfield(p, 'name')
+                    nameStr = char(string(p.name));
+                end
+                if isempty(nameStr) || ~isvarname(nameStr)
+                    continue;
+                end
+
+                labelText = nameStr;
+                if isfield(p, 'label') && ~isempty(p.label)
+                    labelText = char(string(p.label));
+                end
+                    if isfield(p, 'unit') && ~isempty(p.unit)
+                        unitText = char(string(p.unit));
+                        if ~isempty(strtrim(unitText))
+                            labelText = sprintf('%s (%s)', labelText, unitText);
+                        end
+                    end
+                if showAdvancedTag(idx)
+                    labelText = sprintf('%s（高级）', labelText);
+                end
+
+                descText = '';
+                if isfield(p, 'description') && ~isempty(p.description)
+                    descText = char(string(p.description));
+                end
+
+                unitText = '';
+                if isfield(p, 'unit') && ~isempty(p.unit)
+                    unitText = char(string(p.unit));
+                end
+
+                label = uilabel(app.EvaluatorSimpleGrid);
+                label.Text = labelText;
+                label.Layout.Row = row;
+                label.Layout.Column = 1;
+                if ~isempty(descText)
+                    label.Tooltip = descText;
+                end
+
+                paramType = 'number';
+                if isfield(p, 'type') && ~isempty(p.type)
+                    paramType = lower(char(string(p.type)));
+                end
+
+                [optItems, optItemsData] = parseEvaluatorParamOptions(app, p);
+                if ~isempty(optItems)
+                    control = uidropdown(app.EvaluatorSimpleGrid);
+                    control.Items = optItems;
+                    if ~isempty(optItemsData)
+                        control.ItemsData = optItemsData;
+                    end
+                    control.Layout.Row = row;
+                    control.Layout.Column = 2;
+                    control.ValueChangedFcn = @(src, event) updateConfigStatus(app);
+
+                    defaultVal = [];
+                    if isfield(p, 'default')
+                        defaultVal = p.default;
+                    end
+                    control.Value = pickEvaluatorDropdownValue(app, defaultVal, control);
+                    paramType = 'enum';
+                else
+                    switch paramType
+                        case {'bool', 'boolean', 'logical'}
+                            control = uicheckbox(app.EvaluatorSimpleGrid);
+                            control.Layout.Row = row;
+                            control.Layout.Column = 2;
+                            control.ValueChangedFcn = @(src, event) updateConfigStatus(app);
+                            defaultVal = false;
+                            if isfield(p, 'default')
+                                defaultVal = p.default;
+                            end
+                            if ischar(defaultVal) || isstring(defaultVal)
+                                defaultStr = lower(char(string(defaultVal)));
+                                defaultVal = any(strcmp(defaultStr, {'1', 'true', 'yes', 'on'}));
+                            elseif isnumeric(defaultVal)
+                                defaultVal = defaultVal ~= 0;
+                            end
+                            control.Value = logical(defaultVal);
+                            paramType = 'boolean';
+                        case {'string', 'text', 'char'}
+                            control = uieditfield(app.EvaluatorSimpleGrid, 'text');
+                            control.Layout.Row = row;
+                            control.Layout.Column = 2;
+                            control.ValueChangedFcn = @(src, event) updateConfigStatus(app);
+                            defaultVal = '';
+                            if isfield(p, 'default')
+                                defaultVal = p.default;
+                            end
+                            control.Value = char(string(defaultVal));
+                            paramType = 'string';
+                        otherwise
+                            control = uispinner(app.EvaluatorSimpleGrid);
+                            control.Layout.Row = row;
+                            control.Layout.Column = 2;
+                            control.ValueChangedFcn = @(src, event) updateConfigStatus(app);
+
+                            minVal = [];
+                            maxVal = [];
+                            if isfield(p, 'min') && ~isempty(p.min)
+                                minVal = p.min;
+                                if ischar(minVal) || isstring(minVal)
+                                    minVal = str2double(minVal);
+                                end
+                            end
+                            if isfield(p, 'max') && ~isempty(p.max)
+                                maxVal = p.max;
+                                if ischar(maxVal) || isstring(maxVal)
+                                    maxVal = str2double(maxVal);
+                                end
+                            end
+                            if isempty(minVal) || isnan(minVal)
+                                minVal = -inf;
+                            end
+                            if isempty(maxVal) || isnan(maxVal)
+                                maxVal = inf;
+                            end
+                            control.Limits = [double(minVal), double(maxVal)];
+
+                            stepVal = [];
+                            if isfield(p, 'step') && ~isempty(p.step)
+                                stepVal = p.step;
+                                if ischar(stepVal) || isstring(stepVal)
+                                    stepVal = str2double(stepVal);
+                                end
+                            end
+                            if isempty(stepVal) || isnan(stepVal)
+                                if strcmp(paramType, 'integer')
+                                    stepVal = 1;
+                                else
+                                    stepVal = 0.1;
+                                end
+                            end
+                            control.Step = double(stepVal);
+
+                            defaultVal = [];
+                            if isfield(p, 'default')
+                                defaultVal = p.default;
+                            end
+                            if isempty(defaultVal) && isfinite(minVal)
+                                defaultVal = minVal;
+                            end
+                            if isempty(defaultVal)
+                                defaultVal = 0;
+                            end
+                            if ischar(defaultVal) || isstring(defaultVal)
+                                defaultVal = str2double(defaultVal);
+                            end
+                            if ~isnumeric(defaultVal) || ~isscalar(defaultVal) || isnan(defaultVal)
+                                defaultVal = 0;
+                            end
+                            if defaultVal < control.Limits(1)
+                                defaultVal = control.Limits(1);
+                            end
+                            if defaultVal > control.Limits(2)
+                                defaultVal = control.Limits(2);
+                            end
+                            control.Value = defaultVal;
+
+                            if isprop(control, 'RoundFractionalValues') && strcmp(paramType, 'integer')
+                                control.RoundFractionalValues = 'on';
+                            end
+
+                            if strcmp(paramType, 'integer')
+                                paramType = 'integer';
+                            else
+                                paramType = 'number';
+                            end
+                    end
+                end
+
+                if ~isempty(descText)
+                    control.Tooltip = descText;
+                elseif ~isempty(nameStr) && ~strcmp(nameStr, labelText)
+                    control.Tooltip = nameStr;
+                end
+
+                unitLabel = uilabel(app.EvaluatorSimpleGrid);
+                unitLabel.Text = unitText;
+                unitLabel.Layout.Row = row;
+                unitLabel.Layout.Column = 3;
+                unitLabel.FontColor = [0.5, 0.5, 0.5];
+
+                idxCtrl = numel(app.evaluatorParamControls) + 1;
+                app.evaluatorParamControls(idxCtrl).name = nameStr;
+                app.evaluatorParamControls(idxCtrl).control = control;
+                app.evaluatorParamControls(idxCtrl).type = paramType;
+                app.evaluatorParamControls(idxCtrl).meta = p;
+            end
+        end
+
+        function [params, source] = getEvaluatorParamsFromUI(app)
+            params = struct();
+            source = 'table';
+            if isEvaluatorSimpleMode(app) && ~isempty(app.evaluatorParamControls)
+                params = getEvaluatorParamsFromSimpleForm(app);
+                if ~isempty(fieldnames(params))
+                    source = 'simple';
+                    return;
+                end
+            end
+            params = getEvaluatorParamsFromTable(app);
+        end
+
+        function params = getEvaluatorParamsFromActiveView(app)
+            params = struct();
+            try
+                if ~isempty(app.EvaluatorSimplePanel) && isvalid(app.EvaluatorSimplePanel) && ...
+                        strcmp(app.EvaluatorSimplePanel.Visible, 'on')
+                    params = getEvaluatorParamsFromSimpleForm(app);
+                    if ~isempty(fieldnames(params))
+                        return;
+                    end
+                end
+            catch
+            end
+            params = getEvaluatorParamsFromTable(app);
+        end
+
+        function params = getEvaluatorParamsFromTable(app)
+            params = struct();
+            paramData = app.EvaluatorParamsTable.Data;
+            if isempty(paramData)
+                return;
+            end
+
+            for i = 1:size(paramData, 1)
+                nameStr = char(string(paramData{i, 1}));
+                if isempty(strtrim(nameStr))
+                    continue;
+                end
+                if ~isvarname(nameStr)
+                    continue;
+                end
+
+                value = paramData{i, 2};
+                if ischar(value) || isstring(value)
+                    value = str2double(value);
+                end
+                params.(nameStr) = value;
+            end
+        end
+
+        function params = getEvaluatorParamsFromSimpleForm(app)
+            params = struct();
+            if isempty(app.evaluatorParamControls)
+                return;
+            end
+
+            for i = 1:numel(app.evaluatorParamControls)
+                item = app.evaluatorParamControls(i);
+                nameStr = item.name;
+                if isempty(nameStr) || ~isvarname(nameStr)
+                    continue;
+                end
+                ctrl = item.control;
+                if isempty(ctrl) || ~isvalid(ctrl)
+                    continue;
+                end
+
+                value = ctrl.Value;
+                if isstring(value)
+                    value = char(value);
+                end
+
+                switch item.type
+                    case 'integer'
+                        if isnumeric(value)
+                            value = round(value);
+                        end
+                    case 'number'
+                        if ~isnumeric(value)
+                            value = str2double(value);
+                        end
+                    case 'boolean'
+                        value = logical(value);
+                    case 'string'
+                        value = char(string(value));
+                end
+
+                params.(nameStr) = value;
+            end
+        end
+
+        function fillSimpleFormFromParams(app, params)
+            if nargin < 2 || isempty(params) || ~isstruct(params)
+                return;
+            end
+            if isempty(app.evaluatorParamControls)
+                return;
+            end
+
+            for i = 1:numel(app.evaluatorParamControls)
+                item = app.evaluatorParamControls(i);
+                nameStr = item.name;
+                if isempty(nameStr) || ~isfield(params, nameStr)
+                    continue;
+                end
+                ctrl = item.control;
+                if isempty(ctrl) || ~isvalid(ctrl)
+                    continue;
+                end
+
+                value = params.(nameStr);
+                if isstring(value)
+                    value = char(value);
+                end
+
+                if isa(ctrl, 'matlab.ui.control.DropDown')
+                    if isprop(ctrl, 'ItemsData') && ~isempty(ctrl.ItemsData)
+                        itemsData = ctrl.ItemsData;
+                        if isnumeric(itemsData) || islogical(itemsData)
+                            itemsData = num2cell(itemsData);
+                        end
+                        matched = false;
+                        for k = 1:numel(itemsData)
+                            if isequal(itemsData{k}, value)
+                                ctrl.Value = itemsData{k};
+                                matched = true;
+                                break;
+                            end
+                        end
+                        if ~matched && (ischar(value) || isstring(value))
+                            numVal = str2double(value);
+                            if ~isnan(numVal)
+                                for k = 1:numel(itemsData)
+                                    if isequal(itemsData{k}, numVal)
+                                        ctrl.Value = itemsData{k};
+                                        break;
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        valueStr = char(string(value));
+                        if any(strcmp(ctrl.Items, valueStr))
+                            ctrl.Value = valueStr;
+                        end
+                    end
+                elseif isa(ctrl, 'matlab.ui.control.CheckBox')
+                    if ischar(value) || isstring(value)
+                        valueStr = lower(char(string(value)));
+                        value = any(strcmp(valueStr, {'1', 'true', 'yes', 'on'}));
+                    end
+                    ctrl.Value = logical(value);
+                elseif isa(ctrl, 'matlab.ui.control.EditField')
+                    ctrl.Value = char(string(value));
+                elseif isa(ctrl, 'matlab.ui.control.Spinner') || isa(ctrl, 'matlab.ui.control.NumericEditField')
+                    if ischar(value) || isstring(value)
+                        value = str2double(value);
+                    end
+                    if isnumeric(value) && isscalar(value) && ~isnan(value)
+                        try
+                            ctrl.Value = value;
+                        catch
+                        end
+                    end
+                end
+            end
+        end
+
+        function fillEvaluatorParamsTable(app, params, units)
+            if nargin < 2 || isempty(params) || ~isstruct(params)
+                app.EvaluatorParamsTable.Data = cell(0, 3);
+                return;
+            end
+
+            if nargin < 3 || isempty(units) || ~isstruct(units)
+                units = struct();
+                meta = getEvaluatorMeta(app);
+                if isstruct(meta) && isfield(meta, parameters) && ~isempty(meta.parameters)
+                    for i = 1:numel(meta.parameters)
+                        p = meta.parameters(i);
+                        if isfield(p, name) && isfield(p, unit)
+                            nameStr = char(string(p.name));
+                            unitStr = char(string(p.unit));
+                            if ~isempty(strtrim(nameStr)) && ~isempty(strtrim(unitStr))
+                                units.(nameStr) = unitStr;
+                            end
+                        end
+                    end
+                end
+            end
+
+            f = fieldnames(params);
+            tableData = cell(length(f), 3);
+            for i = 1:length(f)
+                nameStr = f{i};
+                tableData{i, 1} = nameStr;
+                tableData{i, 2} = params.(nameStr);
+                unitStr = '';
+                if isfield(units, nameStr)
+                    unitStr = units.(nameStr);
+                end
+                tableData{i, 3} = unitStr;
+            end
+            app.EvaluatorParamsTable.Data = tableData;
+        end
+
+        function [items, itemsData] = parseEvaluatorParamOptions(app, param) %#ok<MANU>
+            items = {};
+            itemsData = {};
+            if ~isstruct(param)
+                return;
+            end
+
+            raw = [];
+            if isfield(param, 'options')
+                raw = param.options;
+            elseif isfield(param, 'choices')
+                raw = param.choices;
+            elseif isfield(param, 'enum')
+                raw = param.enum;
+            end
+
+            if isempty(raw)
+                return;
+            end
+
+            if ischar(raw)
+                items = {raw};
+                return;
+            elseif isstring(raw)
+                items = cellstr(raw);
+                return;
+            elseif isnumeric(raw) || islogical(raw)
+                raw = num2cell(raw);
+            elseif iscell(raw)
+                % keep as is
+            else
+                return;
+            end
+
+            if iscell(raw) && isscalar(raw) && iscell(raw{1})
+                raw = raw{1};
+            end
+
+            items = cell(1, numel(raw));
+            allNumeric = true;
+            for i = 1:numel(raw)
+                v = raw{i};
+                if isstring(v)
+                    v = char(v);
+                end
+                if isnumeric(v) || islogical(v)
+                    items{i} = num2str(v);
+                elseif ischar(v)
+                    items{i} = v;
+                    allNumeric = false;
+                else
+                    items{i} = '';
+                    allNumeric = false;
+                end
+                raw{i} = v;
+            end
+
+            keepMask = ~cellfun(@isempty, items);
+            items = items(keepMask);
+            if allNumeric
+                itemsData = raw(keepMask);
+            end
+        end
+
+        function value = pickEvaluatorDropdownValue(app, defaultVal, control) %#ok<MANU>
+            value = '';
+            if isempty(control) || ~isvalid(control)
+                return;
+            end
+
+            if isprop(control, 'ItemsData') && ~isempty(control.ItemsData)
+                itemsData = control.ItemsData;
+                if isnumeric(itemsData) || islogical(itemsData)
+                    itemsData = num2cell(itemsData);
+                end
+                if ~isempty(itemsData)
+                    value = itemsData{1};
+                end
+                if isempty(defaultVal)
+                    return;
+                end
+                if ischar(defaultVal) || isstring(defaultVal)
+                    numVal = str2double(defaultVal);
+                    if ~isnan(numVal)
+                        defaultVal = numVal;
+                    else
+                        defaultVal = char(string(defaultVal));
+                    end
+                end
+                for i = 1:numel(itemsData)
+                    if isequal(itemsData{i}, defaultVal)
+                        value = itemsData{i};
+                        return;
+                    end
+                end
+                return;
+            end
+
+            items = control.Items;
+            if isstring(items)
+                items = cellstr(items);
+            end
+            if isempty(items)
+                value = '';
+                return;
+            end
+            value = items{1};
+            if isempty(defaultVal)
+                return;
+            end
+            defaultStr = char(string(defaultVal));
+            if any(strcmp(items, defaultStr))
+                value = defaultStr;
             end
         end
 
@@ -1883,7 +2807,7 @@ classdef MAPOGUI < handle
                 end
             end
 
-            newRow = {defaultName, ''};
+            newRow = {defaultName, '', ''};
             app.VarMappingTable.Data = [currentData; newRow];
             logMessage(app, '添加新变量映射');
             updateConfigStatus(app);
@@ -2039,25 +2963,33 @@ classdef MAPOGUI < handle
         end
 
         function syncResMappingButtonPushed(app)
-            %% 同步结果节点映射（按问题目标名生成/补齐行）
+            %% 同步结果映射：从问题目标名生成
 
             objNames = getProblemObjectiveNames(app);
             if isempty(objNames)
-                uialert(app.UIFigure, '请先在“问题配置”中添加优化目标，然后再同步映射。', ...
-                    '同步结果映射', 'Icon', 'warning');
+                uialert(app.UIFigure, '请先在问题配置中定义优化目标', ...
+                    '无目标', 'Icon', 'warning');
                 return;
             end
 
             currentData = app.ResMappingTable.Data;
 
-            % 记录已填写的节点路径（优先保留非空路径）
+            % 保留已有映射中的节点路径和说明
             pathMap = containers.Map('KeyType', 'char', 'ValueType', 'char');
-            extraRows = cell(0, 2);
+            unitMap = containers.Map('KeyType', 'char', 'ValueType', 'char');
+            extraRows = cell(0, 3);
 
             if ~isempty(currentData)
                 for i = 1:size(currentData, 1)
                     nameStr = char(string(currentData{i, 1}));
-                    pathStr = char(string(currentData{i, 2}));
+                    pathStr = '';
+                    unitStr = '';
+                    if size(currentData, 2) >= 2
+                        pathStr = char(string(currentData{i, 2}));
+                    end
+                    if size(currentData, 2) >= 3
+                        unitStr = char(string(currentData{i, 3}));
+                    end
 
                     if isempty(strtrim(nameStr))
                         continue;
@@ -2069,14 +3001,18 @@ classdef MAPOGUI < handle
                         elseif isempty(strtrim(pathMap(nameStr))) && ~isempty(strtrim(pathStr))
                             pathMap(nameStr) = pathStr;
                         end
+                        if ~isKey(unitMap, nameStr)
+                            unitMap(nameStr) = unitStr;
+                        elseif isempty(strtrim(unitMap(nameStr))) && ~isempty(strtrim(unitStr))
+                            unitMap(nameStr) = unitStr;
+                        end
                     else
-                        % 额外映射：保留在表格末尾（框架会忽略不需要的字段）
-                        extraRows(end+1, :) = {nameStr, pathStr}; %#ok<AGROW>
+                        extraRows(end+1, :) = {nameStr, pathStr, unitStr}; %#ok<AGROW>
                     end
                 end
             end
 
-            newData = cell(numel(objNames), 2);
+            newData = cell(numel(objNames), 3);
             for i = 1:numel(objNames)
                 on = objNames{i};
                 newData{i, 1} = on;
@@ -2085,11 +3021,16 @@ classdef MAPOGUI < handle
                 else
                     newData{i, 2} = '';
                 end
+                if isKey(unitMap, on)
+                    newData{i, 3} = unitMap(on);
+                else
+                    newData{i, 3} = '';
+                end
             end
 
             app.ResMappingTable.Data = [newData; extraRows];
             refreshResMappingDropdown(app);
-            logMessage(app, sprintf('结果映射已同步 %d 个目标', numel(objNames)));
+            logMessage(app, sprintf('已同步结果映射 %d 项', numel(objNames)));
             updateConfigStatus(app);
         end
 
@@ -2131,7 +3072,7 @@ classdef MAPOGUI < handle
 
                 if isempty(placeholders)
                     currentData = app.ResMappingTable.Data;
-                    newRow = {templateName, templatePath};
+                    newRow = {templateName, templatePath, ''};
                     app.ResMappingTable.Data = [currentData; newRow];
                     logMessage(app, sprintf('应用模板: %s', templateName));
                 else
@@ -2144,7 +3085,7 @@ classdef MAPOGUI < handle
                         end
 
                         currentData = app.ResMappingTable.Data;
-                        newRow = {answers{1}, buildPath};
+                        newRow = {answers{1}, buildPath, ''};
                         app.ResMappingTable.Data = [currentData; newRow];
                         logMessage(app, sprintf('应用模板: %s -> %s', templateName, buildPath));
                     end
@@ -2207,40 +3148,172 @@ classdef MAPOGUI < handle
         end
 
         function validatePathsButtonPushed(app)
-            logMessage(app, '验证节点路径...');
+            % 询问用户验证方式
+            selection = uiconfirm(app.UIFigure, ...
+                '选择验证方式：', ...
+                '节点路径验证', ...
+                'Options', {'格式检查', '实际连接验证', '取消'}, ...
+                'DefaultOption', 1, ...
+                'CancelOption', 3, ...
+                'Icon', 'question');
+
+            if strcmp(selection, '取消')
+                return;
+            end
+
+            if strcmp(selection, '格式检查')
+                % 原有的格式检查逻辑
+                validatePathsFormat(app);
+            else
+                % 实际连接Aspen验证
+                validatePathsWithAspen(app);
+            end
+        end
+
+        function validatePathsFormat(app)
+            % 仅进行格式检查（不连接Aspen）
+            logMessage(app, '验证节点路径格式...');
 
             varData = app.VarMappingTable.Data;
             invalidVarPaths = {};
             for i = 1:size(varData, 1)
+                varName = varData{i, 1};
                 path = varData{i, 2};
                 if ~AspenNodeTemplates.validateNodePath(path)
-                    invalidVarPaths{end+1} = sprintf('Row %d: %s', i, path); %#ok<AGROW>
+                    invalidVarPaths{end+1} = sprintf('[%d] %s: %s', i, varName, path); %#ok<AGROW>
                 end
             end
 
             resData = app.ResMappingTable.Data;
             invalidResPaths = {};
             for i = 1:size(resData, 1)
+                resName = resData{i, 1};
                 path = resData{i, 2};
                 if ~AspenNodeTemplates.validateNodePath(path)
-                    invalidResPaths{end+1} = sprintf('Row %d: %s', i, path); %#ok<AGROW>
+                    invalidResPaths{end+1} = sprintf('[%d] %s: %s', i, resName, path); %#ok<AGROW>
                 end
             end
 
+            totalInvalid = length(invalidVarPaths) + length(invalidResPaths);
+            totalPaths = size(varData, 1) + size(resData, 1);
+
             if isempty(invalidVarPaths) && isempty(invalidResPaths)
-                uialert(app.UIFigure, '所有节点路径格式正确！', '验证成功', 'Icon', 'success');
-                logMessage(app, '所有节点路径验证通过');
+                uialert(app.UIFigure, sprintf('所有 %d 个节点路径格式正确！', totalPaths), '验证成功', 'Icon', 'success');
+                logMessage(app, '所有节点路径格式验证通过');
             else
-                msg = '发现无效路径:\n\n';
+                msg = sprintf('发现 %d 个格式错误的路径（共 %d 个）:\n\n', totalInvalid, totalPaths);
                 if ~isempty(invalidVarPaths)
-                    msg = [msg, '变量映射:\n', strjoin(invalidVarPaths, '\n'), '\n\n'];
+                    msg = [msg, sprintf('变量映射 (%d 个无效):\n', length(invalidVarPaths)), strjoin(invalidVarPaths, '\n'), '\n\n'];
                 end
                 if ~isempty(invalidResPaths)
-                    msg = [msg, '结果映射:\n', strjoin(invalidResPaths, '\n')];
+                    msg = [msg, sprintf('结果映射 (%d 个无效):\n', length(invalidResPaths)), strjoin(invalidResPaths, '\n')];
                 end
-                uialert(app.UIFigure, sprintf(msg), '验证失败', 'Icon', 'warning');
-                logMessage(app, sprintf('发现 %d 个无效路径', length(invalidVarPaths) + length(invalidResPaths)));
+                msg = [msg, '\n\n提示: 路径必须以 \Data\ 开头，并包含 Streams 或 Blocks 等关键字'];
+                uialert(app.UIFigure, sprintf(msg), '格式验证失败', 'Icon', 'warning');
+                logMessage(app, sprintf('发现 %d 个格式错误的路径', totalInvalid));
             end
+        end
+
+        function validatePathsWithAspen(app)
+            % 实际连接Aspen并验证节点是否存在
+            logMessage(app, '开始实际连接验证节点路径...');
+            app.ValidatePathsButton.Enable = 'off';
+            drawnow;
+
+            aspenApp = [];
+            try
+                % 获取仿真器配置
+                simType = app.SimulatorTypeDropDown.Value;
+                modelPath = app.ModelPathField.Value;
+
+                if ~strcmpi(simType, 'Aspen')
+                    uialert(app.UIFigure, '实际连接验证仅支持 Aspen Plus 仿真器', '不支持', 'Icon', 'warning');
+                    app.ValidatePathsButton.Enable = 'on';
+                    return;
+                end
+
+                if isempty(modelPath)
+                    error('请先选择模型文件');
+                end
+                if ~exist(modelPath, 'file')
+                    error('模型文件不存在: %s', modelPath);
+                end
+
+                % 直接创建COM对象，不使用AspenPlusSimulator类
+                logMessage(app, '正在连接 Aspen Plus...');
+                aspenApp = actxserver('Apwn.Document');
+                aspenApp.invoke('InitFromArchive2', modelPath);
+                aspenApp.Visible = double(app.VisibleCheckBox.Value);
+                aspenApp.SuppressDialogs = 1;
+
+                % 首次运行
+                logMessage(app, '正在初始化运行...');
+                aspenApp.Engine.Run2(1);
+                while aspenApp.Engine.IsRunning == 1
+                    pause(2);
+                end
+                logMessage(app, 'Aspen Plus 连接成功');
+
+                % 准备节点数据
+                varData = app.VarMappingTable.Data;
+                resData = app.ResMappingTable.Data;
+
+                % 验证变量节点
+                logMessage(app, sprintf('验证 %d 个变量节点...', size(varData, 1)));
+                [validVarCount, invalidVarNodes] = validateNodesDirectly(aspenApp, varData, 'input');
+
+                % 验证结果节点
+                logMessage(app, sprintf('验证 %d 个结果节点...', size(resData, 1)));
+                [validResCount, invalidResNodes] = validateNodesDirectly(aspenApp, resData, 'output');
+
+                % 断开连接
+                aspenApp.Close();
+                delete(aspenApp);
+                aspenApp = [];
+                logMessage(app, 'Aspen Plus 已断开连接');
+
+                % 显示结果
+                totalValid = validVarCount + validResCount;
+                totalInvalid = length(invalidVarNodes) + length(invalidResNodes);
+                totalPaths = size(varData, 1) + size(resData, 1);
+
+                if totalInvalid == 0
+                    msg = sprintf('所有 %d 个节点路径验证成功！\n\n', totalPaths);
+                    msg = [msg, sprintf('变量节点: %d/%d 有效\n', validVarCount, size(varData, 1))];
+                    msg = [msg, sprintf('结果节点: %d/%d 有效', validResCount, size(resData, 1))];
+                    uialert(app.UIFigure, msg, '验证成功', 'Icon', 'success');
+                    logMessage(app, sprintf('所有节点路径验证成功 (%d/%d)', totalValid, totalPaths));
+                else
+                    msg = sprintf('发现 %d 个无效节点（共 %d 个）:\n\n', totalInvalid, totalPaths);
+                    msg = [msg, sprintf('变量节点: %d/%d 有效\n', validVarCount, size(varData, 1))];
+                    msg = [msg, sprintf('结果节点: %d/%d 有效\n\n', validResCount, size(resData, 1))];
+
+                    if ~isempty(invalidVarNodes)
+                        msg = [msg, sprintf('变量映射无效节点 (%d 个):\n', length(invalidVarNodes))];
+                        msg = [msg, strjoin(invalidVarNodes, '\n'), '\n\n'];
+                    end
+                    if ~isempty(invalidResNodes)
+                        msg = [msg, sprintf('结果映射无效节点 (%d 个):\n', length(invalidResNodes))];
+                        msg = [msg, strjoin(invalidResNodes, '\n')];
+                    end
+
+                    uialert(app.UIFigure, sprintf(msg), '验证失败', 'Icon', 'warning');
+                    logMessage(app, sprintf('发现 %d 个无效节点', totalInvalid));
+                end
+
+            catch ME
+                if ~isempty(aspenApp)
+                    try
+                        aspenApp.Close();
+                        delete(aspenApp);
+                    catch
+                    end
+                end
+                logMessage(app, sprintf('验证失败: %s', ME.message));
+                uialert(app.UIFigure, sprintf('验证失败: %s', ME.message), '错误', 'Icon', 'error');
+            end
+
+            app.ValidatePathsButton.Enable = 'on';
         end
 
         %% ========================================
@@ -2677,39 +3750,41 @@ classdef MAPOGUI < handle
 
             % 评估器参数表（economicParameters）校验：参数名必须可作为 struct 字段，值必须为数值标量
             if valid
-                paramData = app.EvaluatorParamsTable.Data;
-                if isempty(paramData)
-                    paramData = cell(0, 2);
-                end
-
-                paramErrors = {};
-                for i = 1:size(paramData, 1)
-                    nameStr = char(string(paramData{i, 1}));
-                    if isempty(strtrim(nameStr))
-                        continue;
-                    end
-                    if ~isvarname(nameStr)
-                        paramErrors{end+1} = sprintf('评估器参数名必须是合法 MATLAB 标识符: Row %d: %s', i, nameStr); %#ok<AGROW>
-                        continue;
+                [~, source] = getEvaluatorParamsFromUI(app);
+                if strcmp(source, 'table')
+                    paramData = app.EvaluatorParamsTable.Data;
+                    if isempty(paramData)
+                        paramData = cell(0, 3);
                     end
 
-                    value = paramData{i, 2};
-                    if isempty(value) || ~isnumeric(value) || ~isscalar(value)
-                        paramErrors{end+1} = sprintf('评估器参数值必须为数值标量: %s', nameStr); %#ok<AGROW>
-                        continue;
-                    end
-                    if isnan(value)
-                        paramErrors{end+1} = sprintf('评估器参数值为 NaN: %s', nameStr); %#ok<AGROW>
-                    end
-                end
+                    paramErrors = {};
+                    for i = 1:size(paramData, 1)
+                        nameStr = char(string(paramData{i, 1}));
+                        if isempty(strtrim(nameStr))
+                            continue;
+                        end
+                        if ~isvarname(nameStr)
+                            paramErrors{end+1} = sprintf('评估器参数名必须是合法 MATLAB 标识符: Row %d: %s', i, nameStr); %#ok<AGROW>
+                            continue;
+                        end
 
-                if ~isempty(paramErrors)
-                    errors = [errors, paramErrors];
-                    valid = false;
+                        value = paramData{i, 2};
+                        if isempty(value) || ~isnumeric(value) || ~isscalar(value)
+                            paramErrors{end+1} = sprintf('评估器参数值必须为数值标量: %s', nameStr); %#ok<AGROW>
+                            continue;
+                        end
+                        if isnan(value)
+                            paramErrors{end+1} = sprintf('评估器参数值为 NaN: %s', nameStr); %#ok<AGROW>
+                        end
+                    end
+
+                    if ~isempty(paramErrors)
+                        errors = [errors, paramErrors];
+                        valid = false;
+                    end
                 end
             end
 
-            % 仿真器配置
             if isempty(strtrim(app.ModelPathField.Value))
                 errors{end+1} = '请选择仿真器模型文件';
                 valid = false;
@@ -2949,9 +4024,9 @@ classdef MAPOGUI < handle
         end
 
         function collectGUIData(app)
-            %% 从 GUI 控件收集数据到 app.guiData
+            %% 从GUI收集数据并构建配置
 
-            % 问题基本信息
+            % 基本信息
             app.guiData.problem.name = app.ProblemNameField.Value;
             app.guiData.problem.description = strjoin(app.ProblemDescArea.Value, '\n');
 
@@ -2963,8 +4038,9 @@ classdef MAPOGUI < handle
                 app.guiData.problem.variables(i).type = varData{i, 2};
                 app.guiData.problem.variables(i).lowerBound = varData{i, 3};
                 app.guiData.problem.variables(i).upperBound = varData{i, 4};
-                app.guiData.problem.variables(i).unit = varData{i, 5};
-                app.guiData.problem.variables(i).description = varData{i, 6};
+                app.guiData.problem.variables(i).values = varData{i, 5};
+                app.guiData.problem.variables(i).unit = varData{i, 6};
+                app.guiData.problem.variables(i).description = varData{i, 7};
             end
 
             % 优化目标
@@ -2973,8 +4049,20 @@ classdef MAPOGUI < handle
             for i = 1:size(objData, 1)
                 app.guiData.problem.objectives(i).name = objData{i, 1};
                 app.guiData.problem.objectives(i).type = objData{i, 2};
-                app.guiData.problem.objectives(i).weight = objData{i, 3};
-                app.guiData.problem.objectives(i).description = objData{i, 4};
+                app.guiData.problem.objectives(i).expression = objData{i, 3};
+                app.guiData.problem.objectives(i).unit = objData{i, 4};
+                app.guiData.problem.objectives(i).weight = objData{i, 5};
+                app.guiData.problem.objectives(i).description = objData{i, 6};
+            end
+
+            % 派生目标
+            derivedData = app.DerivedTable.Data;
+            app.guiData.problem.derived = struct([]);
+            for i = 1:size(derivedData, 1)
+                app.guiData.problem.derived(i).name = derivedData{i, 1};
+                app.guiData.problem.derived(i).expression = derivedData{i, 2};
+                app.guiData.problem.derived(i).unit = derivedData{i, 3};
+                app.guiData.problem.derived(i).description = derivedData{i, 4};
             end
 
             % 约束条件
@@ -2984,7 +4072,8 @@ classdef MAPOGUI < handle
                 app.guiData.problem.constraints(i).name = conData{i, 1};
                 app.guiData.problem.constraints(i).type = conData{i, 2};
                 app.guiData.problem.constraints(i).expression = conData{i, 3};
-                app.guiData.problem.constraints(i).description = conData{i, 4};
+                app.guiData.problem.constraints(i).unit = conData{i, 4};
+                app.guiData.problem.constraints(i).description = conData{i, 5};
             end
 
             % 评估器
@@ -2992,30 +4081,25 @@ classdef MAPOGUI < handle
             app.guiData.problem.evaluator.timeout = app.EvaluatorTimeoutSpinner.Value;
             app.guiData.problem.evaluator.economicParameters = struct();
 
-            paramData = app.EvaluatorParamsTable.Data;
-            if isempty(paramData)
-                paramData = cell(0, 2);
-            end
-
-            eco = struct();
-            for i = 1:size(paramData, 1)
-                nameStr = char(string(paramData{i, 1}));
-                if isempty(strtrim(nameStr))
-                    continue;
-                end
-                if ~isvarname(nameStr)
-                    % 防御：无效字段名将被跳过（运行前会在 validateConfiguration 提示）
-                    continue;
-                end
-
-                value = paramData{i, 2};
-                if ischar(value) || isstring(value)
-                    value = str2double(value);
-                end
-                eco.(nameStr) = value;
-            end
-
+            [eco, ~] = getEvaluatorParamsFromUI(app);
             app.guiData.problem.evaluator.economicParameters = eco;
+            app.guiData.problem.evaluator.parameterUnits = struct();
+            paramData = app.EvaluatorParamsTable.Data;
+            if ~isempty(paramData)
+                for i = 1:size(paramData, 1)
+                    nameStr = char(string(paramData{i, 1}));
+                    if ~isvarname(nameStr)
+                        continue;
+                    end
+                    unitStr = '';
+                    if size(paramData, 2) >= 3
+                        unitStr = char(string(paramData{i, 3}));
+                    end
+                    if ~isempty(strtrim(unitStr))
+                        app.guiData.problem.evaluator.parameterUnits.(nameStr) = unitStr;
+                    end
+                end
+            end
 
             % 仿真器
             app.guiData.simulator.type = app.SimulatorTypeDropDown.Value;
@@ -3026,7 +4110,7 @@ classdef MAPOGUI < handle
             app.guiData.simulator.settings.visible = app.VisibleCheckBox.Value;
             app.guiData.simulator.settings.suppressWarnings = app.SuppressWarningsCheckBox.Value;
 
-            % 节点映射 - 变量
+            % 仿真器 - 变量映射
             varMapData = app.VarMappingTable.Data;
             app.guiData.simulator.nodeMapping.variables = struct();
             for i = 1:size(varMapData, 1)
@@ -3037,14 +4121,22 @@ classdef MAPOGUI < handle
                 end
             end
 
-            % 节点映射 - 结果
+            % 仿真器 - 结果映射
             resMapData = app.ResMappingTable.Data;
             app.guiData.simulator.nodeMapping.results = struct();
+            app.guiData.simulator.nodeMapping.resultUnits = struct();
             for i = 1:size(resMapData, 1)
                 resName = char(string(resMapData{i, 1}));
                 nodePath = char(string(resMapData{i, 2}));
+                unitStr = '';
+                if size(resMapData, 2) >= 3
+                    unitStr = char(string(resMapData{i, 3}));
+                end
                 if isvarname(resName)
                     app.guiData.simulator.nodeMapping.results.(resName) = nodePath;
+                    if ~isempty(strtrim(unitStr))
+                        app.guiData.simulator.nodeMapping.resultUnits.(resName) = unitStr;
+                    end
                 end
             end
 
@@ -3093,41 +4185,104 @@ classdef MAPOGUI < handle
 
             % 决策变量
             if isfield(guiData.problem, 'variables')
-                varData = cell(length(guiData.problem.variables), 6);
+                varData = cell(length(guiData.problem.variables), 7);
                 for i = 1:length(guiData.problem.variables)
                     var = guiData.problem.variables(i);
+                    valueText = '';
+                    if isfield(var, 'values') && ~isempty(var.values)
+                        values = var.values;
+                        if isstring(values)
+                            values = cellstr(values);
+                        end
+                        if isnumeric(values)
+                            valueText = strjoin(arrayfun(@(x) num2str(x), values(:)', 'UniformOutput', false), ', ');
+                        elseif iscell(values)
+                            cleaned = cell(size(values));
+                            for k = 1:numel(values)
+                                v = values{k};
+                                if isstring(v)
+                                    v = char(v);
+                                elseif isnumeric(v)
+                                    v = num2str(v);
+                                elseif ~ischar(v)
+                                    v = '';
+                                end
+                                cleaned{k} = v;
+                            end
+                            cleaned = cleaned(~cellfun(@isempty, cleaned));
+                            valueText = strjoin(cleaned, ', ');
+                        elseif ischar(values)
+                            valueText = values;
+                        end
+                    end
+                    lb = [];
+                    ub = [];
+                    unitText = '';
+                    descText = '';
+                    if isfield(var, 'lowerBound')
+                        lb = var.lowerBound;
+                    end
+                    if isfield(var, 'upperBound')
+                        ub = var.upperBound;
+                    end
+                    if isfield(var, 'unit')
+                        unitText = var.unit;
+                    end
+                    if isfield(var, 'description')
+                        descText = var.description;
+                    end
+
                     varData{i, 1} = var.name;
                     varData{i, 2} = var.type;
-                    varData{i, 3} = var.lowerBound;
-                    varData{i, 4} = var.upperBound;
-                    varData{i, 5} = var.unit;
-                    varData{i, 6} = var.description;
+                    varData{i, 3} = lb;
+                    varData{i, 4} = ub;
+                    varData{i, 5} = valueText;
+                    varData{i, 6} = unitText;
+                    varData{i, 7} = descText;
                 end
                 app.VariablesTable.Data = varData;
             end
 
             % 优化目标
             if isfield(guiData.problem, 'objectives')
-                objData = cell(length(guiData.problem.objectives), 4);
+                objData = cell(length(guiData.problem.objectives), 6);
                 for i = 1:length(guiData.problem.objectives)
                     obj = guiData.problem.objectives(i);
                     objData{i, 1} = obj.name;
                     objData{i, 2} = obj.type;
-                    objData{i, 3} = obj.weight;
-                    objData{i, 4} = obj.description;
+                    objData{i, 3} = obj.expression;
+                    objData{i, 4} = obj.unit;
+                    objData{i, 5} = obj.weight;
+                    objData{i, 6} = obj.description;
                 end
                 app.ObjectivesTable.Data = objData;
             end
 
+            % 派生目标
+            if isfield(guiData.problem, 'derived')
+                derivedData = cell(length(guiData.problem.derived), 4);
+                for i = 1:length(guiData.problem.derived)
+                    d = guiData.problem.derived(i);
+                    derivedData{i, 1} = d.name;
+                    derivedData{i, 2} = d.expression;
+                    derivedData{i, 3} = d.unit;
+                    derivedData{i, 4} = d.description;
+                end
+                app.DerivedTable.Data = derivedData;
+            else
+                app.DerivedTable.Data = cell(0, 4);
+            end
+
             % 约束条件
             if isfield(guiData.problem, 'constraints')
-                conData = cell(length(guiData.problem.constraints), 4);
+                conData = cell(length(guiData.problem.constraints), 5);
                 for i = 1:length(guiData.problem.constraints)
                     con = guiData.problem.constraints(i);
                     conData{i, 1} = con.name;
                     conData{i, 2} = con.type;
                     conData{i, 3} = con.expression;
-                    conData{i, 4} = con.description;
+                    conData{i, 4} = con.unit;
+                    conData{i, 5} = con.description;
                 end
                 app.ConstraintsTable.Data = conData;
             end
@@ -3136,37 +4291,24 @@ classdef MAPOGUI < handle
             if isfield(guiData.problem, 'evaluator')
                 if isfield(guiData.problem.evaluator, 'type')
                     evalType = char(string(guiData.problem.evaluator.type));
-                    items = app.EvaluatorTypeDropDown.Items;
-                    if isstring(items)
-                        items = cellstr(items);
-                    end
-                    if ~iscell(items)
-                        items = {};
-                    end
-                    if ~ismember(evalType, items)
-                        items{end+1} = evalType; %#ok<AGROW>
-                        app.EvaluatorTypeDropDown.Items = items;
-                    end
-                    app.EvaluatorTypeDropDown.Value = evalType;
+                    ensureEvaluatorTypeInDropdown(app, evalType);
                 end
                 if isfield(guiData.problem.evaluator, 'timeout')
                     app.EvaluatorTimeoutSpinner.Value = guiData.problem.evaluator.timeout;
                 end
+            end
 
-                if isfield(guiData.problem.evaluator, 'economicParameters') && isstruct(guiData.problem.evaluator.economicParameters)
-                    eco = guiData.problem.evaluator.economicParameters;
-                    f = fieldnames(eco);
-                    tableData = cell(length(f), 2);
-                    for i = 1:length(f)
-                        tableData{i, 1} = f{i};
-                        tableData{i, 2} = eco.(f{i});
-                    end
-                    app.EvaluatorParamsTable.Data = tableData;
-                else
-                    app.EvaluatorParamsTable.Data = cell(0, 2);
+            params = struct();
+            units = struct();
+            if isfield(guiData.problem.evaluator, 'economicParameters') && isstruct(guiData.problem.evaluator.economicParameters)
+                eco = guiData.problem.evaluator.economicParameters;
+                if isfield(guiData.problem.evaluator, 'parameterUnits') && isstruct(guiData.problem.evaluator.parameterUnits)
+                    units = guiData.problem.evaluator.parameterUnits;
                 end
-
-                updateEvaluatorInfo(app);
+                fillEvaluatorParamsTable(app, eco, units);
+                params = eco;
+            else
+                app.EvaluatorParamsTable.Data = cell(0, 3);
             end
 
             % 仿真器
@@ -3209,10 +4351,15 @@ classdef MAPOGUI < handle
             % 节点映射 - 结果
             if isfield(guiData.simulator, 'nodeMapping') && isfield(guiData.simulator.nodeMapping, 'results')
                 resNames = fieldnames(guiData.simulator.nodeMapping.results);
-                resMapData = cell(length(resNames), 2);
+                resMapData = cell(length(resNames), 3);
                 for i = 1:length(resNames)
                     resMapData{i, 1} = resNames{i};
                     resMapData{i, 2} = guiData.simulator.nodeMapping.results.(resNames{i});
+                    resMapData{i, 3} = '';
+                    if isfield(guiData.simulator.nodeMapping, 'resultUnits') && ...
+                       isfield(guiData.simulator.nodeMapping.resultUnits, resNames{i})
+                        resMapData{i, 3} = guiData.simulator.nodeMapping.resultUnits.(resNames{i});
+                    end
                 end
                 app.ResMappingTable.Data = resMapData;
             end
@@ -3668,12 +4815,88 @@ classdef MAPOGUI < handle
 
             items = unique([objNames(:); existing(:)], 'stable');
 
-            if isempty(items)
-                app.ResMappingTable.ColumnFormat = {'char', 'char'};
-            else
-                app.ResMappingTable.ColumnFormat = {items, 'char'};
-            end
+            app.ResMappingTable.ColumnFormat = {'char', 'char', 'char'};
         end
 
+    end
+end
+
+%% 辅助函数：直接验证Aspen节点（使用COM对象）
+function [validCount, invalidNodes] = validateNodesDirectly(aspenApp, nodeData, nodeType)
+    % validateNodesDirectly - 直接使用COM对象验证节点路径
+    %
+    % 输入:
+    %   aspenApp - Aspen COM对象
+    %   nodeData - N×2 cell数组 {变量名, 节点路径}
+    %   nodeType - 节点类型 ('input' 或 'output')
+    %
+    % 返回:
+    %   validCount - 有效节点数量
+    %   invalidNodes - 无效节点列表（cell数组）
+
+    validCount = 0;
+    invalidNodes = {};
+
+    if isempty(nodeData)
+        return;
+    end
+
+    for i = 1:size(nodeData, 1)
+        nodeName = nodeData{i, 1};
+        nodePath = nodeData{i, 2};
+
+        if isempty(nodePath)
+            invalidNodes{end+1} = sprintf('[%d] %s: 路径为空', i, nodeName); %#ok<AGROW>
+            continue;
+        end
+
+        try
+            % 尝试访问节点
+            node = aspenApp.Tree.FindNode(nodePath);
+
+            % 检查节点有效性
+            if isempty(node)
+                invalidNodes{end+1} = sprintf('[%d] %s: 节点不存在\n    路径: %s', i, nodeName, nodePath); %#ok<AGROW>
+            elseif strcmp(class(node), 'handle')
+                % 无效的handle对象
+                invalidNodes{end+1} = sprintf('[%d] %s: 节点不存在（无效handle）\n    路径: %s', i, nodeName, nodePath); %#ok<AGROW>
+            else
+                % 尝试读取值
+                try
+                    value = node.Value;
+                    validCount = validCount + 1;
+
+                    % 对于输入节点，检查是否可写
+                    if strcmpi(nodeType, 'input')
+                        try
+                            node.Value = value;  % 尝试写入相同的值
+                        catch
+                            invalidNodes{end+1} = sprintf('[%d] %s: 节点只读（无法设置值）\n    路径: %s', i, nodeName, nodePath); %#ok<AGROW>
+                            validCount = validCount - 1;
+                        end
+                    end
+
+                catch ME
+                    invalidNodes{end+1} = sprintf('[%d] %s: 无法访问Value属性\n    路径: %s\n    错误: %s', ...
+                        i, nodeName, nodePath, ME.message); %#ok<AGROW>
+                end
+            end
+
+        catch ME
+            invalidNodes{end+1} = sprintf('[%d] %s: FindNode失败\n    路径: %s\n    错误: %s', ...
+                i, nodeName, nodePath, ME.message); %#ok<AGROW>
+        end
+    end
+end
+
+%% 辅助函数：验证Aspen节点（已废弃，保留用于兼容性）
+function [validCount, invalidNodes] = validateNodesInAspen(simulator, nodeData, nodeType)
+    % 此函数已废弃，请使用 validateNodesDirectly
+    validCount = 0;
+    invalidNodes = {};
+
+    for i = 1:size(nodeData, 1)
+        nodeName = nodeData{i, 1};
+        invalidNodes{end+1} = sprintf('[%d] %s: 无法访问Aspen对象（类未重新加载）', i, nodeName); %#ok<AGROW>
     end
 end

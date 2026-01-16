@@ -1,3 +1,4 @@
+%% 
 function launchGUI(varargin)
 %% launchGUI - 启动 MAPO 图形用户界面
 %

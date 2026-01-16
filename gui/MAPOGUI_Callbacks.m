@@ -30,7 +30,7 @@ function startupFcn(app)
     app.callbacks = [];
 
     % 初始化表格数据
-    app.VariablesTable.Data = cell(0, 6);
+    app.VariablesTable.Data = cell(0, 7);
     app.ObjectivesTable.Data = cell(0, 4);
     app.ConstraintsTable.Data = cell(0, 4);
     app.VarMappingTable.Data = cell(0, 2);
@@ -74,7 +74,7 @@ function AddVariableButtonPushed(app, event)
     %% 添加变量
 
     currentData = app.VariablesTable.Data;
-    newRow = {'Var1', 'continuous', 0, 100, '', ''};
+    newRow = {'Var1', 'continuous', 0, 100, '', '', ''};
     app.VariablesTable.Data = [currentData; newRow];
 
     logMessage(app, '添加新变量');
@@ -943,8 +943,9 @@ function collectGUIData(app)
         app.guiData.problem.variables(i).type = varData{i, 2};
         app.guiData.problem.variables(i).lowerBound = varData{i, 3};
         app.guiData.problem.variables(i).upperBound = varData{i, 4};
-        app.guiData.problem.variables(i).unit = varData{i, 5};
-        app.guiData.problem.variables(i).description = varData{i, 6};
+        app.guiData.problem.variables(i).values = varData{i, 5};
+        app.guiData.problem.variables(i).unit = varData{i, 6};
+        app.guiData.problem.variables(i).description = varData{i, 7};
     end
 
     % 优化目标
@@ -1051,15 +1052,60 @@ function loadGUIData(app, guiData)
 
     % 决策变量
     if isfield(guiData.problem, 'variables')
-        varData = cell(length(guiData.problem.variables), 6);
+        varData = cell(length(guiData.problem.variables), 7);
         for i = 1:length(guiData.problem.variables)
             var = guiData.problem.variables(i);
+            valueText = '';
+            if isfield(var, 'values') && ~isempty(var.values)
+                values = var.values;
+                if isstring(values)
+                    values = cellstr(values);
+                end
+                if isnumeric(values)
+                    valueText = strjoin(arrayfun(@(x) num2str(x), values(:)', 'UniformOutput', false), ', ');
+                elseif iscell(values)
+                    cleaned = cell(size(values));
+                    for k = 1:numel(values)
+                        v = values{k};
+                        if isstring(v)
+                            v = char(v);
+                        elseif isnumeric(v)
+                            v = num2str(v);
+                        elseif ~ischar(v)
+                            v = '';
+                        end
+                        cleaned{k} = v;
+                    end
+                    cleaned = cleaned(~cellfun(@isempty, cleaned));
+                    valueText = strjoin(cleaned, ', ');
+                elseif ischar(values)
+                    valueText = values;
+                end
+            end
+            lb = [];
+            ub = [];
+            unitText = '';
+            descText = '';
+            if isfield(var, 'lowerBound')
+                lb = var.lowerBound;
+            end
+            if isfield(var, 'upperBound')
+                ub = var.upperBound;
+            end
+            if isfield(var, 'unit')
+                unitText = var.unit;
+            end
+            if isfield(var, 'description')
+                descText = var.description;
+            end
+
             varData{i, 1} = var.name;
             varData{i, 2} = var.type;
-            varData{i, 3} = var.lowerBound;
-            varData{i, 4} = var.upperBound;
-            varData{i, 5} = var.unit;
-            varData{i, 6} = var.description;
+            varData{i, 3} = lb;
+            varData{i, 4} = ub;
+            varData{i, 5} = valueText;
+            varData{i, 6} = unitText;
+            varData{i, 7} = descText;
         end
         app.VariablesTable.Data = varData;
     end

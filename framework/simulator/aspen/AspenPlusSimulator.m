@@ -743,6 +743,112 @@ classdef AspenPlusSimulator < SimulatorBase
 
             success = true;
         end
+
+        function node = findNode(obj, nodePath)
+            % findNode 查找Aspen节点
+            %
+            % 输入:
+            %   nodePath - 节点路径字符串
+            %
+            % 返回:
+            %   node - Aspen节点对象，如果不存在则返回空
+            %
+            % 示例:
+            %   node = simulator.findNode('\Data\Streams\FEED\Input\TEMP\MIXED');
+
+            if isempty(obj.aspenApp)
+                error('AspenPlusSimulator:NotConnected', '仿真器未连接');
+            end
+
+            nodePath = AspenPlusSimulator.normalizeAspenNodePath(nodePath);
+            node = obj.aspenApp.Tree.FindNode(nodePath);
+        end
+
+        function count = getStreamCount(obj)
+            % getStreamCount 获取流股数量
+            %
+            % 返回:
+            %   count - 流股数量
+
+            if isempty(obj.aspenApp)
+                error('AspenPlusSimulator:NotConnected', '仿真器未连接');
+            end
+
+            try
+                streamsNode = obj.aspenApp.Tree.FindNode('\Data\Streams');
+                if ~isempty(streamsNode)
+                    count = streamsNode.Elements.Count;
+                else
+                    count = 0;
+                end
+            catch
+                count = 0;
+            end
+        end
+
+        function name = getStreamName(obj, index)
+            % getStreamName 获取指定索引的流股名称
+            %
+            % 输入:
+            %   index - 流股索引（从1开始）
+            %
+            % 返回:
+            %   name - 流股名称
+
+            if isempty(obj.aspenApp)
+                error('AspenPlusSimulator:NotConnected', '仿真器未连接');
+            end
+
+            streamsNode = obj.aspenApp.Tree.FindNode('\Data\Streams');
+            if ~isempty(streamsNode)
+                name = streamsNode.Elements.Item(index-1).Name;
+            else
+                name = '';
+            end
+        end
+
+        function count = getBlockCount(obj)
+            % getBlockCount 获取设备数量
+            %
+            % 返回:
+            %   count - 设备数量
+
+            if isempty(obj.aspenApp)
+                error('AspenPlusSimulator:NotConnected', '仿真器未连接');
+            end
+
+            try
+                blocksNode = obj.aspenApp.Tree.FindNode('\Data\Blocks');
+                if ~isempty(blocksNode)
+                    count = blocksNode.Elements.Count;
+                else
+                    count = 0;
+                end
+            catch
+                count = 0;
+            end
+        end
+
+        function name = getBlockName(obj, index)
+            % getBlockName 获取指定索引的设备名称
+            %
+            % 输入:
+            %   index - 设备索引（从1开始）
+            %
+            % 返回:
+            %   name - 设备名称
+
+            if isempty(obj.aspenApp)
+                error('AspenPlusSimulator:NotConnected', '仿真器未连接');
+            end
+
+            blocksNode = obj.aspenApp.Tree.FindNode('\Data\Blocks');
+            if ~isempty(blocksNode)
+                name = blocksNode.Elements.Item(index-1).Name;
+            else
+                name = '';
+            end
+        end
     end
 
     methods (Static, Access = private)

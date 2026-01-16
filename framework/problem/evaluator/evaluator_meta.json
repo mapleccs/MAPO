@@ -1,0 +1,186 @@
+﻿[
+  {
+    "type": "ORCEvaluator",
+    "displayName": "ORC 余热回收",
+    "class": "ORCEvaluator",
+    "description": "有机朗肯循环(ORC)余热回收评估器",
+    "parameters": [
+      {
+        "name": "electricityPrice",
+        "label": "电价",
+        "type": "number",
+        "default": 0.1,
+        "min": 0,
+        "max": 10,
+        "step": 0.01,
+        "unit": "$/kWh"
+      },
+      {
+        "name": "operatingHours",
+        "label": "年运行小时",
+        "type": "number",
+        "default": 8000,
+        "min": 0,
+        "max": 8760,
+        "step": 10,
+        "unit": "h/年"
+      },
+      {
+        "name": "coolingWaterCost",
+        "label": "冷却水成本",
+        "type": "number",
+        "default": 0.354,
+        "min": 0,
+        "max": 10,
+        "step": 0.001,
+        "unit": "$/GJ"
+      }
+    ]
+  },
+  {
+    "type": "MyCaseEvaluator",
+    "displayName": "自定义模板",
+    "class": "MyCaseEvaluator",
+    "description": "用户自定义评估器模板（建议复制后修改）",
+    "parameters": [
+      {
+        "name": "productPrice",
+        "label": "产品价格",
+        "type": "number",
+        "default": 1000,
+        "min": 0,
+        "step": 10,
+        "unit": "$/ton"
+      },
+      {
+        "name": "energyCost",
+        "label": "能源成本",
+        "type": "number",
+        "default": 0.1,
+        "min": 0,
+        "step": 0.01,
+        "unit": "$/kWh"
+      },
+      {
+        "name": "operatingHours",
+        "label": "年运行小时",
+        "type": "number",
+        "default": 8000,
+        "min": 0,
+        "max": 8760,
+        "step": 10,
+        "unit": "h/年"
+      }
+    ]
+  },
+  {
+    "type": "DistillationEvaluator",
+    "displayName": "精馏塔评估器",
+    "class": "DistillationEvaluator",
+    "description": "精馏塔过程优化评估器",
+    "parameters": [
+      {
+        "name": "minPurity",
+        "label": "最小纯度",
+        "type": "number",
+        "default": 0.995,
+        "min": 0,
+        "max": 1,
+        "step": 0.0001
+      },
+      {
+        "name": "maxEnergyRatio",
+        "label": "最大能耗比",
+        "type": "number",
+        "default": 10,
+        "min": 0,
+        "step": 0.1
+      },
+      {
+        "name": "columnDiameter",
+        "label": "塔径",
+        "type": "number",
+        "default": 1.5,
+        "min": 0,
+        "step": 0.1,
+        "unit": "m"
+      },
+      {
+        "name": "feedRate",
+        "label": "进料流量",
+        "type": "number",
+        "default": 100,
+        "min": 0,
+        "step": 1,
+        "unit": "kmol/hr"
+      },
+      {
+        "name": "constraintPenalty",
+        "label": "惩罚系数",
+        "type": "number",
+        "default": 100000000,
+        "min": 0,
+        "step": 1000,
+        "advanced": true
+      }
+    ]
+  },
+  {
+    "type": "ADNProductionEvaluator",
+    "displayName": "ADN 生产评估器",
+    "class": "ADNProductionEvaluator",
+    "description": "ADN 生产过程优化评估器",
+    "parameters": [
+      {
+        "name": "constraintPenalty",
+        "label": "惩罚系数",
+        "type": "number",
+        "default": 100000000,
+        "min": 0,
+        "step": 1000,
+        "advanced": true
+      }
+    ]
+  },
+  {
+    "type": "ASPLProductionEvaluator",
+    "displayName": "阿司匹林评估器",
+    "class": "ASPLProductionEvaluator",
+    "description": "阿司匹林生产过程优化评估器",
+    "parameters": [
+      {
+        "name": "constraintPenalty",
+        "label": "惩罚系数",
+        "type": "number",
+        "default": 100000000,
+        "min": 0,
+        "step": 1000,
+        "advanced": true
+      }
+    ]
+  },
+  {
+    "type": "ZDT1Evaluator",
+    "displayName": "ZDT1 基准测试",
+    "class": "ZDT1Evaluator",
+    "description": "ZDT1 基准测试评估器",
+    "parameters": []
+  },
+  {
+    "type": "ExpressionEvaluator",
+    "displayName": "表达式评估器",
+    "class": "ExpressionEvaluator",
+    "description": "基于表达式的目标/约束/派生计算，支持单位与分段函数",
+    "parameters": [
+      {
+        "name": "constraintPenalty",
+        "label": "惩罚系数",
+        "type": "number",
+        "default": 100000000,
+        "min": 0,
+        "step": 1000,
+        "advanced": true
+      }
+    ]
+  }
+]

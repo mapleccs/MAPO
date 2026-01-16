@@ -359,55 +359,75 @@ classdef SimulatorConfig < handle
                 obj.simulatorType = simConfig.type;
             end
 
-            if isfield(simConfig, 'config')
+            simDetails = struct();
+            if isfield(simConfig, 'config') && isstruct(simConfig.config)
                 simDetails = simConfig.config;
+            elseif isfield(simConfig, 'settings') && isstruct(simConfig.settings)
+                simDetails = simConfig.settings;
+            else
+                simDetails = simConfig;
+            end
 
-                if isfield(simDetails, 'backupPath')
-                    obj.modelPath = simDetails.backupPath;
-                elseif isfield(simDetails, 'modelPath')
-                    obj.modelPath = simDetails.modelPath;
+            if isfield(simDetails, 'backupPath')
+                obj.modelPath = simDetails.backupPath;
+            elseif isfield(simDetails, 'modelPath')
+                obj.modelPath = simDetails.modelPath;
+            end
+
+            if isfield(simDetails, 'timeout')
+                obj.timeout = simDetails.timeout;
+            end
+
+            if isfield(simDetails, 'visible')
+                obj.visible = simDetails.visible;
+            end
+
+            % Load node/result mappings (support both flat and nested forms).
+            varMapping = struct();
+            resMapping = struct();
+
+            if isfield(simDetails, 'nodeMapping')
+                [varMapping, resMapping] = SimulatorConfig.splitNodeMapping(simDetails.nodeMapping);
+            end
+            if isfield(simDetails, 'resultMapping') && isstruct(simDetails.resultMapping)
+                resMapping = SimulatorConfig.mergeStructs(resMapping, simDetails.resultMapping);
+            end
+
+            if isempty(fieldnames(varMapping)) && isfield(simConfig, 'nodeMapping')
+                [varMapping, resMapping] = SimulatorConfig.splitNodeMapping(simConfig.nodeMapping);
+            end
+            if isempty(fieldnames(resMapping)) && isfield(simConfig, 'resultMapping') && isstruct(simConfig.resultMapping)
+                resMapping = SimulatorConfig.mergeStructs(resMapping, simConfig.resultMapping);
+            end
+
+            if ~isempty(fieldnames(varMapping))
+                obj.clearNodeMapping();
+                varNames = fieldnames(varMapping);
+                for i = 1:length(varNames)
+                    varName = varNames{i};
+                    nodePath = varMapping.(varName);
+                    obj.setNodeMapping(varName, nodePath);
                 end
+            end
 
-                if isfield(simDetails, 'timeout')
-                    obj.timeout = simDetails.timeout;
+            if ~isempty(fieldnames(resMapping))
+                obj.clearResultMapping();
+                resultNames = fieldnames(resMapping);
+                for i = 1:length(resultNames)
+                    resultName = resultNames{i};
+                    nodePath = resMapping.(resultName);
+                    obj.setResultMapping(resultName, nodePath);
                 end
+            end
 
-                if isfield(simDetails, 'visible')
-                    obj.visible = simDetails.visible;
-                end
-
-                % 加载节点映射
-                if isfield(simDetails, 'nodeMapping')
-                    obj.clearNodeMapping();
-                    mapping = simDetails.nodeMapping;
-                    varNames = fieldnames(mapping);
-                    for i = 1:length(varNames)
-                        varName = varNames{i};
-                        nodePath = mapping.(varName);
-                        obj.setNodeMapping(varName, nodePath);
-                    end
-                end
-
-                % 加载结果映射
-                if isfield(simDetails, 'resultMapping')
-                    obj.clearResultMapping();
-                    mapping = simDetails.resultMapping;
-                    resultNames = fieldnames(mapping);
-                    for i = 1:length(resultNames)
-                        resultName = resultNames{i};
-                        nodePath = mapping.(resultName);
-                        obj.setResultMapping(resultName, nodePath);
-                    end
-                end
-
-                % 加载其他额外配置
-                excludeFields = {'backupPath', 'modelPath', 'timeout', 'visible', 'nodeMapping', 'resultMapping'};
-                allFields = fieldnames(simDetails);
-                for i = 1:length(allFields)
-                    field = allFields{i};
-                    if ~ismember(field, excludeFields)
-                        obj.additionalConfig.(field) = simDetails.(field);
-                    end
+            % Load additional config fields.
+            excludeFields = {'backupPath', 'modelPath', 'timeout', 'visible', ...
+                             'nodeMapping', 'resultMapping', 'type', 'settings', 'config'};
+            allFields = fieldnames(simDetails);
+            for i = 1:length(allFields)
+                field = allFields{i};
+                if ~ismember(field, excludeFields)
+                    obj.additionalConfig.(field) = simDetails.(field);
                 end
             end
         end
@@ -573,6 +593,39 @@ classdef SimulatorConfig < handle
     end
 
     methods (Static, Access = private)
+        function [varMapping, resMapping] = splitNodeMapping(mapping)
+            varMapping = struct();
+            resMapping = struct();
+
+            if isempty(mapping) || ~isstruct(mapping)
+                return;
+            end
+
+            if isfield(mapping, 'variables') || isfield(mapping, 'results')
+                if isfield(mapping, 'variables') && isstruct(mapping.variables)
+                    varMapping = mapping.variables;
+                end
+                if isfield(mapping, 'results') && isstruct(mapping.results)
+                    resMapping = mapping.results;
+                end
+            else
+                varMapping = mapping;
+            end
+        end
+
+        function out = mergeStructs(base, extra)
+            out = base;
+            if isempty(extra) || ~isstruct(extra)
+                return;
+            end
+
+            fields = fieldnames(extra);
+            for i = 1:length(fields)
+                name = fields{i};
+                out.(name) = extra.(name);
+            end
+        end
+
         function s = ensureChar(value)
             if ischar(value)
                 s = value;

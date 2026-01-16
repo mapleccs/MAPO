@@ -76,6 +76,8 @@ classdef MATLABFunctionEvaluator < Evaluator
             % 示例:
             %   result = evaluator.evaluate([1, 2, 3]);
 
+            obj.evaluationCounter = obj.evaluationCounter + 1;
+
             result = struct();
             result.success = true;
             result.message = '';

@@ -124,6 +124,11 @@ classdef (Abstract) Evaluator < handle
             n = obj.evaluationCounter;
         end
 
+        function n = getEvaluationCount(obj)
+            % getEvaluationCount - alias for getNumberOfEvaluations
+            n = obj.getNumberOfEvaluations();
+        end
+
         function resetCounter(obj)
             % resetCounter 重置评估计数器
             %
@@ -155,10 +160,13 @@ classdef (Abstract) Evaluator < handle
             end
 
             % 执行评估
+            prevCount = obj.evaluationCounter;
             result = obj.evaluate(variables);
 
-            % 增加计数器
-            obj.evaluationCounter = obj.evaluationCounter + 1;
+            % 增加计数器（避免子类重复计数）
+            if obj.evaluationCounter == prevCount
+                obj.evaluationCounter = obj.evaluationCounter + 1;
+            end
         end
 
         function result = evaluateBatch(obj, population)
